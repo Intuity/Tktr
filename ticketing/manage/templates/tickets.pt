@@ -1,0 +1,138 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Tickets</tal:title>
+    <script metal:fill-slot="script" type="text/javascript">
+    function changeFilterType(selector) {
+        if($(selector).val() == 'status') {
+            $("#filtervalue").addClass("hidden");
+            $("#filtervalue-status").removeClass("hidden");
+        } else {
+            $("#filtervalue").removeClass("hidden");
+            $("#filtervalue-status").addClass("hidden");
+        }
+        $("#filtervalue").val("").prop('disabled', false);
+    }
+    </script>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable pink unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Help</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <p>Ticket types are the different tickets that people are able to purchase through the system. The ticket type defines the name, description and cost of each ticket. Each ticket type has its own ticket pool, this is a set of tickets that have been released but not yet purchased. The "Released" column shows the total number of tickets of this type that have been made available for purchase, while the "In Pool" column shows the total number of tickets of this type that are still available for purchase.</p>
+					<p>For each ticket a number of "add-ons" may be configured that allows the customer to add additional experiences and features to their ticket, such as dining or queue jump. Add-ons may also be unlimited for use in the case of charitable donations or any other "unlimited" upgrade.</p>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        <a href="${request.route_path('admin_ticket_type_add')}" class="ll_btn pull-right" style="margin-top:5px;margin-left:5px" tal:condition="view.is_admin">
+            <i class="icon-plus-sign"></i>
+			<span class="pull-right">Add Type</span>
+        </a>
+		<a href="${request.route_path('admin_tickets_report')}" class="ll_btn pull-right" style="margin-top:5px;margin-left:5px">
+			<i class="icon-pencil"></i>
+			<span class="pull-right">
+				Tickets Report
+			</span>
+		</a>
+		<a href="${request.route_path('admin_tickets_allocate')}" class="ll_btn pull-right" style="margin-top:5px;margin-left:5px" tal:condition="view.is_admin">
+			<i class="icon-ticket"></i>
+			<span class="pull-right">
+				Allocate Tickets
+			</span>
+		</a>
+        
+        <div class="clearline" style="margin-bottom:5px;"></div>
+        
+        <div class="expandable pink container">
+            <div class="exp-head container">
+                <h3 class="pull-left">Tickets</h3>
+            </div>
+            <div class="exp-body">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <form action="${request.route_path('admin_tickets_all')}" method="GET" class="form-horizontal">
+                        <br />
+                        <div class="control-group">
+                            <label for="name" class="control-label">Search for ticket</label>
+                            <div class="controls">
+                                <select id="filtertype" name="filtertype" onchange="javascript:changeFilterType(this);">
+                                    <option selected disabled>Filter...</option>
+                                    <option value="status">By Payment Status</option>
+                                    <option value="refcode">By Identification Code</option>
+                                    <option value="guestcrsid">By Guest CRSid</option>
+                                    <option value="guestname">By Guest Name</option>
+                                    <option value="guestemail">By Guest Email</option>
+                                    <option value="guestcollege">By Guest College</option>
+                                    <option value="ownercrsid">By Purchaser CRSid</option>
+                                    <option value="ownername">By Purchaser Name</option>
+                                    <option value="owneremail">By Purchaser Email</option>
+                                    <option value="ownerusername">By Purchaser Username</option>
+                                    <option value="ownercollege">By Purchaser College</option>
+                                </select> 
+                                <input type="text" id="filtervalue" name="filtervalue" placeholder="Search value..." disabled="disabled" />
+                                <select id="filtervalue-status" name="filtervalue-status" class="hidden">
+                                    <option value="all">All</option>
+                                    <option value="paid">Paid</option>
+                                    <option value="unpaid">Unpaid</option>
+                                    <option value="expiring">Expiring</option>
+                                    <option value="expired">Expired</option>
+                                </select>
+                                <button type="submit" id="submit" name="submit" value="submit" class="ll_btn" style="display:inline-block;">
+                                    <i class="icon-search"></i>
+                                    <span class="pull-right">Search</span>
+                                </button>
+                                <span class="help-block">Select the filter you wish to use and enter the text you wish to filter by and click "Search".</span>
+                            </div>
+                        </div>
+            
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <br />
+        
+        <table class="table table-bordered table-striped" tal:condition="len(pools) > 0" name="tickettypestable">
+            
+            <thead>
+                
+                <th class="span3">Ticket Type</th>
+                <th class="span1">Released</th>
+                <th class="span1">Pool</th>
+                <th class="span1">Limit</th>
+                <th>Actions</th>
+                
+            </thead>
+            
+            <tbody>
+            
+                <tr tal:repeat="pool pools">
+                    <td>${pool.tick_type.name}</td>
+                    <td>${pool.tick_type.total_released}</td>
+                    <td>${len(pool.tickets)}</td>
+                    <td>${'Yes' if pool.tick_type.purchase_limit != None and pool.tick_type.purchase_limit > 0 else 'No'}</td>
+                    <td>
+						<a href="${request.route_path('admin_tickets_addons', tick_code=pool.tick_type.__name__)}">Add-ons</a>&nbsp;&nbsp;
+						<a href="${request.route_path('admin_tickets_type', tick_code=pool.tick_type.__name__)}">Purchased</a>&nbsp;&nbsp;&nbsp;
+						<tal:adminoptions tal:condition="view.is_admin">
+						<a href="${request.route_path('admin_ticket_type_edit', tick_code=pool.tick_type.__name__)}">Edit</a>&nbsp;&nbsp;&nbsp;
+						<a href="${request.route_path('admin_tickets_release', tick_code=pool.tick_type.__name__)}" class="release_tick_link">Release</a>&nbsp;&nbsp;&nbsp;
+						<a class="danger" onclick="if(confirm('Are you sure you want to retract all unpurchased tickets?')) { window.location.href = '${request.route_path('admin_tickets_retract', tick_code=pool.tick_type.__name__)}' }" href="#">Retract</a>&nbsp;&nbsp;&nbsp;
+						<a href="#" onclick="if(confirm('Are you sure you want to delete this ticket type?')) { window.location.href = '${request.route_path('admin_tickets_delete', tick_code=pool.tick_type.__name__)}' }" class="danger">Delete</a>
+						</tal:adminoptions>
+					</td>
+                </tr>
+                
+            </tbody>
+            
+        </table>
+        <h4 style="text-align:center;" tal:condition="len(pools) == 0">You have not yet added any ticket types, perhaps <a href="${request.route_path('admin_ticket_type_add')}">add one</a>?</h4>
+        <br />
+        
+        
+    </tal:content>
+</tal:macro>

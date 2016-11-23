@@ -1,0 +1,72 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Settings</tal:title>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable blue unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Help</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <p>The queue is a way of controlling the maximum number of people able to concurrently buy tickets. A lower number means less server stress and a lower chance of double-allocation for a ticket. If you are expecting a high purchase rate it is recommended to enable queueing.</p>
+					
+					<p>The active list shows the people that are currently in the ticket purchase system and the time they have remaining to purchase tickets.</p>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        
+        <br />
+		
+        <div class="clearline"></div>
+        
+		<h1 class="pull-left">Active Customers</h1>
+		
+        <div class="clearline"></div>
+		
+        <table class="table table-bordered table-striped">
+            <thead>
+                <th class="span3">Identifier</th>
+				<th class="span2">User ID</th>
+                <th class="span2">Remaining</th>
+				<th class="span2">Last Ping</th>
+                <th>Actions</th>
+            </thead>
+            <tbody>
+                <tal:block tal:repeat="client request.root.active.values()">
+                <tr>
+                    <td>${client.queue_id}</td>
+					<td>${client.user_id}</td>
+                    <td>${view.client_time_left(client.queue_id)}</td>
+					<td>${view.client_last_ping(client.queue_id)}</td>
+					<td>
+						<a class="ll_btn danger" href="?action=kick&client=${client.queue_id}"><i class="icon-remove"></i> <span class="pull-right">Remove</span></a>
+					</td>
+                </tr>
+                </tal:block>
+            </tbody>
+        </table>
+		
+        <div class="clearline"></div>
+        
+		<h1 class="pull-left">Queue Statistics</h1>
+		
+        <div class="clearline"></div>
+		
+        <table class="table table-bordered">
+            <tbody>
+				<tr>
+	                <td class="span3">Active Customers</td>
+					<td>${len(request.root.active)}</td>
+				</tr>
+				<tr>
+					<td class="span3">Customers in Queue</td>
+					<td>${len(request.root.queue)}</td>
+				</tr>
+            </tbody>
+        </table>
+        
+    </tal:content>
+</tal:macro>

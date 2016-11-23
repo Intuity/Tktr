@@ -1,0 +1,113 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Accounts</tal:title>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable red unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Help</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <p>
+                        Accounts allow your team to monitor and control the system whilst your customers can login to purchase tickets. Privilege levels are determined by the group the account rests in, be careful when setting these as high enough privilege levels will allow a person to control progressively more of the system. You can define extra groups as you wish and setup filters so when accounts are created via Raven they are automatically placed into the correct group.
+                    </p>
+                    <p>
+                        You can also create 'system accounts', that is accounts not authenticated via Raven for your guests. These can be used, for example, in cases where your guests are outside of the university. These can automatically be created in bulk or individually, do so by clicking "Add Users".
+                    </p>
+                    <p>
+                       Accounts Export allows you to export a spreadsheet document containing details of all of your guests, this can be done on a per group basis or across the entirety of the user base. 
+                    </p>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        
+        <a href="${request.route_path('admin_group_add')}" class="ll_btn pull-right" style="margin:5px;margin-right:0;">
+            <i class="icon-plus-sign"></i><span class="pull-right">Add Group</span>
+        </a>
+        
+        <a href="${request.route_path('admin_user_add')}" class="ll_btn pull-right" style="margin:5px;margin-right:0;">
+            <i class="icon-plus-sign"></i><span class="pull-right">Add Users</span>
+        </a>
+        
+        <a href="${request.route_path('admin_accounts_export')}" class="ll_btn pull-right" style="margin:5px;margin-right:0;">
+            <i class="icon-pencil"></i><span class="pull-right">Accounts Export</span>
+        </a>
+        
+        <div class="clearline"></div>
+        
+        <div class="expandable red container">
+            <div class="exp-head container">
+                <h3 class="pull-left">Groups</h3>
+            </div>
+            <div class="exp-body">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <th class="span3">Group Name</th>
+                            <th class="span2">Privileges</th>
+                            <th class="span1">Size</th>
+                            <th class="span1">Filter</th>
+                            <th class="span1">Edit</th>
+                            <th>Actions</th>
+                        </thead>
+                        <tbody>
+                            <tr tal:repeat="group groups">
+                                <td>${group.name}</td>
+                                <td>${group.privileges[0].title()}</td>
+                                <td>${len(group.members)}</td>
+                                <td>${len(group.user_filter)}</td>
+                                <td>${'Yes' if group.can_delete else 'No'}</td>
+                                <td><a href="${request.route_path('admin_users')}?filter=group&value=${group.name}">Members</a><tal:unprotected tal:condition="group.can_delete">&nbsp;&nbsp;&nbsp;&nbsp;<a href="${request.route_path('admin_group_edit', group_id=group.__name__)}">Edit</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" onclick="javascript:if(confirm('Are you sure you want to delete the group ${group.name}?')) window.location.href='${request.route_path('admin_group_delete', group_id=group.__name__)}';" class="danger">Delete</a></tal:unprotected>&nbsp;&nbsp;&nbsp;&nbsp;<a href="${request.route_path('admin_group_filter', group_id=group.__name__)}">User Filter</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <br />
+        
+        <div class="expandable red container">
+            <div class="exp-head container">
+                <h3 class="pull-left">Users</h3>
+            </div>
+            <div class="exp-body">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <form action="${request.route_path('admin_users')}" method="GET" class="form-horizontal">
+                        <br />
+                        <div class="control-group">
+                            <label for="name" class="control-label">Search for user</label>
+                            <div class="controls">
+                                <select id="filter" name="filter" onchange="$('#value').prop('disabled', false);">
+                                    <option selected disabled>Filter...</option>
+                                    <option value="crsid">By CRSid</option>
+                                    <option value="name">By Name</option>
+                                    <option value="email">By Email</option>
+                                    <option value="college">By College</option>
+                                    <option value="username">By Username</option>
+                                    <option value="group">By Group</option>
+                                </select> 
+                                <input type="text" id="value" name="value" placeholder="Search value..." disabled="disabled" />
+                                <button type="submit" id="submit" name="submit" value="submit" class="ll_btn" style="display:inline-block;">
+                                    <i class="icon-search"></i>
+                                    <span class="pull-right">Search</span>
+                                </button>
+                                <span class="help-block">Select the filter you wish to use and enter the text you wish to filter by and click "Search".</span>
+                            </div>
+                        </div>
+            
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="clearbar"></div>
+        <br /><br />
+        
+    </tal:content>
+</tal:macro>

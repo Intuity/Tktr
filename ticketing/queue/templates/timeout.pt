@@ -1,0 +1,10 @@
+<tal:macro metal:use-macro="view.site_style">
+    <tal:content metal:fill-slot="content">
+        
+        <h1>Time's up!</h1>
+        <h3>Sorry you didn't complete your purchase fast enough and your session has timed out. If you still wish to purchase tickets you will need to rejoin the queue.</h3>
+        <br /><br />
+		<h4 style="text-align:center;"><a href="${request.route_path('queue')}">Back to the queue</a></h4>
+		<br /><br /><br /><br /><br />
+    </tal:content>
+</tal:macro>

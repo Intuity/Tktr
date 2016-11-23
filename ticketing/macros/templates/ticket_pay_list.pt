@@ -1,0 +1,82 @@
+<tal:block metal:define-macro="ticket_pay_list">
+<div class="ticketbox" tal:repeat="ticket view.session_tickets" tal:condition="not:alteration">
+    <div class="headline expanded">
+        <div class="icon">
+            <img style="width:100px;margin-top:8px;" src="/static/img/TicketBackgroundRotated.png" />
+        </div>
+        <div class="info">
+            <span class="ticket_id">${ticket.__name__}</span>
+            <h3 tal:condition="view.guest_details_required and ticket.guest_info != None">${ticket.guest_info.title} ${ticket.guest_info.fullname}</h3>
+            <h3 style="font-style:italic;" tal:condition="view.guest_details_required and ticket.guest_info == None">No Guest Details Entered</h3>
+            <h3 tal:condition="not view.guest_details_required">Guest Ticket</h3>
+            <span class="ticket_type">
+                ${ticket.tick_type.name}
+                <tal:block tal:condition="ticket.guest_info == ticket.owner.profile and view.guest_details_required">
+                 (Your Ticket)
+                </tal:block>
+				<tal:addon tal:condition="ticket.addons" tal:repeat="addon ticket.addons.values()"> + ${addon.name}</tal:addon>
+            </span>
+        </div>
+        <div class="strip">
+            <div class="item">
+                <strong>Base Cost</strong>
+            </div>
+            <div class="item">
+                ${structure:view.format_price(ticket.tick_type.cost)}
+            </div>
+            <div class="item">
+                <strong>Addon Cost</strong>
+            </div>
+            <div class="item">
+                ${structure:view.format_price(ticket.addon_cost)}
+            </div>
+            <div class="item">
+                <strong>Total Cost</strong>
+            </div>
+            <div class="item">
+                ${structure:view.format_price(ticket.total_cost)}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="ticketbox" tal:repeat="ticket payment.tickets" tal:condition="alteration">
+    <div class="headline expanded">
+        <div class="icon">
+            <img style="width:100px;margin-top:8px;" src="/static/img/TicketBackgroundRotated.png" />
+        </div>
+        <div class="info">
+            <span class="ticket_id">${ticket.__name__}</span>
+            <h3 tal:condition="view.guest_details_required and ticket.guest_info != None">${ticket.guest_info.title} ${ticket.guest_info.fullname}</h3>
+            <h3 style="font-style:italic;" tal:condition="view.guest_details_required and ticket.guest_info == None">No Guest Details Entered</h3>
+            <h3 tal:condition="not view.guest_details_required">Guest Ticket</h3>
+            <span class="ticket_type">
+                ${ticket.tick_type.name}
+                <tal:block tal:condition="ticket.guest_info == ticket.owner.profile and view.guest_details_required">
+                 (Your Ticket)
+                </tal:block>
+				<tal:addon tal:condition="ticket.addons" tal:repeat="addon ticket.addons.values()"> + ${addon.name}</tal:addon>
+            </span>
+        </div>
+        <div class="strip">
+            <div class="item">
+                <strong>Base Cost</strong>
+            </div>
+            <div class="item">
+                ${structure:view.format_price(ticket.tick_type.cost)}
+            </div>
+            <div class="item">
+                <strong>Addon Cost</strong>
+            </div>
+            <div class="item">
+                ${structure:view.format_price(ticket.addon_cost)}
+            </div>
+            <div class="item">
+                <strong>Total Cost</strong>
+            </div>
+            <div class="item">
+                ${structure:view.format_price(ticket.total_cost)}
+            </div>
+        </div>
+    </div>
+</div>
+</tal:block>

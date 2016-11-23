@@ -1,0 +1,41 @@
+<tal:macro metal:use-macro="view.site_style">
+    <tal:content metal:fill-slot="content">
+        
+        <div style="width:50px;height:50px;float:left;margin-right:10px;margin-top:-2px;background-image:url(/static/img/MiniCrest.png);"></div>
+		<h1>Sign in</h1>
+
+        <div style="width:634px;height:372px;margin-left:auto;margin-right:auto;margin-top:30px;margin-bottom:30px;">
+            <div style="width:300px;height:370px;background-color:rgba(255, 255, 255, 0.2);border:1px solid #CCC;float:left;text-align:center;">
+				<div style="width:280px;margin:10px;">
+	                <h2>Raven</h2>
+	                <p>
+	                    If you are a member of Cambridge University then you may login to purchase tickets using your Raven account.
+	                </p>
+	                <a href="/start_raven?action=buy_tickets" class="ll_btn raven_btn" id="ravenbutton">
+	                    <h2><i class="icon-raven"></i> Login via Raven</h2>
+	                </a>
+				</div>
+            </div>
+        
+            <div style="width:280px;height:350px;background-color:rgba(255, 255, 255, 0.2);border:1px solid #CCC;padding:10px;float:left;margin-left:30px;">
+                <h2 style="text-align:center;">Public Account</h2>
+                <p style="text-align:center;">
+                    <span tal:condition="view.public_signup_enabled">If you are not a member of the University you can <a href="${request.route_path('account_signup')}">sign-up for an account here</a>.</span><span tal:condition="not:view.public_signup_enabled">If you are not a member of the University of Cambridge you will need to login with your provided account details.</span>
+                </p>
+                <form id="alumniform" class="loginform" action="" method="POST">
+                    <h4>Username</h4>
+                    <input class="ll_field" type="text" id="username" name="username" />
+                    <br />
+                    <h4>Password</h4>
+                    <input class="ll_field" type="password" id="password" name="password" />
+                    
+                    <button class="pull-right ll_btn" name="submit" id="submit" value="submit">
+                        <i class="icon-signin"></i> <span class="pull-right">Login</span>
+                    </button>
+                </form>
+            </div>
+            <div class="clearbar"></div>
+        </div>
+        
+    </tal:content>
+</tal:macro>

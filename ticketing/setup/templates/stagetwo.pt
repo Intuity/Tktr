@@ -1,0 +1,36 @@
+<tal:macro metal:use-macro="view.site_style">
+    <tal:content metal:fill-slot="content">
+        
+        <h1>Setup Ticketing</h1>
+        <br />
+        <h3>Administrator Password Setup</h3>
+		<p>
+            In the form below please double enter a new password for the administrator of the ticketing system, you should choose a secure password as this user will have full control of the ticketing system. You can change the password later by logging into the system, going to your profile and clicking 'Set Password'.
+        </p>
+        <br />
+        
+		<div class="clearbar"></div>
+        
+        <form method="POST" action="" class="form-horizontal">
+            <div class="control-group">
+                <label class="control-label" for="password_one">Password:</label>
+                <div class="controls">
+                    <input type="password" name="password_one" id="password_one" />
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="password_two">Repeat Password:</label>
+                <div class="controls">
+                    <input type="password" name="password_two" id="password_two" />
+                </div>
+            </div>
+            
+            <button type="submit" class="ll_btn pull-right" name="submit" id="submit" value="submit">
+                <i class="icon-arrow-right"></i> Next Step
+            </button>
+        </form>
+         
+        <div class="clearbar"></div>
+        <br />
+    </tal:content>
+</tal:macro>

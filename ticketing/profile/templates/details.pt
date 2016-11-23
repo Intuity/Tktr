@@ -1,0 +1,184 @@
+<tal:macro metal:use-macro="view.site_style">
+    <tal:content metal:fill-slot="content">
+        
+        <h1>Current Guest Details</h1><br />
+        <div style="background-color:white;border:1px solid #666;width:206px;" class="pull-left" tal:condition="view.photo_required">
+            <img src="${request.route_path('guest_profile_photo', tick_id=ticket.__name__)}" width="200" style="margin:3px;" />
+        </div>
+
+		<a href="${request.route_path('user_profile')}" class="ll_btn pull-left">
+			<i class="icon-arrow-left pull-left"></i>
+			<span class="pull-right">Back</span>
+		</a>
+        
+		<tal:unpaid tal:condition="not:ticket.payment.paid">
+		<a href="${request.route_path('return_tickets', tick_id=ticket.__name__)}" class="ll_btn pull-right">
+			<i class="icon-arrow-right pull-left"></i>
+			<span class="pull-right">Return Tickets</span>
+		</a>
+		<a href="${request.route_path('alter_payment', tick_id=ticket.__name__)}" class="ll_btn pull-right" style="margin-right:10px;">
+			<i class="icon-credit-card pull-left"></i>
+			<span class="pull-right">Change Payment Method</span>
+		</a>
+		</tal:unpaid>
+		<tal:paid tal:condition="ticket.payment.paid">
+		<a class="ll_btn pull-right" style="margin-right:10px;" tal:attributes="class 'll_btn pull-right disabled' if ticket.locked_down else 'll_btn pull-right'; href nothing if ticket.locked_down else request.route_path('ticket_download', tick_id=ticket.__name__)" tal:condition="view.ticket_download_enabled">
+			<i class="icon-arrow-down pull-left"></i>
+			<span class="pull-right">Download Ticket</span>
+		</a>
+		</tal:paid>
+		<div class="clearline"></div>
+        <br />
+        
+        <div class="ticketdetails">
+            <div class="headline">
+                <div class="icon"></div>
+                <div class="details">
+                    <h4>${ticket.__name__}</h4>
+                    <h3 tal:condition="ticket.guest_info != None">${ticket.guest_info.title} ${ticket.guest_info.fullname}</h3>
+                    <h3 tal:condition="ticket.guest_info == None">No Name Entered</h3>
+                </div>
+            </div>
+            <hr />
+            <table>
+                <tbody>
+                    <tr>
+                        <td>Date of Birth</td>
+                        <td>${ticket.guest_info.dob.strftime("%d/%m/%Y") if ticket.guest_info and ticket.guest_info.dob else 'Not Set'}</td>
+                        <td>Email Address</td>
+                        <td>${ticket.guest_info.email if ticket.guest_info else 'Not Set'}</td>
+                    </tr>
+                    <tr>
+                        <td>Ticket Addons</td>
+                        <td colspan="3">
+    						<tal:addon tal:repeat="addon ticket.addons.values()" tal:condition="len(ticket.addons) > 0">${addon.name} </tal:addon>
+    						<tal:noaddon tal:condition="len(ticket.addons) == 0">No addons</tal:noaddon>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Member of Cambridge</td>
+                        <td>${'Yes' if ticket.guest_info and ticket.guest_info.raven_user else 'No'}</td>
+                        <td>Profile Completed?</td>
+                        <td>${'Yes' if ticket.guest_info != None and ticket.guest_info.complete else 'No'}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <tal:cambridge tal:condition="ticket.guest_info and ticket.guest_info.raven_user">
+            <h4 style="font-weight:600;">Cambridge Membership Details</h4>
+            <table>
+                <tbody>
+                    <tr>
+                        <td>Membership Type</td>
+                        <td>${view.graduate_status(ticket.guest_info.grad_status)}</td>
+                        <td>College</td>
+                        <td>${view.college_name(ticket.guest_info.college)}</td>
+                    </tr>
+                    <tr>
+                        <td>CRSid</td>
+                        <td>${ticket.guest_info.crsid}</td>
+                    </tr>
+                </tbody>
+            </table>
+            </tal:cambridge>
+            <hr />
+            <table>
+                <tbody>
+                    <tr>
+                        <td>Ticket Total Cost</td>
+                        <td>${structure:view.format_price(ticket.total_cost)}</td>
+                        <td>Payment Completed?</td>
+                        <td>${'Yes' if ticket.payment.paid else 'No'}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <tal:canchange tal:condition="not ticket.locked_down">
+            <h3>Change Details</h3>
+            <tal:notpaid tal:condition="not:ticket.payment.paid">
+            <p>
+                As you have not yet completed payment for this ticket, you cannot currently alter the details of the guest. You can pay for tickets instantly
+                by clicking 'Change Payment Method' above.
+            </tal:notpaid>
+            <tal:paid tal:condition="ticket.payment.paid">
+            <p>
+                <tal:charged tal:condition="view.details_fee_enabled">
+                <tal:enabled tal:condition="ticket.change_enabled">
+                As you have not yet changed the guest details for this ticket since either having been transferred it from another account or since you purchased a 
+                guest detail alteration, you are able to make updates to the details of this ticket without charge. To make changes click "Start Editing 
+                Guest Details" below. Please note that once you have made a change, you will have to pay full payment alteration fee of 
+                ${structure:view.format_price(view.details_fee)} if you wish to make another change. Please also note that the alteration fee may change over
+                time, see the <a href="${request.route_path('read_purchase_agreement')}">Purchase Agreement</a> for more information.
+                </tal:enabled>
+                <tal:notenabled tal:condition="not:ticket.change_enabled">
+                Guest details can be only be altered by paying a fee of ${structure:view.format_price(view.details_fee)} and this amount may change over time 
+                (please see the <a href="${request.route_path('read_purchase_agreement')}">Purchase Agreement</a> for more information). 
+                If only a minor change is required, for example a misspelled name, then the fee may be waived however you will need 
+                to get in touch with the committee directly.
+                </tal:notenabled>
+                </tal:charged>
+                <tal:notcharged tal:condition="not:view.details_fee_enabled">
+                You may update your guest's details free of charge, either to correct a small mistake or to change the guest entirely. To get started just
+                click "Start Editing Guest Details" below. Please note that updating guest details may only temporarily be without charge, for more
+                information see the <a href="${request.route_path('read_purchase_agreement')}">Purchase Agreement</a>.<br /><br />
+                </tal:notcharged>
+            </p>
+        
+            <p>
+                Please note that you (the ticket owner) remain responsible for any guest tickets held on your account and will be the
+                only person able to collect these tickets in advance of the event. If you instead wish to transfer ownership of a
+                ticket to another person, you may do so by instead clicking 'Transfer Ticket' on your profile page.
+            </p>
+        
+            <br />
+        
+    		<a class="ll_btn" tal:attributes="class 'll_btn pull-right disabled' if ticket.locked_down else 'll_btn pull-right'; href nothing if ticket.locked_down else request.route_path('ticket_edit_guest', tick_id=ticket.__name__)">
+    			<i class="icon-pencil"></i> Start Editing Guest Details
+    		</a>
+            </tal:paid>
+        </tal:canchange>
+        <tal:cannotchange tal:condition="ticket.locked_down">
+        <h3>Change Details</h3>
+        <p>
+            The details for this ticket have been locked down by the committee and editing is no longer permitted.
+        </p>
+        </tal:cannotchange>
+        
+        <div class="clearbar"></div>
+        <br />
+        
+        <tal:comment tal:condition="None">
+        <h3>Payment History</h3>
+        <table class="table table-bordered table-striped">
+            
+            <thead>
+                
+                <tr>
+                    <th class="span2">Date</th>
+                    <th class="span2">Method</th>
+                    <th class="span2">Amount Due</th>
+                    <th class="span2">Amount Paid</th>
+                    <th class="span2">Method Fee</th>
+                    <th>Status</th>
+                </tr>
+                
+            </thead>
+            
+            <tbody>
+            
+                <tr tal:repeat="stage ticket.payment.history[::-1]">
+                    <td>${stage.date.strftime("%d/%m/%Y")}</td>
+                    <td>${view.get_payment_method(stage.method).name}</td>
+                    <td>${structure:view.format_price(stage.amount_remaining)}</td>
+                    <td>${structure:view.format_price(stage.amount_paid)}</td>
+                    <td>${structure:view.format_price(stage.processing_charge)}</td>
+                    <td>${stage.status}</td>
+                </tr>
+                
+            </tbody>
+            
+        </table>
+        </tal:comment>
+        
+    </tal:content>
+</tal:macro>

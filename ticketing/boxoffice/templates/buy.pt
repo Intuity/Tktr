@@ -1,0 +1,105 @@
+<tal:macro metal:use-macro="view.site_style">
+    <script type="text/javascript" metal:fill-slot="script">
+    function countTickets() {
+        var total_tickets = 0;
+        var cost_total = 0;
+		var limited = ${'true' if view.purchase_limited else 'false'};
+        $("select").each(function() {
+            var tickets = parseInt($(this).val());
+            var cost = parseInt($(this).parent().children("input").val()) / 100.0;
+            total_tickets += tickets;
+            cost_total += cost * tickets;
+        });
+        if(limited && total_tickets > ${view.purchase_max}) {
+            $("#alert").removeClass("hidden");
+            $("#submit").attr("disabled", true);
+            $("#errormsg").html("At the moment you can only purchase a maximum of two tickets.");
+        } else {
+            $("#alert").addClass("hidden");
+            $("#submit").attr("disabled", false);
+        }
+        // Add up the order total
+        $("#ordertotal").html(cost_total.toFixed(2));
+    }
+    </script>
+    <tal:content metal:fill-slot="content">
+        
+        <h1>Buy Tickets</h1>
+        <tal:block tal:condition="python:(view.user.total_tickets < view.purchase_max or not view.purchase_limited)">
+		
+		<tal:limited tal:condition="view.purchase_limited">
+        Please select the number of tickets you wish to purchase, at present you may only purchase a maximum of ${view.purchase_max} tickets. You can purchase add-ons for your tickets on the <strong>next page</strong> if there is stock left.
+		</tal:limited>
+		<tal:unlimited tal:condition="not:view.purchase_limited">
+		Please select the number of tickets you wish to purchase, one of the tickets must be your own. You can purchase add-ons for your tickets on the <strong>next page</strong> if there is stock left.
+		</tal:unlimited>
+        <br /><br />
+        <div class="alert alert-info hidden" id="alert" style="background-color:#F5F5F5; border-radius:0;" tal:condition="not:exists:error">
+            <strong>Sorry!</strong> <span id="errormsg">At the moment you can only purchase a maximum of ${view.purchase_max} tickets.</span>
+        </div>
+        <div class="alert alert-info" id="alert" style="background-color:#F5F5F5; border-radius:0;" tal:condition="exists:error">
+            <strong>Sorry!</strong> <span id="errormsg" tal:content="error">At the moment you can only purchase a maximum of ${view.purchase_max} tickets.</span>
+        </div>
+        
+        <form action="" method="POST">
+            <table class="table table-striped table-bordered">
+            
+                <thead>
+                    <th>Type</th>
+                    <th style="text-align:right;">Cost</th>
+                    <th style="text-align:right;">Quantity</th>
+                </thead>
+                <tbody>
+                    <tr tal:repeat="type view.ticket_types">
+                        <td class="span8">
+                            <h4 style="margin:0;padding:0;">${type.name}</h4>
+                            <span style="color:#666">
+								${type.description}
+								<tal:limited tal:condition="type.purchase_limit > 0">
+								<br /><span style="font-style:italic;font-size:12px;">Purchase of this type is limited to ${type.purchase_limit} tickets.</span>
+								</tal:limited>
+							</span>
+                        </td>
+                        <td class="span2" style="text-align:right;">
+							${structure:view.format_price(type.cost)}
+						</td>
+                        <td tal:condition="len(type.__parent__.tickets) > 0 and view.user_can_buy_type(type.__name__)" style="text-align:right;">
+                            <select id="${type.__name__}" name="${type.__name__}" class="span1" onchange="countTickets();">
+								<tal:limited tal:condition="view.purchase_limited and (type.purchase_limit > view.purchase_max or type.purchase_limit == 0)">
+                                <option tal:repeat="number python:range(view.purchase_max + 1)" value="${number}">${number}</option>
+								</tal:limited>
+								<tal:unlimited tal:condition="view.purchase_limited == False and type.purchase_limit <= 0">
+								<option tal:repeat="number python:range(10)" value="${number}">${number}</option>
+								</tal:unlimited>
+								<tal:type_and_max_limit tal:condition="view.purchase_limited and type.purchase_limit <= view.purchase_max and type.purchase_limit > 0">
+                                <option tal:repeat="number python:range(type.purchase_limit + 1)" value="${number}">${number}</option>
+								</tal:type_and_max_limit>
+								<tal:type_limit tal:condition="view.purchase_limited == False and type.purchase_limit > 0">
+                                <option tal:repeat="number python:range(type.purchase_limit + 1)" value="${number}">${number}</option>
+								</tal:type_limit>
+                            </select>
+                            <input type="hidden" class="cost" value="${type.cost}" />
+                        </td>
+                        <td tal:condition="len(type.__parent__.tickets) <= 0" style="text-align:right;">SOLD OUT</td>
+						<td tal:condition="not:view.user_can_buy_type(type.__name__)" style="text-align:right;">Max Number Already Purchased</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3 class="pull-right">Sub-Total: &pound;<span id="ordertotal">0.00</span></h3>
+			<div class="clearbar"></div>
+            <a href="${request.route_path('user_profile')}" class="ll_btn danger pull-left"><i class="icon-remove"></i><span class="pull-right">Cancel</span></a>
+            <button type="submit" name="submit" id="submit" value="submit" class="ll_btn pull-right"><i class="icon-arrow-right"></i><span class="pull-right">Next</span></button>
+        </form>
+         
+        <div class="clearbar"></div>
+        <br />
+        </tal:block>
+        <tal:block tal:condition="view.user.total_tickets >= view.purchase_max and view.purchase_limited">
+        <br /><br />
+        <h4 style="text-align:center;">You have already purchased the maximum number of tickets allowed at the present time.<br /><br /><a href="${request.route_path('user_profile')}">Back to profile</a></h4>
+        
+        <br /><br /><br />
+        </tal:block>
+        
+    </tal:content>
+</tal:macro>

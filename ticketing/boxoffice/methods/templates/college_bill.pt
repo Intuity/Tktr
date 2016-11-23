@@ -1,0 +1,49 @@
+<tal:macro metal:use-macro="view.site_style">
+    <tal:content metal:fill-slot="content">
+        
+        <h1>Pay Via College Bill</h1>
+        <p>${method.customer_description}</p>
+        <p>${more_details}</p>
+        <p style="font-weight:bold;font-size:17px;color:#C00;">Click "Pay Via College Bill" to complete your order, clicking "Back" will let you choose an alternative method of payment.</p>
+        
+        <h3>Your Order Summary</h3>
+        <tal:macro metal:use-macro="view.ticket_pay_list"></tal:macro>
+        
+        <table style="width:400px;font-size:18px;font-weight:300;" class="table table-bordered">
+            <tbody>
+                <tr>
+                    <td>Reference Code</td>
+                    <td>${payment_id}</td>
+                </tr>
+                <tr>
+                    <td style="width:200px;">Order subtotal</td>
+                    <td>${structure:subtotal}</td>
+                </tr>
+                <tr>
+                    <td>Processing charge</td>
+                    <td>${structure:processing}</td>
+                </tr>
+                <tr>
+                    <td>Order total</td>
+                    <td>${structure:total}</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <br />
+        
+        <a href="${request.route_path('pay_for_tickets')}" class="ll_btn pull-left" tal:condition="not:alteration">
+            <i class="icon-arrow-left"></i><span class="pull-right">Back</span>
+        </a>
+        <a href="${request.route_path('alter_payment', tick_id=payment.tickets[0].__name__)}" class="ll_btn pull-left" tal:condition="alteration">
+            <i class="icon-arrow-left"></i><span class="pull-right">Back</span>
+        </a>
+        <a href="?action=pay" class="ll_btn pull-right" id="makepayment">
+            <i class="icon-ok"></i><span class="pull-right">Pay Via College Bill</span>
+        </a>
+        
+        <div class="clearbar"></div>
+        <br />
+        
+    </tal:content>
+</tal:macro>

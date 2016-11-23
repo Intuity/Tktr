@@ -1,0 +1,77 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Settings</tal:title>
+    <tal:title metal:fill-slot="subtitle">Payment Methods</tal:title>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable blue unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Help</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+					<p>
+					    Payment methods determine the different ways in which customers can make payments for your tickets. By switching on a payment method you will enable that payment method to be used for individuals when checking out (changes to state are only applied when you click 'Save'). Each payment method available to you has a separate section below with its own settings, make sure you fill in all the details for each payment method before enabling it otherwise customers will be presented with incorrect information.
+					</p>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+		
+		<br />
+        
+        <form class="form-horizontal" action="" method="POST">
+        
+            <tal:block tal:repeat="method methods">
+	        <div class="expandable blue container">
+	            <div class="exp-head container">
+	                <h3 class="pull-left">${method.name}</h3>
+                    <div class="ll_switch unselectable pull-right blue">
+                        <div class="onstate" tal:attributes="class 'onstate' if method.enabled else 'onstate hidden'">
+                            <div class="off" onclick="Tick.admin.switch($(this).closest('.ll_switch'), 'off');">Off</div>
+                            <div class="on">On</div>
+                        </div>
+                        <div class="offstate hidden" tal:attributes="class 'offstate hidden' if method.enabled else 'offstate'">
+                            <div class="off">Off</div>
+                            <div class="on" onclick="Tick.admin.switch($(this).closest('.ll_switch'), 'on');">On</div>
+                        </div>
+                    </div>
+                    <h4 class="pull-right">Accept Payments via ${method.short_name}:</h4>
+                </div>
+                <div class="exp-body container collapse in" tal:attributes="class 'exp-body container collapse in' if method.enabled else 'exp-body container collapse'">
+	                <div class="breakerline"></div>
+	                <div class="inner">
+                        <input id="enable_${method.__name__}" name="enable_${method.__name__}" class="enabled" type="hidden" value="yes" tal:attributes="value 'yes' if method.enabled else 'no'" />
+                        
+                        ${method.description}
+                        <div class="clearbar"></div>
+                        <br />
+                        <div class="control-group" tal:repeat="setting view.sort_payment_method_settings(method.settings)">
+                            <label for="${method.__name__}+${setting.__name__}" class="control-label">${setting.name}</label>
+                            <div class="controls">
+                                <div class="input-prepend" tal:condition="python:(not setting.long_value and not setting.confidential and setting.monetary)">
+                                    <span class="add-on">&pound;</span>
+                                    <input type="text" name="${method.__name__}+${setting.__name__}" id="${method.__name__}+${setting.__name__}" value="${setting.display_value}" />
+                                </div>
+                                <input type="text" name="${method.__name__}+${setting.__name__}" id="${method.__name__}+${setting.__name__}" value="${setting.display_value}" tal:condition="python:(not setting.long_value and not setting.confidential and not setting.monetary)" /> ${'%' if setting.percentage else nothing}
+                                <input type="password" name="${method.__name__}+${setting.__name__}" id="${method.__name__}+${setting.__name__}" value="${setting.display_value}" tal:condition="python:(not setting.long_value and setting.confidential and not setting.monetary)" />
+                                <textarea style="width:450px;height:100px;resize:none;" id="${method.__name__}+${setting.__name__}" name="${method.__name__}+${setting.__name__}" tal:condition="setting.long_value">${setting.display_value}</textarea>
+                                <span class="help-block">${setting.description}${' Please note the field value is hidden for security.' if setting.confidential else nothing}</span>
+                            </div>
+                        </div>
+                        
+	                </div>
+	            </div>
+	        </div>
+            <br />
+            </tal:block>
+            
+            <button type="submit" class="ll_btn pull-right" id="submit" name="submit" value="submit">
+                <i class="icon-save"></i><span class="pull-right">Save</span>
+            </button>
+            <br />
+        </form>
+        
+    </tal:content>
+</tal:macro>

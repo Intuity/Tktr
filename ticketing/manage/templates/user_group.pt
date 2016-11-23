@@ -1,0 +1,59 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Users</tal:title>
+	<tal:subtitle metal:fill-slot="subtitle">For ${user.username}</tal:subtitle>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable red unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Help</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <p>
+                        Select the group you want to move the user to and click "Move". This will also clear any group filters that exist for the user so that they are not moved back into the original group by mistake.
+                    </p>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        <br />
+        <div class="expandable red container">
+            <div class="exp-head container">
+                <h3 class="pull-left">Change Group</h3>
+            </div>
+            <div class="exp-body">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <form action="" method="POST" class="form-horizontal">
+                        <br />
+                        <div class="control-group">
+                            <label for="name" class="control-label">Group</label>
+                            <div class="controls">
+                                <select id="selgroup" name="selgroup">
+									<option tal:repeat="group request.root.groups.values()" value="${group.__name__}" tal:attributes="selected 'selected' if user.__parent__ == group else nothing">${group.name}</option>
+								</select>
+                                <span class="help-block">The group to move the user into.</span>
+                            </div>
+                        </div>
+                        
+                        <a href="${request.route_path('admin_accounts')}" class="ll_btn pull-left">
+                           <i class="icon-arrow-left"></i>
+                           <span class="pull-right">Cancel</span>
+                        </a>
+                        
+                        <button type="submit" class="pull-right ll_btn success" name="submit" id="submit" value="submit">
+                            <i class="icon-arrow-right"></i><span class="pull-right">Move</span>
+                        </button>
+                        <div class="clearbar"></div>
+            
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="clearbar"></div>
+        <br /><br />
+        
+    </tal:content>
+</tal:macro>

@@ -1,0 +1,35 @@
+<tal:macro metal:use-macro="view.site_style">
+    <tal:content metal:fill-slot="content">
+        
+        <h1>Discount Code</h1>
+        
+		<p>
+			If you have been sent a discount code then enter it below and click 'Check Discount' to see if you qualify for a discounted ticket price. All prices in the ticketing system shown to you will then be discounted to the level determined by your discount code.
+		</p>
+		<br />
+		<form class="form-horizontal" action="" method="POST" autocomplete="off">
+			
+			<div class="control-group">
+				<label class="control-label" for="discount_code">Discount Code:</label>
+				<div class="controls">
+					<input type="text" name="discount_code" id="discount_code" autocomplete="on" value="${discount_code}" />&nbsp;
+                    <span class="help-block">If you have been sent a discount code, enter it here.</span>
+				</div>
+			</div>
+            
+            <br />
+            
+            <a href="${request.route_path('user_profile')}" class="ll_btn pull-left">
+               <i class="icon-arrow-left"></i>
+               <span class="pull-right">Cancel</span>
+            </a>
+            
+            <button type="submit" class="pull-right ll_btn success" name="submit" id="submit" value="submit">
+                <i class="icon-ok"></i><span class="pull-right">Check Discount</span>
+            </button>
+            <div class="clearbar"></div>
+			
+		</form>
+        
+    </tal:content>
+</tal:macro>

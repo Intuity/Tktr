@@ -1,0 +1,117 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Accounts</tal:title>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable red unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Help</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <p>You can use this form to export reports of all the accounts that exist on the system. This allows you to bring out values such as postal address, email address and other contact details as well as specific details on purchased tickets.</p>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        <br />
+        <div class="expandable red container">
+            <div class="exp-head container">
+                <h3 class="pull-left">Accounts Export</h3>
+            </div>
+            <div class="exp-body">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <form action="" method="POST" class="form-horizontal">
+                        <br />
+						
+                        <div class="control-group">
+                            <label for="group" class="control-label">Group</label>
+                            <div class="controls">
+                                <select id="group" name="group" class="span3">
+									<option value="any" selected="selected">All Groups</option>
+                                    <option tal:repeat="group groups" value="${group.__name__}">${group.name}</option>
+								</select>
+                                <span class="help-block">The group you wish to export, if you wish to see all users select 'All Groups'.</span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="has_tickets" class="control-label">Holds Tickets</label>
+                            <div class="controls">
+								<label class="checkbox">
+									<input type="checkbox" value="hastickets" id="has_tickets" name="has_tickets" /> Has at least one ticket
+								</label>
+                                <span class="help-block">Export only the users who have purchased tickets.</span>
+                            </div>
+                        </div>
+            
+                        <div class="control-group">
+                            <label for="cost" class="control-label">Export Fields</label>
+                            <div class="controls" id="tickchoice">
+								<label class="checkbox">
+									<input type="checkbox" value="export" checked="checked" id="opt_username" name="opt_username" /> Username
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" checked="checked" id="opt_salutation" name="opt_salutation" /> Salutation
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" checked="checked" id="opt_fullname" name="opt_fullname" /> Full Name
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_crsid" name="opt_crsid" /> CRSid
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" checked="checked" id="opt_email" name="opt_email" /> Email Address
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_phone_num" name="opt_phone_num" /> Phone Number
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_dob" name="opt_dob" /> Date of Birth
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_college" name="opt_college" /> College
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_grad" name="opt_grad" /> Graduate Status
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_postal" name="opt_postal" /> Postal Address
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" checked="checked" id="opt_tickets" name="opt_tickets" /> Total number of held tickets
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_completed" name="opt_completed" /> All details complete (may take a while)
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_notes" name="opt_notes" /> Notes
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_payments" name="opt_payments" /> Pending payments
+								</label>
+								<span class="help-block" id="tickchoiceinfo">Whichever options are ticked will be included in the report when it is exported as separate columns.</span>
+                            </div>
+                        </div>
+                        
+                        <a href="${request.route_path('admin_accounts')}" class="ll_btn pull-left">
+                           <i class="icon-arrow-left"></i>
+                           <span class="pull-right">Cancel</span>
+                        </a>
+                        
+                        <button type="submit" class="pull-right ll_btn success" name="submit" id="submit" value="submit">
+                            <i class="icon-save"></i><span class="pull-right">Export</span>
+                        </button>
+                        <div class="clearbar"></div>
+            
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="clearbar"></div>
+        <br /><br />
+        
+    </tal:content>
+</tal:macro>

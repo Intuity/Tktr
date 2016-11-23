@@ -1,0 +1,276 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Sales</tal:title>
+    <script type="text/javascript" metal:fill-slot="script">
+    var day_sales_data = {
+    	labels : ${lc_titles},
+    	datasets : [
+    		{
+    			fillColor : "rgba(151,187,205,0.5)",
+    			strokeColor : "rgba(151,187,205,1)",
+    			pointColor : "rgba(151,187,205,1)",
+    			pointStrokeColor : "#fff",
+    			data : ${lc_sales}
+    		}
+    	]
+    };
+    var day_revenue_data = {
+    	labels : ${lc_titles},
+    	datasets : [
+    		{
+    			fillColor : "rgba(151,187,205,0.5)",
+    			strokeColor : "rgba(151,187,205,1)",
+    			pointColor : "rgba(151,187,205,1)",
+    			pointStrokeColor : "#fff",
+    			data : ${lc_revenue}
+    		}
+    	]
+    };
+    var minute_sales_data = {
+    	labels : ${lc_minute_titles},
+    	datasets : [
+    		{
+    			fillColor : "rgba(151,187,205,0.5)",
+    			strokeColor : "rgba(151,187,205,1)",
+    			pointColor : "rgba(151,187,205,1)",
+    			pointStrokeColor : "#fff",
+    			data : ${lc_minute_sales}
+    		}
+    	]
+    };
+    var minute_revenue_data = {
+    	labels : ${lc_minute_titles},
+    	datasets : [
+    		{
+    			fillColor : "rgba(151,187,205,0.5)",
+    			strokeColor : "rgba(151,187,205,1)",
+    			pointColor : "rgba(151,187,205,1)",
+    			pointStrokeColor : "#fff",
+    			data : ${lc_minute_revenue}
+    		}
+    	]
+    };
+    var bc_data = {
+    	labels : ${bc_titles},
+    	datasets : [
+    		{
+    			fillColor : "rgba(85,136,204,0.5)",
+    			strokeColor : "rgba(85,136,204,1)",
+    			pointColor : "rgba(85,136,204,1)",
+    			pointStrokeColor : "#fff",
+    			data : ${bc_sold}
+    		},
+    		{
+    			fillColor : "rgba(204,85,85,0.5)",
+    			strokeColor : "rgba(204,85,85,1)",
+    			pointColor : "rgba(204,85,85,1)",
+    			pointStrokeColor : "#fff",
+    			data : ${bc_unsold}
+    		}
+    	]
+    };
+    var pie_data = [
+    	{
+    		value: ${basicbreakdown.unsold},
+    		color:"#C55"
+    	},
+    	{
+    		value : ${basicbreakdown.sold},
+    		color : "#58C"
+    	},		
+    ];
+    $(document).ready(function() {
+        var st_day_ctx = $("#daysalestime").get(0).getContext("2d");
+        var st_day_chart = new Chart(st_day_ctx).Line(day_sales_data, {
+            "datasetFill": false,
+        });
+        var st_minute_ctx = $("#minutesalestime").get(0).getContext("2d");
+        var st_minute_chart = new Chart(st_minute_ctx).Line(minute_sales_data, {
+            "datasetFill": false,
+        });
+        var prop_ctx = $("#propofticks").get(0).getContext("2d");;
+        var prop_chart = new Chart(prop_ctx).Bar(bc_data, {
+            "scaleOverride": true,
+            "scaleSteps": 10,
+            "scaleStepWidth": ${bc_step_val},
+            "scaleStartValue": 0,
+        });
+        var sold_ctx = $("#soldvsunsold").get(0).getContext("2d");;
+        var sold_chart = new Chart(sold_ctx).Pie(pie_data, {
+            "animationEasing": "easeOutQuart", 
+            "animateScale": true, 
+            "animationSteps": 60,
+        });
+    }); 
+    var change_graph = function(selector) {
+        document.getElementById('daysalestime').innerHTML = '';
+        document.getElementById('minutesalestime').innerHTML = '';
+        var option = $(selector).val();
+        if(option == "sales") {
+            var st_day_ctx = $("#daysalestime").get(0).getContext("2d");
+            var st_day_chart = new Chart(st_day_ctx).Line(day_sales_data, {
+                "datasetFill": false,
+            });
+            var st_minute_ctx = $("#minutesalestime").get(0).getContext("2d");
+            var st_minute_chart = new Chart(st_minute_ctx).Line(minute_sales_data, {
+                "datasetFill": false,
+            });
+        } else if(option == "revenue") {
+            var st_day_ctx = $("#daysalestime").get(0).getContext("2d");
+            var st_day_chart = new Chart(st_day_ctx).Line(day_revenue_data, {
+                "datasetFill": false,
+            });
+            var st_minute_ctx = $("#minutesalestime").get(0).getContext("2d");
+            var st_minute_chart = new Chart(st_minute_ctx).Line(minute_revenue_data, {
+                "datasetFill": false,
+            });
+        }
+        document.getElementById('daysalestime').setAttribute('width', 900);
+        document.getElementById('daysalestime').setAttribute('height', 200);
+        document.getElementById('daysalestime').style.width = '900px';
+        document.getElementById('daysalestime').style.height = '200px';
+        document.getElementById('minutesalestime').setAttribute('width', 900);
+        document.getElementById('minutesalestime').setAttribute('height', 200);
+        document.getElementById('minutesalestime').style.width = '900px';
+        document.getElementById('minutesalestime').style.height = '200px';
+    };
+    function changeFilterType(selector) {
+        if($(selector).val() == 'status') {
+            $("#filtervalue").addClass("hidden");
+            $("#filtervalue-status").removeClass("hidden");
+        } else {
+            $("#filtervalue").removeClass("hidden");
+            $("#filtervalue-status").addClass("hidden");
+        }
+        $("#filtervalue").val("").prop('disabled', false);
+    }
+    </script>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable green unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Help</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <p>
+                        This screen shows you a basic breakdown of sales figures over the past 10 days as well as the proportion of tickets left to sell. You can switch the first graph between sale volume and sale revenue by using the drop-down in the top right of the panel. 
+                    </p>
+                    <p>
+                        From this section you can also view, confirm and reject payments. To find a specific payment use the form in the "Payments" section and then follow the steps to view or change a payment. When a payment is made via cheque or direct bank transfer, confirmation must be manually processed - whereas when payments are made through Stripe they are automatically put into a confirmed state.
+                    </p>
+					<p>Please note that revenue will only show is calculated from payment totals. Transactions such as ticket allocation or ticket transferrals will count as payments, however they have a zero associated cost to them - therefore they will not be show in revenue.</p>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        
+        <br />
+        
+        <div class="expandable green container">
+            <div class="exp-head container">
+                <h3 class="pull-left">Payments Search</h3>
+            </div>
+            <div class="exp-body">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <form action="${request.route_path('admin_payments', _scheme='https')}" method="GET" class="form-horizontal">
+                        <br />
+                        <div class="control-group">
+                            <label for="name" class="control-label">Search for payment</label>
+                            <div class="controls">
+                                <select id="filter" name="filter" onchange="javascript:$('#value').prop('disabled', false);changeFilterType(this);">
+                                    <option selected disabled>Filter...</option>
+                                    <option value="status">By Payment Status</option>
+                                    <option value="refcode">By Reference Code</option>
+                                    <option value="crsid">By CRSid</option>
+                                    <option value="name">By Name</option>
+                                    <option value="email">By Email</option>
+                                    <option value="username">By Username</option>
+                                </select> 
+                                <input type="text" id="filtervalue" name="filtervalue" placeholder="Search value..." disabled="disabled" />
+                                <select id="filtervalue-status" name="filtervalue-status" class="hidden">
+                                    <option value="all">All</option>
+                                    <option value="paid">Paid</option>
+                                    <option value="unpaid">Unpaid</option>
+                                    <option value="expiring">Expiring</option>
+                                    <option value="expired">Expired</option>
+                                </select>
+                                <button type="submit" id="submit" name="submit" value="submit" class="ll_btn" style="display:inline-block;">
+                                    <i class="icon-search"></i>
+                                    <span class="pull-right">Search</span>
+                                </button>
+                                <span class="help-block">Select the filter you wish to use and enter the text you wish to filter by and click "Search".</span>
+                            </div>
+                        </div>
+            
+                    </form>
+                </div>
+            </div>
+        </div>
+		
+		<div class="clearline"></div>
+		
+		<a href="${request.route_path('admin_sales_export')}" class="ll_btn pull-right" style="margin:5px 0 5px 0;">
+			<i class="icon-pencil"></i>
+			<span class="pull-right">
+				Payments Report
+			</span>
+		</a>
+		
+		<div class="clearline"></div>
+        
+        <div class="expandable green">
+            <div class="exp-head container">
+                <h3 class="pull-left">Ticket Sales Over Time</h3>
+                <select class="pull-right" style="margin:5px;" onchange="change_graph(this);">
+                    <option value="sales">Sales Volume By Day</option>
+                    <option value="revenue">Revenue By Day</option>
+                </select>
+                <h4 class="pull-right">Graph:</h4>
+            </div>
+            <div class="exp-body container">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <canvas id="daysalestime" width="900" height="200" tal:condition="sales_exist"></canvas>
+                    <canvas id="minutesalestime" width="900" height="200" tal:condition="sales_exist"></canvas>
+					<div style="width:900px;height:100px;text-align:center;" tal:condition="not:sales_exist">
+						<h4 style="line-height:100px;">No sales have been made so far.</h4>
+					</div>
+                    <span class="help-block" tal:condition="sales_exist">
+                        Please note this graph adjusts to show the last period of active sales (1 or more sales per day) and as such might not show the most recent dates.
+                    </span>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        
+        <br />
+		
+		<div class="clearline"></div>
+        
+        <div class="expandable green">
+            <div class="exp-head container">
+                <h3>Proportions of Tickets</h3>
+            </div>
+            <div class="exp-body container">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <canvas id="propofticks" width="400" height="200"></canvas>
+                    <canvas id="soldvsunsold" width="200" height="200" style="margin-left:100px;"></canvas>
+                    <div style="width:200px;height:100px;float:right;margin-top:75px;">
+                        <div style="width:15px;height:15px;border:1px solid #666;background-color:#C55;float:left;"></div>
+                        <div style="float:left;width:150px;height:17px;line-height:15px;vertical-align:middle;margin-left:5px;">Unsold Tickets (${basicbreakdown.unsold})</div>
+                        <div class="clearbar" style="height:5px;"></div>
+                        <div style="width:15px;height:15px;border:1px solid #666;background-color:#58C;float:left;"></div>
+                        <div style="float:left;width:150px;height:17px;line-height:15px;vertical-align:middle;margin-left:5px;">Sold Tickets (${basicbreakdown.sold})</div>
+                    </div>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        <br />
+        
+    </tal:content>
+</tal:macro>

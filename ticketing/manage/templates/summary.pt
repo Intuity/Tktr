@@ -1,0 +1,127 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Summary</tal:title>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <script type="text/javascript" tal:condition="sales_exist">
+        var day_sales_data = {
+        	labels : ${lc_titles},
+        	datasets : [
+        		{
+        			fillColor : "rgba(151,187,205,0.5)",
+        			strokeColor : "rgba(151,187,205,1)",
+        			pointColor : "rgba(151,187,205,1)",
+        			pointStrokeColor : "#fff",
+        			data : ${lc_sales}
+        		}
+        	]
+        };
+        var minute_sales_data = {
+        	labels : ${lc_minute_titles},
+        	datasets : [
+        		{
+        			fillColor : "rgba(151,187,205,0.5)",
+        			strokeColor : "rgba(151,187,205,1)",
+        			pointColor : "rgba(151,187,205,1)",
+        			pointStrokeColor : "#fff",
+        			data : ${lc_minute_sales}
+        		}
+        	]
+        };
+        $(document).ready(function() {
+            var st_day_ctx = document.getElementById('daychart').getContext('2d');
+            var st_day_chart = new Chart(st_day_ctx).Line(day_sales_data, {
+                "datasetFill": false,
+            });
+            var st_minute_ctx = document.getElementById('minutechart').getContext('2d');
+            var st_minute_chart = new Chart(st_minute_ctx).Line(minute_sales_data, {
+                "datasetFill": false,
+            });
+            
+        });
+        </script>
+        
+        <div class="expandable green unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Most Recent Sales Volume</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-up"></i></h2>
+            </div>
+            <div class="exp-body container collapse in">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <canvas id="daychart" width="900" height="200" tal:condition="sales_exist"></canvas>
+                    <canvas id="minutechart" width="900" height="200" tal:condition="sales_exist"></canvas>
+					<div style="width:900px;height:100px;text-align:center;" tal:condition="not:sales_exist">
+						<h4 style="line-height:100px;">No sales have been made so far.</h4>
+					</div>
+                    <span class="help-block" tal:condition="sales_exist">
+                        Please note this graph adjusts to show the last period of active sales (1 or more sales per day) and as such might not show the most recent dates.
+                    </span>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        <br />
+        <div class="expandable pink unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Tickets</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-up"></i></h2>
+            </div>
+            <div class="exp-body container collapse in">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <table class="table table-bordered">
+                        <thead>
+                            <th class="span3">Total Released</th>
+                            <th class="span3">Purchased</th>
+                            <th class="span3">Remaining</th>
+                            <th class="span3">Revenue</th>
+                        </thead>
+                        <tbody>
+                            <td>${tick_stats.totalreleased}</td>
+                            <td>${tick_stats.purchased}</td>
+                            <td>${tick_stats.remaining}</td>
+                            <td>${structure:view.format_price(tick_stats.revenue)}</td>
+                        </tbody>
+                    </table>
+					<span class="help-block">Please note that the revenue calculation only takes account of purchases made online, and does not take account of ticket allocations (i.e. allocating "free" or externally paid for tickets to individuals).</span>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        <br />
+        <div class="expandable red unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Accounts</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-up"></i></h2>
+            </div>
+            <div class="exp-body container collapse in">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <table class="table table-bordered">
+                        <thead>
+                            <th class="span2">Total Users</th>
+                            <th class="span2">With Tickets</th>
+                            <th class="span2">Undergraduates</th>
+                            <th class="span2">Post-graduates</th>
+                            <th class="span2">Fellows</th>
+                            <th class="span2">Alumni</th>
+                        </thead>
+                        <tbody>
+                            <td>${user_stats.total}</td>
+                            <td>${user_stats.withtickets}</td>
+                            <td>${user_stats.undergrad}</td>
+                            <td>${user_stats.postgrad}</td>
+                            <td>${user_stats.fellow}</td>
+                            <td>${user_stats.alumni}</td>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        <br />
+        
+        
+        
+    </tal:content>
+</tal:macro>

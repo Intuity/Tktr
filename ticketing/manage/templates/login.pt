@@ -1,0 +1,36 @@
+<tal:macro metal:use-macro="view.site_style">
+    <link rel="stylesheet" href="/admin/static/css/admin.css" metal:fill-slot="style" />
+    <tal:content metal:fill-slot="content">
+        
+        <h1>Login to Manage</h1>
+        
+        <script type="text/javascript">
+        $(document).ready(function() {
+            setTimeout('$("#loginform").addClass("in");',300);
+        });
+        </script>
+        
+        <div class="loginform fade" id="loginform">
+            
+            <div style="margin:10px;margin-top:20px;">
+                <div style="text-align:center;font-size:80px;">
+                    <i tal:condition="exists:error" class="icon-ban-circle icon-red"></i>
+                    <i tal:condition="not:exists:error" class="icon-ticket icon-blue"></i>
+                </div>
+                <form action="" method="POST">
+                    <h4>Username</h4>
+                    <input class="ll_field" type="text" id="username" name="username" value="${prep_user}" />
+                    <br />
+                    <h4>Password</h4>
+                    <input class="ll_field" type="password" id="password" name="password" />
+                    
+                    <button class="pull-right ll_btn" name="submit" id="submit" value="submit">
+                        <i class="icon-lock"></i> <span class="pull-right">Login</span>
+                    </button>
+                </form>
+            </div>
+            
+        </div>
+        
+    </tal:content>
+</tal:macro>

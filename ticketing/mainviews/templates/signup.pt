@@ -1,0 +1,192 @@
+<tal:macro metal:use-macro="view.site_style">
+    <script metal:fill-slot="script">
+    
+    var checked_email = false;
+    var checked_user = false;
+    var checked_pwd = false;
+    var checked_pwd_match = false;
+
+	var check_email = function() {
+        var field = document.getElementById('email');
+        var feedback = document.getElementById('email_feedback');
+        if(field.value.length < 5) {
+            feedback.innerHTML = '';
+            feedback.style.color = '';
+            return;
+        }
+		checked_email = /^.*?@.*?\..*?/i.test(field.value);
+        if(checked_email) {
+            feedback.innerHTML = '<i class="icon-ok"></i> OK';
+            feedback.style.color = '';
+        } else {
+            feedback.innerHTML = '<i class="icon-remove"></i> Invalid email';
+            feedback.style.color = 'red';
+        }
+        submit_check();
+	}
+
+    var check_password = function() {
+        var field = document.getElementById('password');
+        var stripped = field.value.replace(/ /g, '');
+        var pwd_feedback = document.getElementById('pwd_strength');
+        var strongRegex = new RegExp("^(?=.{8,})(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*\\W).*$", "g");
+        var mediumRegex = new RegExp("^(?=.{7,})(((?=.*[A-Z])(?=.*[a-z]))|((?=.*[A-Z])(?=.*[0-9]))|((?=.*[a-z])(?=.*[0-9]))).*$", "g");
+        var enoughRegex = new RegExp("(?=.{6,}).*", "g");
+        if (false == enoughRegex.test(stripped)) {
+            pwd_feedback.innerHTML = '<i class="icon-remove"></i> Too short';
+            pwd_feedback.style.color = 'red';
+            checked_pwd = false;
+        } else if (strongRegex.test(stripped)) {
+            pwd_feedback.innerHTML = '<i class="icon-ok"></i> Strong';
+            pwd_feedback.style.color = '';
+            checked_pwd = true;
+        } else if (mediumRegex.test(stripped)) {
+            pwd_feedback.innerHTML = '<i class="icon-ok"></i> Good';
+            pwd_feedback.style.color = '';
+            checked_pwd = true;
+        } else {
+            pwd_feedback.innerHTML = '<i class="icon-exclamation"></i> Weak';
+            pwd_feedback.style.color = 'orange';
+            checked_pwd = true;
+        }
+        submit_check();
+        check_match();
+        return true;
+    };
+    
+    var check_match = function() {
+        var field_one = document.getElementById('password');
+        var field_two = document.getElementById('confirm_password');
+        var feedback = document.getElementById('confirm_status');
+        checked_pwd_match = field_one.value == field_two.value;
+        if(checked_pwd_match) {
+            feedback.innerHTML = '<i class="icon-ok"></i> Passwords match';
+            feedback.style.color = '';
+        } else {
+            feedback.innerHTML = '<i class="icon-remove"></i> Passwords don\'t match';
+            feedback.style.color = 'red';
+        }
+        submit_check();
+    };
+    
+    var check_username = function() {
+        var typed = document.getElementById('username').value.replace(/ /g, '');
+        var feedback = document.getElementById('username_feedback');
+        if(typed.length < 3) {
+            feedback.innerHTML = '';
+            checked_user = false;
+            submit_check();
+            return;
+        }
+        // Check not of CRSid form
+        var pattern = new RegExp(/^[A-Za-z]+[0-9]+$/);
+        if(pattern.test(typed)) {
+            feedback.innerHTML = '<i class="icon-remove"></i> Already exists';
+            feedback.style.color = 'red';
+            checked_user = false;
+            submit_check();
+            return;
+        }
+        // Check not already existing
+		$.get("/admin/accounts/user/" + typed + "/check", function(data) {
+			if(data == "true") {
+				feedback.innerHTML = '<i class="icon-remove"></i> Already exists';
+                feedback.style.color = 'red';
+                checked_user = false;
+			} else if(data == "false") {
+				feedback.innerHTML = '<i class="icon-ok"></i> OK';
+                feedback.style.color = '';
+                checked_user = true;
+			} else {
+				feedback.innerHTML = '';
+                checked_user = true;
+			}
+            submit_check();
+		});
+    };
+    
+    var submit_check = function() {
+        var button = document.getElementById('submit');
+        button.disabled = !(checked_pwd && checked_pwd_match && checked_user && checked_email);
+    };
+
+    $(document).ready(function() {
+        document.getElementById('email').setAttribute('onkeyup', 'check_email();');
+        document.getElementById('email').setAttribute('onvaluechange', 'check_email();');
+        document.getElementById('username').setAttribute('onkeyup', 'check_username();');
+        document.getElementById('username').setAttribute('onvaluechange', 'check_username();');
+        document.getElementById('password').setAttribute('onkeyup', 'check_password();');
+        document.getElementById('password').setAttribute('onvaluechange', 'check_password();');
+        document.getElementById('confirm_password').setAttribute('onkeyup', 'check_match();');
+        document.getElementById('confirm_password').setAttribute('onvaluechange', 'check_match();');
+        // Check everything
+        check_email();
+        check_username();
+    });
+    </script>
+    <tal:content metal:fill-slot="content">
+        
+        <h1>Create an Account</h1>
+        
+		<p>
+			To create an account please fill in your email address, chosen username and password into the following fields and click 'Submit'. Once submitted you will be forwarded on to the next page to fill in more details on your profile, you should also receive a confirmation email that your account has been created.
+		</p>
+		<br />
+		<form class="form-horizontal" action="" method="POST" autocomplete="off" enctype="multipart/form-data">
+			
+			<div class="control-group" id="othertitlebox" style="">
+				<label class="control-label" for="email">Your Email Address:</label>
+				<div class="controls">
+					<input type="text" name="email" id="email" value="${email}" />&nbsp;
+                    <span id="email_feedback"></span>
+				</div>
+			</div>
+            
+			<div class="control-group" id="othertitlebox" style="">
+				<label class="control-label" for="username">Your Username:</label>
+				<div class="controls">
+					<input type="text" name="username" id="username" value="${username}" />&nbsp;
+                    <span id="username_feedback"></span>
+				</div>
+			</div>
+			
+			<div class="control-group">
+				<label class="control-label" for="password">Password:</label>
+				<div class="controls">
+					<input type="password" name="password" id="password" autocomplete="on" />&nbsp;
+                    <span id="pwd_strength"></span>
+				</div>
+			</div>
+			
+			<div class="control-group">
+				<label class="control-label" for="confirm_password">Confirm Password:</label>
+				<div class="controls">
+					<input type="password" name="confirm_password" id="confirm_password" autocomplete="on" />&nbsp;
+                    <span id="confirm_status"></span>
+				</div>
+			</div>
+			
+			<div class="control-group">
+				<label class="control-label" for="discount_code">Discount Code:</label>
+				<div class="controls">
+					<input type="text" name="discount_code" id="discount_code" autocomplete="on" value="${discount_code}" />&nbsp;
+                    <span class="help-block">If you have been sent a discount code, enter it here to qualify for discounted tickets.</span>
+				</div>
+			</div>
+            
+            <br />
+            
+            <a href="${request.route_path('welcome')}" class="ll_btn pull-left">
+               <i class="icon-arrow-left"></i>
+               <span class="pull-right">Cancel</span>
+            </a>
+            
+            <button type="submit" class="pull-right ll_btn success" disabled="disabled" name="submit" id="submit" value="submit">
+                <i class="icon-ok"></i><span class="pull-right">Submit</span>
+            </button>
+            <div class="clearbar"></div>
+			
+		</form>
+        
+    </tal:content>
+</tal:macro>

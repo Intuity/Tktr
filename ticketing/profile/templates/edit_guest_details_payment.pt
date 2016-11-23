@@ -1,0 +1,101 @@
+<tal:macro metal:use-macro="view.site_style">
+    <tal:content metal:fill-slot="content">
+        
+        <h1 class="pull-left">Guest Details Alteration Payment</h1>
+        <div class="clearline"></div>
+		<p>
+			To be able to alter the details of your guest you need to pay the alteration fee of ${structure:view.format_price(view.details_fee)}. 
+            Once the payment is completed you will be taken to a form where you will be able to make any changes to the guest that are required. 
+            Please note that this payment will only allow you to make a single change to the guest, you will have to pay the alteration fee again 
+            if you want to change the details in future.
+		</p>
+		<p>
+			Stripe is a secure, online payment service for processing transactions from Visa or MasterCard credit or debit cards. We do not store 
+            any information on your debit or credit cards on our servers, all processing is done by Stripe. For more information on Stripe visit 
+            www.stripe.com.
+		</p>
+		<div class="clearline"></div>
+        
+        <div class="ticketdetails">
+            <div class="headline">
+                <div class="icon"></div>
+                <div class="details">
+                    <h4>${ticket.__name__}</h4>
+                    <h3>${ticket.guest_info.title} ${ticket.guest_info.fullname}</h3>
+                </div>
+            </div>
+            <hr />
+            <table>
+                <tbody>
+                    <tr>
+                        <td>Date of Birth</td>
+                        <td>${ticket.guest_info.dob.strftime("%d/%m/%Y") if ticket.guest_info.dob else 'Not Set'}</td>
+                        <td>Email Address</td>
+                        <td>${ticket.guest_info.email}</td>
+                    </tr>
+                    <tr>
+                        <td>Member of Cambridge</td>
+                        <td>${'Yes' if ticket.guest_info.raven_user else 'No'}</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+            <tal:cambridge tal:condition="ticket.guest_info.raven_user">
+            <h4 style="font-weight:600;">Cambridge Membership Details</h4>
+            <table>
+                <tbody>
+                    <tr>
+                        <td>Membership Type</td>
+                        <td>${view.graduate_status(ticket.guest_info.grad_status)}</td>
+                        <td>College</td>
+                        <td>${view.college_name(ticket.guest_info.college)}</td>
+                    </tr>
+                    <tr>
+                        <td>CRSid</td>
+                        <td>${ticket.guest_info.crsid}</td>
+                    </tr>
+                </tbody>
+            </table>
+            </tal:cambridge>
+        </div>
+        
+		<h3>Payment Via Stripe</h3>
+		<h4>
+            You will be charged ${structure:view.format_price(view.details_fee)} to enable a guest detail alteration for ticket ${ticket.__name__}.
+            Once the payment has been completed you will be able to make changes to the details as required.
+        </h4>
+        <div class="alert alert-info hidden" id="alert" style="background-color:#F5F5F5; border-radius:0;" tal:condition="not:exists:error">
+            <strong>Sorry!</strong> <span id="errormsg"></span>
+        </div>
+        <div class="alert alert-info" id="alert" style="background-color:#F5F5F5; border-radius:0;" tal:condition="exists:error">
+            <strong>Sorry!</strong> <span id="errormsg">${error}</span>
+        </div>
+		<br /><br />
+        
+		<div style="text-align:center;width:100%;" tal:define="stripe view.get_payment_method('stripe')">
+	        <form id="payment-form" class="form-horizontal" action="" method="POST">
+				<script
+				    src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+				    data-key="${stripe.settings['STRIPEAPIPUBLICKEY'].value}"
+					data-email="${view.user.profile.email}"
+					data-currency="GBP"
+				    data-amount="${view.details_fee}"
+				    data-name="${stripe.settings['ORGNAME'].value}"
+				    data-description="Single Guest Detail Alteration (${structure:view.format_price(view.details_fee)})"
+				    data-image="/static/img/StripeCrest.png"
+                    data-label="Make Payment Via Stripe"
+                    data-zip-code="true"
+                    data-allow-remember-me="false">
+				  </script>
+	        </form>
+		</div>
+        <br /><br />
+        <a id="backlink" href="${request.route_path('ticket_details', tick_id=ticket.__name__)}" class="ll_btn pull-left">
+            <i class="icon-arrow-left"></i><span class="pull-right">Back</span>
+        </a>
+		
+		<br /><br /><br />
+        
+    </tal:content>
+</tal:macro>

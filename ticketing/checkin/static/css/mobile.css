@@ -1,0 +1,12 @@
+td {
+	font-size:16px !important;
+	font-weight:200;
+}
+
+#detailstable td:first-of-type {
+    width:100px !important;
+}
+
+.checkin_footer {
+    display:none;
+}

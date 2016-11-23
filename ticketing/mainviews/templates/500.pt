@@ -1,0 +1,26 @@
+<tal:macro metal:use-macro="view.site_style">
+    <script type="text/javascript" metal:fill-slot="script">
+    function goBack() {
+        window.history.back();
+    }
+    </script>
+    <tal:content metal:fill-slot="content">
+        
+        <h1>Whoops...</h1>
+        <h4>Something happened that we weren't expecting, please click 'Back' and try again. If you're continuing to have a problem then get in touch with support and quote the following error.</h4><br />
+        
+        <div class="container well" style="background-color:#FFF;font-family:Lucida Console;box-shadow:none;">
+            <strong>Host:</strong> ${view.request.host_url}<br />
+            <strong>Path:</strong> ${view.request.path}<br />
+            <strong>Full URL:</strong> ${view.request.url}<br />
+            <strong>Params:</strong> ${view.request.params}<br /><br />
+            <strong>Error:</strong><br />
+            <span style="color:#F00;">${error}</span>
+        </div>
+        
+        <button class="ll_btn" onclick="goBack();">
+            <i class="icon-arrow-left"></i>Back
+        </button>
+        
+    </tal:content>
+</tal:macro>

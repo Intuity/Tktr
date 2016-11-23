@@ -1,0 +1,123 @@
+<tal:macro metal:use-macro="view.site_style">
+    <tal:content metal:fill-slot="content">
+        
+        <h1>Your Payment Details</h1>
+        Please note that changing your payment method <strong>does not reset your payment window</strong>, you will only have the remainder of the <strong>${view.payment_window} days</strong> left from your initial order date (${payment.opened_date.strftime("%d/%m/%Y")}) in which to complete your payment.
+		
+		<h3>Payment ${payment.__name__}</h3>
+        Below is displayed the total cost of your purchase along with the total amount of any payments currently received for your purchase. Please note that the amount already paid takes into account any fees associated with a particular method of payment.<br /><br />
+		<table class="table table-bordered">
+			<thead>
+				<tr>
+                    <td class="span4"><h4 style="margin:0;padding:0;">Payment Total</h4></td>
+                    <td><h4 style="margin:0;padding:0;">${structure:view.format_price(payment.total)}</h4></td>
+                </tr>
+				<tr>
+                    <td class="span4"><h4 style="margin:0;padding:0;">Amount Already Paid</h4></td>
+                    <td><h4 style="margin:0;padding:0;">${structure:view.format_price(payment.amount_paid)}</h4></td>
+                </tr>
+				<tr>
+                    <td class="span4"><h4 style="margin:0;padding:0;">Amount Outstanding</h4></td>
+                    <td><h4 style="margin:0;padding:0;">${structure:view.format_price(payment.amount_remaining)}</h4></td>
+                </tr>
+				<tr>
+                    <td class="span4"><h4 style="margin:0;padding:0;">Complete Payment Due By</h4></td>
+                    <td><h4 style="margin:0;padding:0;">${payment.due_date(view.payment_window).strftime("%d/%m/%Y")}</h4></td>
+                </tr>
+			</thead>
+		</table>
+        
+		<tal:currentmethod tal:condition="orig_method != None">
+		<h3>Current Payment Method</h3>
+		You have chosen to pay for these tickets via <strong>${orig_method.name}</strong>, the details of the payment method including any instructions can be found below.<br /><br />
+		${orig_method.customer_description}<br />
+		<tal:banktransfer tal:condition="orig_method.name == 'Bank Transfer'">
+		<br />
+        <table style="font-size:18px;font-weight:300;" class="table table-bordered">
+            <tbody>
+                <tr>
+                    <td style="width:200px;">Reference Code</td>
+                    <td>${payment.__name__}</td>
+                </tr>
+                <tr>
+                    <td>To Pay</td>
+                    <td>${orig_method.get_value('ORGNAME')}</td>
+                </tr>
+                <tr>
+                    <td>Account Number</td>
+                    <td>${orig_method.get_value('BANKACCOUNTNUMBER')}</td>
+                </tr>
+                <tr>
+                    <td>Sort Code</td>
+                    <td>${orig_method.get_value('BANKSORTCODE')}</td>
+                </tr>
+            </tbody>
+        </table>
+		</tal:banktransfer>
+		<tal:cheque tal:condition="orig_method.name == 'Cheque'">
+		<br />
+        <table style="font-size:18px;font-weight:300;" class="table table-bordered">
+            <tbody>
+                <tr>
+                    <td style="width:200px;">Reference Code</td>
+                    <td>${payment.__name__}</td>
+                </tr>
+                <tr>
+                    <td>To Pay</td>
+                    <td>${orig_method.get_value('ORGNAME')}</td>
+                </tr>
+            </tbody>
+        </table>
+		</tal:cheque>
+		</tal:currentmethod>
+		
+		<h3>Tickets Within Payment</h3>
+		<table class="table table-bordered">
+			<thead>
+				<th class="span4">Guest Name</th>
+				<th class="span3">Ticket Type</th>
+				<th>Ticket Cost</th>
+			</thead>
+			<tbody>
+				<tr tal:repeat="ticket payment.tickets">
+					<td>${ticket.guest_info.fullname if ticket.guest_info else '-'}</td>
+					<td>${ticket.tick_type.name}</td>
+					<td>${structure:view.format_price(ticket.tick_type.cost)} ${structure:'(+ ' +  view.format_price(ticket.addon_cost) + ' of addons)' if (ticket.addon_cost > 0) else ''}</td>
+				</tr>
+			</tbody>
+		</table>
+		
+		<h3>New Payment Method</h3>
+        
+        <table class="table table-striped table-bordered">
+            <thead>
+                <th class="span9">Payment Method</th>
+                <th>Actions</th>
+            </thead>
+            <tbody>
+                
+                <tr tal:repeat="method methods">
+                    <td>
+                        <h4 style="margin:0 0 5px 0;padding:0;">${method.name}</h4>
+                        <span style="color:#666">${method.customer_description}</span>
+                        <i style="color:#C00" tal:condition="method.deadlined"> This payment method has a ${view.payment_window} day payment window.</i>
+                    </td>
+                    <td style="line-height:80px;vertical-align:middle;">
+                        <a href="${request.route_path('alter_payment', tick_id=tick_id)}?method=${method.__name__}" class="ll_btn pull-left" id="pay-stripe">
+                            <i class="icon-money"></i><span class="pull-right">Pay by ${method.short_name}</span>
+                        </a>
+                    </td>
+                </tr>
+                
+            </tbody>
+        </table>
+        
+        <a href="${request.route_path('user_profile')}" class="ll_btn pull-left">
+            <i class="icon-arrow-left"></i><span class="pull-right">Cancel</span>
+        </a>
+        
+        <div class="clearbar"></div>
+        <br />
+        
+    </tal:content>
+</tal:macro>

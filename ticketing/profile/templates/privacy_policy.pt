@@ -1,0 +1,48 @@
+<tal:macro metal:use-macro="view.site_style">
+    <tal:content metal:fill-slot="content">
+        
+        <h1 class="pull-left">Privacy Policy</h1>
+		
+		<div class="clearline"></div>
+		
+		<tal:headlines tal:condition="document.headline_points and len(document.headline_points) > 0">
+		<h3>Important Points</h3>
+		<ul>
+			<li tal:repeat="point document.headline_points" style="font-size:16px;">${point}</li>
+		</ul>
+		</tal:headlines>
+		
+		<h3>The Full Policy</h3>
+		
+		${structure:document.main_body}
+        
+		<h3>Your Agreement</h3>
+		
+		<form class="form-horiztonal" action="" method="post">
+			
+			<div class="control-group">
+				<div class="controls" style="padding:0 10px 0 10px;">
+					<label class="checkbox">
+						<input type="checkbox" id="agreement" name="agreement" value="agreed" onclick="if($(this).prop('checked')) $('#submit').prop('disabled', false); else $('#submit').prop('disabled', true);" /> By checking this box you confirm that you agree to us handling your data in the manner laid out above.
+					</label>
+				</div>
+			</div>
+			
+			<br />
+            
+            <a href="#" onclick="if(confirm('If you do not agree to the user agreement then you will be unable to purchase tickets and you will be logged out and your account automatically deleted. Are you sure you want to continue?')) window.location.href = '${request.route_path('refused_agreement')}';" class="ll_btn pull-left">
+               <i class="icon-arrow-left"></i>
+               <span class="pull-right">Cancel</span>
+            </a>
+            
+            <button type="submit" class="pull-right ll_btn success" name="submit" id="submit" value="submit" disabled="disabled">
+                <i class="icon-ok"></i><span class="pull-right">Submit</span>
+            </button>
+            <div class="clearbar"></div>
+			
+			<br /><br />
+			
+		</form>
+		
+    </tal:content>
+</tal:macro>

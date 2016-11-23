@@ -1,0 +1,147 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Tickets</tal:title>
+    <script metal:fill-slot="script" type="text/javascript">
+    function changeFilterType(selector) {
+        if($(selector).val() == 'status') {
+            $("#filtervalue").addClass("hidden");
+            $("#filtervalue-status").removeClass("hidden");
+        } else {
+            $("#filtervalue").removeClass("hidden");
+            $("#filtervalue-status").addClass("hidden");
+        }
+        $("#filtervalue").val("");
+    }
+    </script>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable pink unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Help</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <p>
+                        Below are the details of the ticket you selected. These include the guest's (ticket holder's) details and also who purchased the ticket. To view the purchase associated with this ticket simply click the payment reference code.
+                    </p>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        
+        <h3 class="pull-left">Ticket: ${ticket.__name__}</h3>
+		<div class="pull-right" style="width:100%;height:50px;text-align:center;">
+	        <h4 style="margin-right:20px;display:inline-block;">
+                <a class="actlink" href="${request.route_path('admin_notes', mode='ticket', id=ticket.__name__)}"><i class="icon-pencil"></i>&ensp;Edit Notes</a>
+            </h4>
+	        <h4 style="margin-right:20px;display:inline-block;">
+                <a class="actlink" href="${request.route_path('admin_ticket_checkin_status', ticket_id=ticket.__name__)}"><i class="icon-ok-sign"></i>&ensp;Alter Check-In</a>
+            </h4>
+	        <h4 style="margin-right:20px;display:inline-block;" tal:condition="view.is_admin and ticket.guest_info != ticket.owner.profile">
+                <a class="actlink" href="#" onclick="if(confirm('Are you sure you want to make this the ticket of the owner?')) { window.location.href = '?action=markowner'; }"><i class="icon-user"></i>&ensp;Mark as Owner's Ticket</a>
+            </h4>
+	        <h4 style="margin-right:20px;display:inline-block;" tal:condition="view.is_admin and ticket.guest_info != ticket.owner.profile">
+                <a class="actlink" href="${request.route_path('admin_ticket_guest_info_edit', ticket_id=ticket.__name__)}"><i class="icon-pencil"></i>&ensp;Edit Profile</a>
+            </h4>
+            <h4 style="display:inline-block;" tal:condition="view.is_admin and ticket.guest_info != ticket.owner.profile and not ticket.change_enabled">
+                <a class="actlink" href="?action=enablealter"><i class="icon-gbp"></i>&ensp;Enable One Alteration</a>
+            </h4>
+            <h4 style="display:inline-block;" tal:condition="view.is_admin and ticket.guest_info != ticket.owner.profile and ticket.change_enabled">
+                <a class="actlink" href="?action=disablealter"><i class="icon-gbp"></i>&ensp;Remove Alteration</a>
+            </h4>
+		</div>
+		<div class="clearline"></div>
+        <div style="background-color:white;border:1px solid #666;width:206px;" class="pull-left" tal:condition="view.photo_required">
+            <img src="/profile/photo" width="200" style="margin:3px;" />
+        </div>
+        <table style="width:550px;margin-left:20px;font-size:18px;" class="pull-left">
+            <tbody>
+                <tr>
+                    <td class="span3" style="padding:5px;">Salutation:</td>
+                    <td style="padding:5px;">${ticket.guest_info.title if ticket.guest_info and ticket.guest_info.title else "-"}</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;">Full Name:</td>
+                    <td style="padding:5px;">${ticket.guest_info.fullname if ticket.guest_info and ticket.guest_info.fullname else "-"}</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;">Email:</td>
+                    <td style="padding:5px;" tal:condition="view.is_admin">${ticket.guest_info.email if ticket.guest_info and ticket.guest_info.email else "-"}</td>
+                    <td style="padding:5px;" tal:condition="not:view.is_admin">Hidden</td>
+                </tr>
+                <tr tal:condition="ticket.guest_info">
+                    <td class="span3" style="padding:5px;">Date of Birth:</td>
+					<tal:admin tal:condition="view.is_admin">
+                    <td style="padding:5px;" tal:condition="ticket.guest_info.dob">${ticket.guest_info.dob.strftime("%d/%m/%Y") if ticket.guest_info and ticket.guest_info.dob else "-"}</td>
+                    <td style="padding:5px;" tal:condition="not:ticket.guest_info.dob">Not Set</td>
+					</tal:admin>
+                    <td style="padding:5px;" tal:condition="not:view.is_admin">Hidden</td>
+                </tr>
+                <tr tal:condition="ticket.guest_info">
+                    <td class="span3" style="padding:5px;">Cambridge Member?</td>
+                    <td style="padding:5px;" tal:condition="ticket.guest_info.raven_user">Yes</td>
+                    <td style="padding:5px;" tal:condition="not:ticket.guest_info.raven_user">No</td>
+                </tr>
+                <tal:cambridge tal:condition="ticket.guest_info and ticket.guest_info.raven_user">
+                <tr>
+                    <td class="span3" style="padding:5px;">College:</td>
+                    <td style="padding:5px;">${view.college_name(ticket.guest_info.college)}</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;">University Membership:</td>
+                    <td style="padding:5px;">${view.graduate_status(ticket.guest_info.grad_status)}</td>
+                </tr>
+                </tal:cambridge>
+                <tr>
+                    <td class="span3" style="padding:5px;">Ticket Type:</td>
+                    <td style="padding:5px;">${ticket.tick_type.name}</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;">Ticket ID:</td>
+                    <td style="padding:5px;">${ticket.id_code}</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;">Checked in?</td>
+                    <td style="padding:5px;">${"Yes" if ticket.checkin_status else "No"}</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;">Alteration Enabled?</td>
+                    <td style="padding:5px;">${"Yes" if ticket.change_enabled else "No"}</td>
+                </tr>
+				<tal:checkin tal:condition="ticket.checkin_status">
+				<tr>
+					<td class="span3" style="padding:5px;">Checked In By:</td>
+					<td style="padding:5px;"><a href="${request.route_path('admin_view_user', user_id=ticket.checkin_data.enacted_by.__name__)}">${ticket.checkin_data.enacted_by.username}</td>
+				</tr>
+				<tr>
+					<td class="span3" style="padding:5px;">Checked In At:</td>
+					<td style="padding:5px;">${ticket.checkin_data.date.strftime("%H:%M:%S - %d/%m/%Y")}</td>
+				</tr>
+				</tal:checkin>
+                <tr>
+                    <td class="span3" style="padding:5px;">Ticket Purchaser:</td>
+                    <td style="padding:5px;">${ticket.owner.profile.fullname if ticket.owner.profile and ticket.owner.profile.fullname else "-"}</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;">Payment Reference:</td>
+                    <td style="padding:5px;"><a href="${request.route_path('admin_single_payment', ref_code=ticket.payment.ref_code)}">${ticket.payment.ref_code}</td>
+                </tr>
+				<tr>
+					<td class="span3" style="padding:5px;">Ticket Add-ons:</td>
+					<td style="padding:5px;">
+						<tal:addon tal:condition="ticket.addons" tal:repeat="addon ticket.addons.values()">${addon.name}<br /></tal:addon>
+					</td>
+				</tr>
+				<tr>
+					<td class="span3" style="padding:5px;">Notes</td>
+					<td style="padding:5px;">${structure:ticket.notes}</td>
+				</tr>
+            </tbody>
+        </table>
+        <div class="clearline"></div>
+        
+        <br /><br />
+        
+    </tal:content>
+</tal:macro>

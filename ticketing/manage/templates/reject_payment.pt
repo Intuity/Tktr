@@ -1,0 +1,91 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Sales</tal:title>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <h3 class="pull-left" style="margin-top:0;">Reject Payment: ${payment.ref_code}</h3>
+        <div style="width:100%;height:1px;clear:both;"></div>
+        <table style="width:550px;font-size:18px;" class="pull-left">
+            <tbody>
+                <tr>
+                    <td class="span3" style="padding:5px;padding-left:0px;">Owner Fullname:</td>
+                    <td style="padding:5px;">${payment.owner.profile.fullname if payment.owner.profile and payment.owner.profile.fullname else "-"}</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;padding-left:0px;">Opened Date:</td>
+                    <td style="padding:5px;">${payment.opened_date.strftime("%d/%m/%Y")}</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;padding-left:0px;">Total:</td>
+                    <td style="padding:5px;">${structure:view.format_price(payment.total)}</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;padding-left:0px;">Payment Method:</td>
+                    <td style="padding:5px;" tal:condition="len(payment.history) > 0">${payment.history[-1].method.title()}</td>
+                    <td style="padding:5px;" tal:condition="len(payment.history) == 0">N/A</td>
+                </tr>
+                <tal:paid tal:condition="payment.paid">
+                <tr>
+                    <td class="span3" style="padding:5px;padding-left:0px;">Status:</td>
+                    <td style="padding:5px;">Payment Received</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;padding-left:0px;">Completion Date:</td>
+                    <td style="padding:5px;">${payment.completed_date.strftime("%d/%m/%Y") if payment.completed_date else '-'}</td>
+                </tr>
+                </tal:paid>
+                <tal:notpaid tal:condition="not:payment.paid">
+                <tr>
+                    <td class="span3" style="padding:5px;padding-left:0px;">Status:</td>
+                    <td style="padding:5px;" tal:condition="python:(not payment.expiring(view.payment_window) and not payment.expired(view.payment_window))">Awaiting Payment</td>
+                    <td style="padding:5px;" tal:condition="python:(payment.expiring(view.payment_window) and not payment.expired(view.payment_window))">Payment Deadline Close</td>
+                    <td style="padding:5px;" tal:condition="python:(payment.expired(view.payment_window))">Payment Deadline Passed</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;padding-left:0px;">Due Date:</td>
+                    <td style="padding:5px;">${view.due_date(payment.opened_date, view.payment_window).strftime("%d/%m/%Y")}</td>
+                </tr>
+                </tal:notpaid>
+            </tbody>
+        </table>
+        
+        <div style="width:100%;height:1px;clear:both;"></div>
+        <br /><br />
+        <div class="expandable green unselectable">
+            <div class="exp-head container">
+                <h3 class="pull-left">Payment Rejection</h3>
+            </div>
+            <div class="exp-body container collapse in">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <p>
+                        Payments may be rejected at any time, however the reason for doing so must be documented fully. The form below allows you to enact a payment rejection, the message you enter will be logged and sent to the customer who's payment has been rejected.
+                    </p>
+                    
+                    <form action="" method="POST" class="form-horizontal">
+                        <div class="control-group">
+                            <label class="control-label" for="reason">Reason for Rejection</label>
+                            <div class="controls">
+                                <textarea name="reason" id="reason" class="fullsize" rows="3"></textarea>
+                            </div>
+                        </div>
+
+                        <a href="${request.route_path('admin_single_payment', ref_code=payment.__name__)}" class="ll_btn pull-left" style="margin-top:12px;">
+                           <i class="icon-arrow-left"></i>
+                           <span class="pull-right">Cancel</span> 
+                        </a>
+                        <button type="submit" class="ll_btn danger pull-right" style="margin-top:12px;margin-left:5px;">
+                           <i class="icon-remove"></i>
+                           <span class="pull-right">Reject Payment</span> 
+                        </button>
+                        
+                        <br /><br />
+                        
+                    </form>
+                    
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        <br />
+    </tal:content>
+</tal:macro>

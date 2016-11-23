@@ -1,0 +1,476 @@
+body,html {
+    font-family:Helvetica;
+}
+
+body {
+    background-image:url(/static/img/agsquare.png);
+    background-position:center top;
+}
+
+h1,h2,h3,h4,h5,h6 {
+    font-weight:200;
+}
+
+.nojsblockout {
+    width:100%;
+    height:40px;
+    position:fixed;
+    background-color:#F00;
+    color:#FFF;
+    vertical-align:middle;
+    line-height:40px;
+}
+
+.nojsblockout h3 { padding:0; margin:0 0 0 10px; }
+
+.container-centered {
+    margin-left:auto;
+    margin-right:auto;
+}
+
+.footer {
+    margin-top:10px;
+    font-size:10px;
+    height:40px;
+    color:#888;
+    text-align:center;
+}
+
+.clear, .clearline {
+    width:100%;
+    height:1px;
+    clear:both;
+}
+
+.hidden {
+    display:none;
+}
+
+h4.no-top-space {
+    margin-top:0;
+}
+
+#ticket_purchase .quantity, #profile_form .date_field {
+    width:70px;
+}
+
+#ticket_purchase .table {
+    margin-left:0;
+    margin-right:0;
+}
+
+.profile_image_box {
+    border:1px #666 solid;
+    padding:5px;
+    width:200px;
+}
+
+.order-row {
+    height:57px;
+}
+
+.btn-vcenter {
+    margin-top:8px;
+}
+
+input, .add-on {
+    border-radius:0 !important;
+}
+
+input {
+    box-sizing:content-box;
+    -moz-box-sizing:content-box;
+}
+
+.ll_field,
+input[type="text"].ll_field,
+input[type="password"].ll_field {
+    width:266px;
+    height:40px;
+    border:1px solid #CCC !important;
+    border-radius:0 !important;
+    font-size:20px !important;
+	padding:0 6px 0 6px;
+	box-sizing:content-box;
+	-moz-box-sizing:content-box;
+}
+
+.ll_btn {
+    width:auto !important;
+    height:30px;
+    background-color:#537BA6;
+    padding:0 10px 0 5px;
+    line-height:30px;
+    color:#FFF;
+    font-size:16px;
+    display:block;
+    border:none;
+    margin-top:15px;
+    font-weight:200;
+    margin:0;
+    vertical-align:middle;
+    box-sizing:border-box;
+    display:block;
+    cursor:pointer;
+    font-family:"Helvetica Neue", Helvetica;
+}
+
+.ll_btn i {
+	margin-right:10px;
+	display:inline-block;
+	float:left;
+	margin-right:10px!important;
+}
+
+.ll_btn span {
+	display:inline-block;
+}
+
+.ll_btn.disabled {
+	background-color:#666 !important;
+	cursor:default;
+}
+
+.ll_btn.disabled:hover {
+	background-color:#666 !important;
+}
+
+button.ll_btn i {
+	margin-left:5px!important;
+}
+
+.ll_btn:hover { background-color:#3F85E3; color:#FFF; text-decoration:none; }
+.ll_btn:active { background-color:#275490; color:#FFF; text-decoration:none; }
+.ll_btn:disabled, .ll_btn.disabled { background-color:#888; color:#FFF; cursor:default; text-decoration:none; }
+
+.ll_btn.danger { background-color:#AF5561; color:#FFF; }
+.ll_btn.danger:hover { background-color:#F04F5C; color:#FFF; }
+.ll_btn.danger:active { background-color:#97333B; color:#FFF; }
+
+.ll_btn.success { background-color:#5B9A5B; color:#FFF; }
+.ll_btn.success:hover { background-color:#5DCB62; color:#FFF; }
+.ll_btn.success:active { background-color:#2C7F2A; color:#FFF; }
+.ll_btn.success:disabled,.ll_btn.success:hover:disabled { background-color:#888; color:#FFF; cursor:default; text-decoration:none; }
+
+.ll_btn i {
+    display:inline-block;
+    margin-top:7px;
+    margin-left:-5px;
+}
+
+a.ll_btn i {
+    margin-left:5px;
+}
+
+a.actlink:hover, a.actlink:active { text-decoration:none; }
+
+.table { background-color:#FFF; }
+.table, .table th, .table td, .table tr, .table thead, .table tbody { border-radius:0 !important; }
+
+.table thead, .table thead th {
+    font-size:18px;
+    font-weight:400;
+}
+
+.clearbar { width:100%;height:1px;clear:both; }
+
+/* Alerts */
+
+.ll_alert {
+    background-color:#F5F5F5;
+    border-radius:0;
+    border:none;
+    border-bottom:1px solid #bce8f1;
+    position:fixed;
+    width:100%;
+    padding: 8px 35px 8px 14px;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+    color: #3a87ad;
+}
+
+.ll_alert i {
+    margin-right:30px;
+    font-size:18px;
+    line-height:20px;
+    cursor:pointer;
+}
+
+.ll_alert i:hover {
+    color:#09F;
+}
+
+.ll_alert-danger {
+    background-color:#F5E5E5;
+    border-bottom:1px solid #E66;
+    color:#b94a48;
+}
+
+.ll_alert-danger i:hover {
+    color:#F55;
+}
+
+/* Raven Buttons */
+
+.raven_btn {
+	width:280px;
+	height:120px;
+	margin-top:40px;
+	padding:0;
+}
+
+.raven_btn h2 {
+	padding:0;
+	margin:0;
+	line-height:120px;
+	width:270px;
+	font-size:28px;
+}
+
+.icon-raven {
+	width:32px;
+	height:105px;
+	background-image:url(/static/img/Raven.png);
+	background-size:32px 32px;
+	background-position:0 center;
+	background-repeat:no-repeat;
+	margin-left:15px!important;
+}
+
+.timer_bar {
+    background-color:#F5F5F5;
+    border-radius:0;
+    border:none;
+    border-bottom:1px solid #bce8f1;
+    width:100%;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+    color: #3a87ad;
+	text-align:center;
+	height:40px;
+	line-height:30px;
+}
+
+.timer_bar h4 {
+	padding:0;
+	margin-top:10px;
+	position:absolute;
+	width:100%;
+	text-align:center;
+}
+
+.help-block {
+    color:#666;
+    font-size:12px;
+    font-style:italic;
+    margin-top:5px !important;
+}
+
+[class*="span"] {
+	margin:0px;
+}
+
+#cookie_splash {
+	width:100%;
+	clear:both;
+	height:100px;
+	background-color:#537BA6;
+	border-bottom:1px solid #275490;
+}
+
+#cookie_splash .splash_holder {
+	width:900px;
+	margin-left:auto;
+	margin-right:auto;
+	color:#FFF;
+	padding:10px 0 0 10px;
+}
+
+#cookie_splash .splash_holder .splash_text {
+	width:850px;
+	float:left;
+}
+
+#cookie_splash .splash_holder .splash_close {
+	width:50px;
+	float:left;
+	text-align:center;
+	padding-top:20px;
+}
+
+#cookie_splash .splash_holder a {
+	color:#0EF;
+}
+
+#cookie_splash .splash_holder a:hover {
+	color:#FFF;
+}
+
+#cookie_splash .splash_holder .splash_close a:hover {
+	text-decoration:none;
+}
+
+/* Small Ticket Box */
+
+.ticketbox {
+    width:100%;
+    position:relative;
+    height:135px;
+    border:1px solid #DDD;
+    margin-bottom:10px;
+    background-color:#FFF;
+}
+
+.ticketbox .headline {
+    top:0;
+    right:220px;
+    bottom:0;
+    left:0;
+    position:absolute;
+    border-right:1px solid #DDD;
+}
+
+.ticketbox .headline.expanded {
+    right:0;
+    border-right:none;
+}
+
+.ticketbox .headline .icon {
+    width:17%;
+    float:left;
+    height:90px;
+    line-height:90px;
+    text-align:center;
+}
+
+.ticketbox .headline .info {
+    width:78%;
+    padding:5px;
+    float:left;
+    height:90px;
+}
+
+.ticketbox .headline .info .ticket_id {
+    font-size:10px;
+    color:#999;
+}
+
+.ticketbox .headline .info h3 {
+    padding:0;
+    margin:0;
+}
+
+.ticketbox .headline .info .ticket_type {
+    font-size:18px;
+    font-weight:300;
+    line-height:25px;
+}
+
+.ticketbox .headline .strip {
+    width:100%;
+    height:34px;
+    border-top:1px solid #DDD;
+    line-height:35px;
+    margin-top:5px;
+    clear:both;
+    background-color:#FCFCFC;
+}
+
+.ticketbox .headline .strip .item {
+    width:15%;
+    height:34px;
+    border-right:1px solid #DDD;
+    padding:0 5px 0 5px;
+    text-align:right;
+    float:left;
+    box-sizing:border-box;
+}
+
+.ticketbox .headline .strip .item:nth-of-type(even) {
+    text-align:left;
+}
+
+.ticketbox .headline .strip .item:last-of-type {
+    border-right:none;
+}
+
+.ticketbox .actions {
+    position:absolute;
+    width:220px;
+    top:0;
+    right:0;
+    padding:5px;
+    box-sizing:border-box;
+}
+
+.ticketbox .actions .ll_btn {
+    width:100% !important;
+    text-align:center !important;
+    margin-top:10px !important;
+}
+
+.ticketbox .actions .ll_btn:first-of-type {
+    margin-top:5px !important;
+}
+
+/* Ticket Detail Box */
+
+.ticketdetails {
+    width:100%;
+    background-color:#FFF;
+    border:1px solid #DDD;
+    box-sizing:border-box;
+    padding:10px;
+}
+
+.ticketdetails .headline {
+    width:100%;
+    height:80px;
+    position:relative;
+}
+
+.ticketdetails .headline .icon {
+    width:80px;
+    height:80px;
+    position:absolute;
+    top:0;
+    left:0;
+    background-image:url(/static/img/TicketBackgroundRotated.png);
+    background-size:contain;
+    background-repeat:no-repeat;
+    background-position:center 10px;
+}
+
+.ticketdetails .headline .details {
+    height:80px;
+    position:absolute;
+    left:100px;
+    top:0;
+    right:0;
+    bottom:0;
+    box-sizing:border-box;
+    padding-top:20px;
+}
+
+.ticketdetails .headline .details h4 {
+    padding:0;
+    margin:0;
+    color:#AAA;
+}
+
+.ticketdetails .headline .details h3 {
+    padding:0;
+    margin:0;
+}
+
+.ticketdetails table {
+    width:100%;
+    font-size:18px;
+    font-weight:300;
+}
+
+.ticketdetails table tr {
+    height:30px;
+}
+
+.ticketdetails table tr td {
+    width:25%;
+}

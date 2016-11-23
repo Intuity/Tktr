@@ -1,0 +1,112 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Tickets</tal:title>
+    <tal:subtitle metal:fill-slot="subtitle">${ticket_type.name if ticket_type else 'All Purchased Tickets'}</tal:subtitle>
+    <script metal:fill-slot="script" type="text/javascript">
+    function changeFilterType(selector) {
+        if($(selector).val() == 'status') {
+            $("#filtervalue").addClass("hidden");
+            $("#filtervalue-status").removeClass("hidden");
+        } else {
+            $("#filtervalue").removeClass("hidden");
+            $("#filtervalue-status").addClass("hidden");
+        }
+        $("#filtervalue").val("");
+    }
+    </script>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable pink unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Help</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    Ticket types are the different tickets that people are able to purchase through the system. The ticket type defines the name, description and cost of each ticket. Each ticket type has its own ticket pool, this is a set of tickets that have been released but not yet purchased. The "Released" column shows the total number of tickets of this type that have been made available for purchase, while the "In Pool" column shows the total number of tickets of this type that are still available for purchase.
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        <br />
+        <div class="expandable pink container">
+            <div class="exp-head container">
+                <h3 class="pull-left">Purchased Tickets</h3>
+            </div>
+            <div class="exp-body">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <form method="GET" class="form-horizontal" action="${form_address}">
+                        <br />
+                        <div class="control-group">
+                            <label for="name" class="control-label">Filter tickets</label>
+                            <div class="controls">
+                                <select id="filtertype" name="filtertype" onchange="javascript:changeFilterType(this);">
+                                    <option tal:attributes="selected python:(filtertype==None or len(filtertype) == 0)" disabled="disabled">Filter...</option>
+                                    <option value="status" tal:attributes="selected python:(filtertype=='status')">By Payment Status</option>
+                                    <option value="refcode" tal:attributes="selected python:(filtertype=='refcode')">By Identification Code</option>
+                                    <option value="guestcrsid" tal:attributes="selected python:(filtertype=='guestcrsid')">By Guest CRSid</option>
+                                    <option value="guestname" tal:attributes="selected python:(filtertype=='guestname')">By Guest Name</option>
+                                    <option value="guestemail" tal:attributes="selected python:(filtertype=='guestemail')">By Guest Email</option>
+                                    <option value="guestcollege" tal:attributes="selected python:(filtertype=='guestcollege')">By Guest College</option>
+                                    <option value="ownercrsid" tal:attributes="selected python:(filtertype=='ownercrsid')">By Purchaser CRSid</option>
+                                    <option value="ownername" tal:attributes="selected python:(filtertype=='ownername')">By Purchaser Name</option>
+                                    <option value="owneremail" tal:attributes="selected python:(filtertype=='owneremail')">By Purchaser Email</option>
+                                    <option value="ownerusername" tal:attributes="selected python:(filtertype=='ownerusername')">By Purchaser Username</option>
+                                    <option value="ownercollege" tal:attributes="selected python:(filtertype=='college')">By Purchaser College</option>
+                                </select>
+                                <input type="text" id="filtervalue" name="filtervalue" placeholder="Search value..." value="${filtervalue}" tal:attributes="class 'hidden' if filtertype == 'status' else nothing" />
+                                <select id="filtervalue-status" name="filtervalue-status" tal:attributes="class 'hidden' if filtertype != 'status' else nothing">
+                                    <option value="all" tal:attributes="selected python:(filtervalue==None)">All</option>
+                                    <option value="paid" tal:attributes="selected python:(filtervalue=='paid')">Paid</option>
+                                    <option value="unpaid" tal:attributes="selected python:(filtervalue=='unpaid')">Unpaid</option>
+                                    <option value="expiring" tal:attributes="selected python:(filtervalue=='expiring')">Expiring</option>
+                                    <option value="expired" tal:attributes="selected python:(filtervalue=='expired')">Expired</option>
+                                </select>
+                                <button type="submit" id="submit" name="submit" value="submit" class="ll_btn" style="display:inline-block;">
+                                    <i class="icon-search"></i>
+                                    <span class="pull-right">Search</span>
+                                </button>
+                                <span class="help-block">Select the filter you wish to use and enter the text you wish to filter by and click "Search".</span>
+                            </div>
+                        </div>
+            
+                    </form>
+                </div>
+            </div>
+        </div>
+        <br />
+        <table class="table table-bordered table-striped">
+            <thead>
+                <th class="span3">Ticket Holder</th>
+                <th class="span2">At Cambridge</th>
+                <th class="span1">Status</th>
+                <th class="span2 align-right">Issue Date</th>
+                <th>Actions</th>
+            </thead>
+            <tbody>
+                <tr tal:repeat="ticket tickets">
+                    <td>${ticket.guest_info.fullname if ticket.guest_info != None else '-'}</td>
+                    <td class="span2">${'Yes' if ticket.guest_info != None and ticket.guest_info.raven_user else 'No'}</td>
+                    <td class="statuscell" tal:condition="ticket.payment.expired(view.payment_window)"><i class="icon-remove-sign red"></i></td>
+                    <td class="statuscell" tal:condition="python:(ticket.payment.expiring(view.payment_window) and not ticket.payment.expired(view.payment_window))"><i class="icon-warning-sign red"></i></td>
+                    <td class="statuscell" tal:condition="python:(not ticket.payment.paid and not ticket.payment.expiring(view.payment_window))"><i class="icon-minus-sign orange"></i></td>
+                    <td class="statuscell" tal:condition="ticket.payment.paid"><i class="icon-ok-sign green"></i></td>
+                    <td class="span2 align-right">${ticket.payment.opened_date.strftime("%d/%m/%Y")}</td>
+                    <td><a href="${request.route_path('admin_ticket_guest_info', ticket_id=ticket.id_code)}">Ticket Information</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="${request.route_path('admin_single_payment', ref_code=ticket.payment.__name__)}">View Payment</a></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="pagination pagination-centered" tal:condition="total_pages > 0">
+            <ul>
+                <li tal:attributes="class 'disabled' if current_page == 1 else nothing"><a tal:attributes="href ('?filtertype=' + filtertype + '&filtervalue=' + filtervalue + '&page=' + str(current_page - 1)) if current_page != 1 else nothing">&laquo;</a></li>
+                <li tal:repeat="pg_num range(1, total_pages + 1)" tal:attributes="class 'active' if pg_num == current_page else nothing"><a href="?filtertype=${filtertype}&filtervalue=${filtervalue}&page=${pg_num}">${pg_num}</a></li>
+                <li tal:attributes="class 'disabled' if current_page == total_pages else nothing"><a tal:attributes="href ('?filtertype=' + filtertype + '&filtervalue=' + filtervalue + '&page=' + str(current_page + 1)) if current_page != total_pages else nothing">&raquo;</a></li>
+            </ul>
+        </div>
+        <h6 style="text-align:center;" tal:condition="len(tickets) > 0">Displaying ${len(tickets)} tickets</h6>
+        <br />
+        
+        
+    </tal:content>
+</tal:macro>

@@ -1,0 +1,82 @@
+<tal:block metal:define-macro="site_style">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="EN" lang="EN">
+<head>
+  <title>${view.site_title}</title>
+  <link rel="icon" type="image/ico" href="/static/img/favicon.ico"/>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+  <meta name="keywords" content="ticketing may ball cambridge university" />
+  <meta name="description" content="University of Cambridge May Ball Ticketing System" />
+  <!-- Bootstrap & JQuery  -->
+  <link rel="stylesheet" href="/static/css/bootstrap.css" media="screen" />
+  <link rel="stylesheet" href="/static/css/font-awesome.min.css" media="screen" />
+  <!--[if IE 7]>
+  <link rel="stylesheet" href="/static/css/font-awesome-ie7.min.css" media="screen" />
+  <![endif]-->
+  <link rel="stylesheet" href="/static/css/ticketing.css" media="screen" />
+  <script type="text/javascript" src="/static/js/jquery.js"></script>
+  <script type="text/javascript" src="/static/js/bootstrap.js"></script>
+  <script type="text/javascript" src="/static/js/ticketing.js"></script>
+  <script type="text/javascript" src="/static/js/profile.js"></script>
+  
+  <tal:content metal:define-slot="script" />
+  
+  <tal:content metal:define-slot="style" />
+  
+  <script type="text/javascript" tal:condition="view.queue_enabled and view.has_queued">
+	$(function() {
+		window.ticketing.start_timer(${view.time_left});
+	});
+  </script>
+  
+</head>
+<body>
+    
+	<div id="cookie_splash" tal:condition="not:view.agreed_to_cookies">
+		<div class="splash_holder">
+			<div class="splash_text">
+				<span style="font-size:20px;">Cookie Policy</span><br />
+				By using this website you agree to our cookie policy which you can access <a href="${request.route_path('read_cookie_policy')}">here</a>. We use cookies to store information on your activities such as your login status and ticket purchase choices. We hold all of this information in accordance with our <a href="${request.route_path('read_privacy_policy')}">privacy policy</a>. Clicking "Close" will store a cookie to remember your choice.
+			</div>
+			<div class="splash_close">
+				<a href="#" onclick="window.ticketing.close_cookie_policy();">
+					<i class="icon-remove-sign" style="font-size:24px;"></i>
+					Close
+				</a>
+			</div>
+			<div class="clearline"></div>
+		</div>
+	</div>
+	
+    <div class="nojsblockout">
+        <h3>You must enable Javascript to use this website!</h3>
+    </div>
+	
+	<div class="timer_bar" id="timer" tal:condition="view.queue_enabled and view.has_queued">
+		<h4><i class="icon-time"></i> <span id="timeleft">You have ${view.formatted_time} left to purchase tickets.</span></h4>
+	</div>
+	
+    <div class="ll_alert ll_alert-danger" id="alert" tal:repeat="message request.session.pop_flash('error')">
+        <strong>Whoops!</strong> <span id="errormsg">${message}<br />${view.error_contact_info}</span> <i class="pull-right icon-remove" onclick="$(this).closest('.ll_alert').remove();"></i>
+    </div>
+
+    <div class="ll_alert" id="alert" style="background-color:#F5F5F5; border-radius:0;" tal:repeat="message request.session.pop_flash('info')">
+        <span id="errormsg">${message}</span> <i class="pull-right icon-remove" onclick="$(this).closest('.ll_alert').remove();"></i>
+    </div>
+    
+    <div class="container centered">
+        <div class="span12" style="height:50px;"></div>
+        <tal:content metal:define-slot="content" />
+    </div>
+    
+
+    <div class="container container-centered footer">
+        Copyright LightLogic ${view.current_year}<br />
+		<a href="${request.route_path('read_privacy_policy')}">Privacy Policy</a> | <a href="${request.route_path('read_purchase_agreement')}">Purchase Agreement</a> | <a href="${request.route_path('read_cookie_policy')}">Cookie Policy</a><br />
+		By using this website you agree to our cookie policy which you can access from the link above. The use of this website is voluntary and exists<br /> for you to purchase tickets for the event. If you do not agree to the terms of the cookie policy you should not use the website.
+		<br /><br />
+    </div>
+    
+</body>
+</html>
+</tal:block>

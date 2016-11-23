@@ -1,0 +1,259 @@
+<tal:block metal:define-macro="site_style">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="EN" lang="EN">
+<head>
+	<title>Ticketing</title>
+	<link rel="icon" type="image/ico" href="/static/img/favicon.ico"/>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+	<meta name="keywords" content="ticketing may ball cambridge university" />
+	<meta name="description" content="University of Cambridge May Ball Ticketing System" />
+    <meta content="width=device-width" />
+	<!-- Bootstrap & JQuery  -->
+	<link rel="stylesheet" href="/static/css/bootstrap.css" media="screen" />
+	<link rel="stylesheet" href="/static/css/font-awesome.min.css" media="screen" />
+	<!--[if IE 7]>
+	<link rel="stylesheet" href="/static/css/font-awesome-ie7.min.css" media="screen" />
+	<![endif]-->
+	<link rel="stylesheet" href="/static/css/ticketing.css" media="screen" />
+	<script type="text/javascript" src="/static/js/jquery.js"></script>
+	<script type="text/javascript" src="/static/js/bootstrap.js"></script>
+	<script type="text/javascript" src="/static/js/ticketing.js"></script>
+	<script type="text/javascript" src="/static/js/profile.js"></script>
+	<script type="text/javascript" src="/admin/static/js/ticketing-admin.js"></script>
+	<script type="text/javascript" src="/checkin/static/js/ticketing-checkin.js"></script>
+    <script type="text/javascript" src="/admin/static/js/Chart.min.js"></script>
+
+    <link rel="stylesheet" href="/admin/static/css/admin.css" />
+    <link rel="stylesheet" href="/checkin/static/css/checkin.css" />
+    <link rel="stylesheet" href="/checkin/static/css/mobile.css" type="text/css" media="only screen and (max-device-width: 480px)" />
+
+	<script type="text/javascript">
+	
+    Tick.checkin.guest_details = ${'true' if view.guest_details_required else 'false'};
+    Tick.checkin.mobile_client = ${"true" if mobile_client else "false"};
+    var passed_lookup = "${payment_id if payment_id != None else ""}";
+    
+	$(document).ready(function() {
+		$("#identifier").focus().keyup(function(e) {
+			if(Tick.checkin.key_timeout != null) {
+				clearTimeout(Tick.checkin.key_timeout);
+				Tick.checkin.key_timeout = null;
+			}
+			Tick.checkin.key_timeout = setTimeout(Tick.checkin.typing_finished, 2000);
+		});
+		$("#overpwd").focus().keyup(function(e) {
+			if(e.keyCode == 13) {
+			    Tick.checkin.override();
+			}
+		});
+        if(passed_lookup.length > 0) {
+            Tick.checkin.lookup(passed_lookup, false, false);
+        }
+	});
+
+	$(window).focus(function() {
+		$("#identifier").focus();
+	});
+	
+	</script>
+  
+</head>
+<body>
+	
+	<div class="dashboard">
+		<div class="errorbox" id="errorbox">
+			<i class="icon-exclamation-sign"></i> <span id="errortext">Here is a dummy error</span>
+		</div>
+		<div class="infobox" id="infobox">
+			<i class="icon-ok-circle"></i> <span id="infotext">Here is a dummy info</span>
+		</div>
+		<div class="errorbox" id="override">
+			<a href="#" class="text-error" onclick="$(this).css('display','none');$('#overpwd').css('display','inline-block').focus();">Override Available</a>
+            <input id="overpwd" type="password" />
+            <span id="overridetext" style="display:none;font-weight:bold;">Override Checkin In Progress!</span>
+		</div>
+	
+	    <div class="checkholder active">
+			<h2>Check-in</h2>
+			<div style="width:10%;height:60px;float:left;background-color:#DDDDDD;box-sizing:border-box;border:#CCCCCC 1px solid;border-right:none;line-height:60px;text-align:center;font-size:40px;">
+				<i id="statusicon" style="line-height:60px;" class="icon-terminal"></i>
+			</div>
+			<input id="identifier" type="text" class="checkfield" style="float:left;width:90%;height:60px;line-height:60px;font-size:25px;font-weight:200 !important;box-sizing:border-box;" placeholder="Scan card or type identifier..." autocomplete="off" tal:attributes="disabled 'disabled' if not view.checkin_active else nothing" />
+			<div class="errorbox" id="inactivecheckin" tal:attributes="class 'errorbox visible' if not view.checkin_active else 'errorbox'">
+				<i class="icon-exclamation-sign"></i> <span>Check-In Is Deactivated</span>
+			</div>
+		</div>
+	
+		<div class="checkinframe" id="frameone">
+		
+			<div class="titlefield" tal:condition="view.guest_details_required">
+				Check-In Step One
+			</div>
+			<div class="titlefield" tal:condition="not:view.guest_details_required">
+				Check-In
+			</div>
+		
+			<div class="innerframe">
+				<h4>1. Check Ticket Holder Details</h4>
+			
+				Please verify the ticket holder's identity against their official ID (passport, driving license, etc.) and make sure that it matches their Cambridge access card.<br /><br />
+			
+		        <table id="detailstable" class="table table-bordered">
+            
+		            <tbody>
+		            	<tr>
+							<td class="span4">Salutation</td>
+							<td id="salutation"></td>
+						</tr>
+		            	<tr>
+							<td class="span4">Ticket Holder</td>
+							<td id="holder"></td>
+						</tr>
+		            	<tr id="crsidbox">
+							<td class="span4">CRSid</td>
+							<td id="crsid"></td>
+						</tr>
+						<tr tal:condition="view.guest_details_required">
+							<td class="span4" style="height:30px;line-height:30px;">Date of Birth (DD/MM/YYYY)</td>
+							<td style="height:30px;line-height:30px;">
+								Day: <input id="dobday" type="text" class="span1" style="margin-bottom:0px;" placeholder=".." onkeyup="if($(this).val().length >= 2) $('#dobmonth').focus();" /> 
+								Month: <input id="dobmonth" type="text" class="span1" style="margin-bottom:0px;" placeholder=".." onkeyup="if($(this).val().length >= 2) $('#dobyear').focus();" /> 
+								Year: <input id="dobyear" type="text" class="span1" style="margin-bottom:0px;" placeholder="...." />
+							</td>
+						</tr>
+						<tr>
+							<td class="span4">Cambridge Member</td>
+							<td id="atcam"></td>
+						</tr>
+						<tr>	
+							<td class="span4">Number of Tickets Held</td>
+							<td id="numtickets"></td>
+						</tr>
+						<tr>	
+							<td class="span4">Checked In</td>
+							<td id="owner_checked"></td>
+						</tr>
+						<tr>	
+							<td class="span4">Notes</td>
+							<td id="notes" style="font-size:14px !important;"></td>
+						</tr>
+		            </tbody>
+            
+		        </table>
+                
+                <tal:block tal:condition="not:view.guest_details_required">
+				<h4>2. Check Each Guest's Details</h4>
+				
+				Please verify each guests identity and date of birth before checking that their ticket type and upgrades match their entrance timing.<br /><br />
+				
+		        <table class="table table-bordered">
+            		
+					<thead>
+						
+						<tr>
+							<th>Ticket Type</th>
+							<th>Upgrades</th>
+							<th>Action</th>
+						</tr>
+						
+					</thead>
+					
+		            <tbody id="gueststable">
+		            	<tr>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+		            </tbody>
+            
+		        </table>
+				
+				<h3>Notes on Guests</h3>
+				<span id="guestnotes"></span>
+		
+				<a class="ll_btn danger pull-left" onclick="Tick.checkin.cancel_checkin();">
+					<i class="icon-remove"></i> Cancel Check-In
+				</a>
+		
+				<a id="allchecked" disabled="disabled" class="ll_btn success pull-right disabled" onclick="Tick.checkin.final_check();">
+					<i class="icon-arrow-right"></i> All Guests OK
+				</a>
+                </tal:block>
+			
+                <tal:block tal:condition="view.guest_details_required">
+				<a class="ll_btn danger pull-left" onclick="Tick.checkin.cancel_checkin();">
+					<i class="icon-remove"></i> Cancel Check-In
+				</a>
+			
+				<a class="ll_btn success pull-right" onclick="Tick.checkin.check_guests();">
+					<i class="icon-arrow-right"></i> Holder Identity OK
+				</a>
+                </tal:block>
+			
+			</div>
+		
+		</div>
+	
+		<div class="checkinframe" id="frametwo" tal:condition="view.guest_details_required">
+		
+			<div class="titlefield">
+				Check-In Step Two
+			</div>
+		
+			<div class="innerframe">
+				<h4>2. Check Each Guest's Details</h4>
+				
+				Please verify each guests identity and date of birth before checking that their ticket type and upgrades match their entrance timing.<br /><br />
+				
+		        <table class="table table-bordered">
+            		
+					<thead>
+						
+						<tr>
+							<th class="span2">Guest Name</th>
+							<th class="span2">Date of Birth</th>
+							<th class="span1">Cam?</th>
+							<th>Ticket Type</th>
+							<th>Upgrades</th>
+							<th class="span2">Action</th>
+						</tr>
+						
+					</thead>
+					
+		            <tbody id="gueststable">
+		            	<tr>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+		            </tbody>
+            
+		        </table>
+				
+				<h3>Notes on Guests</h3>
+				<span id="guestnotes"></span>
+		
+				<a class="ll_btn danger pull-left" onclick="Tick.checkin.cancel_checkin();">
+					<i class="icon-remove"></i> Cancel Check-In
+				</a>
+		
+				<a id="allchecked" disabled="disabled" class="ll_btn success pull-right disabled" onclick="Tick.checkin.final_check();">
+					<i class="icon-arrow-right"></i> All Guests OK
+				</a>
+			
+			</div>
+		
+		</div>
+		
+		<div class="checkin_footer">
+			Copyright LightLogic 2014 | Progress: <span id="quickstats"></span> | Logged in as ${view.user.username} - <a href="${request.route_path('logout')}">Logout</a>
+		</div>
+		
+	</div>
+	
+</body>
+
+</html>

@@ -1,0 +1,95 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Sales</tal:title>
+    <tal:content metal:fill-slot="admin_content" tal:define="stage payment.history[-1]">
+        <tal:def tal:define="method view.get_payment_method(stage.method)">
+            <h3 class="pull-left" style="margin-top:0;">Change Payment Method: ${payment.ref_code}</h3>
+            <div style="width:100%;height:1px;clear:both;"></div>
+            <table style="width:550px;font-size:18px;" class="pull-left">
+                <tbody>
+                    <tr>
+                        <td class="span3" style="padding:5px;padding-left:0px;">Owner Fullname:</td>
+                        <td style="padding:5px;">${payment.owner.profile.fullname}</td>
+                    </tr>
+                    <tr>
+                        <td class="span3" style="padding:5px;padding-left:0px;">Opened Date:</td>
+                        <td style="padding:5px;">${payment.opened_date.strftime("%d/%m/%Y")}</td>
+                    </tr>
+                    <tr>
+                        <td class="span3" style="padding:5px;padding-left:0px;">Total:</td>
+                        <td style="padding:5px;">${structure:view.format_price(payment.total)}</td>
+                    </tr>
+                    <tr>
+                        <td class="span3" style="padding:5px;padding-left:0px;">Stage Method:</td>
+                        <td style="padding:5px;">${method.name if not stage.transfer and method != None else 'Ticket Transfer'}</td>
+                    </tr>
+                    <tal:paid tal:condition="payment.paid">
+                    <tr>
+                        <td class="span3" style="padding:5px;padding-left:0px;">Status:</td>
+                        <td style="padding:5px;">Payment Received</td>
+                    </tr>
+                    <tr>
+                        <td class="span3" style="padding:5px;padding-left:0px;">Completion Date:</td>
+                        <td style="padding:5px;">${payment.completed_date.strftime("%d/%m/%Y")}</td>
+                    </tr>
+                    </tal:paid>
+                    <tal:notpaid tal:condition="not:payment.paid">
+                    <tr>
+                        <td class="span3" style="padding:5px;padding-left:0px;">Status:</td>
+                        <td style="padding:5px;" tal:condition="python:(not payment.expiring(view.payment_window) and not payment.expired(view.payment_window))">Awaiting Payment</td>
+                        <td style="padding:5px;" tal:condition="python:(payment.expiring(view.payment_window) and not payment.expired(view.payment_window))">Payment Deadline Close</td>
+                        <td style="padding:5px;" tal:condition="python:(payment.expired(view.payment_window))">Payment Deadline Passed</td>
+                    </tr>
+                    <tr>
+                        <td class="span3" style="padding:5px;padding-left:0px;">Due Date:</td>
+                        <td style="padding:5px;">${view.due_date(payment.opened_date, view.payment_window).strftime("%d/%m/%Y")}</td>
+                    </tr>
+                    </tal:notpaid>
+                </tbody>
+            </table>
+        
+            <div style="width:100%;height:1px;clear:both;"></div>
+            <br /><br />
+            <div class="expandable green unselectable">
+                <div class="exp-head container">
+                    <h3 class="pull-left">Change Payment Method</h3>
+                </div>
+                <div class="exp-body container collapse in">
+                    <div class="breakerline"></div>
+                    <div class="inner">
+                        <p>
+    						Below you can change the payment method selected for purchasing tickets to any other payment method, providing the payment is not already complete. Use this for keeping track of how payments will be received from different customers, you may also note that the payment method is automatically changed if you 'Enter Payment' and select a method different from the one currently active.
+                        </p>
+                    
+                        <form action="" method="POST" class="form-horizontal">
+                            <div class="control-group">
+                                <label class="control-label" for="method">New Payment Method</label>
+                                <div class="controls">
+                                    <select id="method" name="method">
+                                        <tal:block tal:repeat="method_key view.payment_methods_list">
+                                        <option value="${method_key}" tal:attributes="selected 'selected' if (method != None) and method_key == active_stage.method else nothing">${view.payment_methods_list[method_key]}</option>
+                                        </tal:block>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <a href="${request.route_path('admin_single_payment', ref_code=payment.__name__)}" class="ll_btn pull-left" style="margin-top:12px;">
+                               <i class="icon-arrow-left"></i>
+                               <span class="pull-right">Cancel</span> 
+                            </a>
+                            <button type="submit" id="submit" name="submit" value="submit" class="ll_btn success pull-right" style="margin-top:12px;margin-left:5px;">
+                               <i class="icon-cog"></i>
+                               <span class="pull-right">Change Method</span> 
+                            </button>
+                        
+                            <br /><br />
+                        
+                        </form>
+                    
+                    </div>
+                </div>
+                <div class="clearline"></div>
+            </div>
+            <br />
+        </tal:def>
+    </tal:content>
+</tal:macro>

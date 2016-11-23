@@ -1,0 +1,63 @@
+<tal:macro metal:use-macro="view.site_style">
+    <tal:content metal:fill-slot="content">
+        
+        <h1>Setup Ticketing</h1>
+        <br />
+        <h3>Event Details</h3>
+		<p>
+            To setup basic information about your event enter it into the form below. Don't worry you can change all of this later if you need to, it's just so we have something to work with!
+        </p>
+        <br />
+        
+		<div class="clearbar"></div>
+        
+        <form method="POST" action="" class="form-horizontal">
+            
+            <div class="control-group">
+                <label class="control-label" for="event_name">Event Name:</label>
+                <div class="controls">
+                    <input type="text" name="event_name" id="event_name" value="${event_name}" />
+                    <span class="help-block">This will be used across the site as well as the title for the site.</span>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label class="control-label" for="event_date">Event Date:</label>
+                <div class="controls">
+					Day: 
+					<select class="span2" name="event_day" id="event_day">
+						<option tal:repeat="day range(1, 32)" value="${day}" tal:attributes="selected 'selected' if (event_day != None and day == int(float(event_day))) else nothing">${day}</option>
+					</select>
+					&nbsp;Month: 
+					<select class="span2" name="event_month" id="event_month">
+						<option tal:repeat="month range(1, 13)" value="${month}" tal:attributes="selected 'selected' if (event_month != None and month == int(float(event_month))) else nothing">${view.months[month-1]}</option>
+					</select>
+					&nbsp;Year: 
+					<select class="span2" name="event_year" id="event_year">
+						<option tal:repeat="year reversed(range(int(view.current_year) - 1, int(view.current_year) + 10))" value="${year}" tal:attributes="selected 'selected' if (event_year != None and year == int(float(event_year))) else nothing">${year}</option>
+					</select>
+                    <span class="help-block">The date that the event will take place, will be used in conjunction with the minimum age to check guest details.</span>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label class="control-label" for="min_age">Minimum Age:</label>
+                <div class="controls">
+                    <select class="span2" name="min_age" id="min_age">
+                        <option tal:repeat="age range(0, 101)" value="${age}" tal:attributes="selected 'selected' if (min_age != None and age == int(float(min_age))) else nothing">${age}</option>
+                    </select>
+                    
+                    <span class="help-block">The minimum age that will be admitted to the event, if there is no such limit set this to zero.</span>
+                </div>
+            </div>
+            
+            <button type="submit" class="ll_btn pull-right" name="submit" id="submit" value="submit">
+                <i class="icon-arrow-right"></i> Next Step
+            </button>
+            
+        </form>
+         
+        <div class="clearbar"></div>
+        <br />
+    </tal:content>
+</tal:macro>

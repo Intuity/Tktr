@@ -1,0 +1,46 @@
+body, html {
+    font-family:Helvetica, Arial;
+}
+
+.container {
+    width:17cm;
+	margin-left:auto;
+	margin-right:auto;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight:200;
+}
+
+table {
+    width:600px;
+    padding:0;
+    border-spacing:0;
+    border-collapse:collapse;
+}
+
+thead {
+    padding:0;
+    margin:0;
+}
+
+th {
+    text-align:left;
+    font-weight:600;
+    border:1px solid #000;
+    margin:0;
+    padding:3px;
+}
+
+tbody {
+    margin:0;
+}
+
+td {
+    border:1px solid #000;
+    margin:0;
+}
+
+#print, .footer, #profile, #pDebug {
+    display:none;
+}

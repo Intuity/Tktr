@@ -1,0 +1,16 @@
+* "O" & "0" are both used as well as "1" & "I" and "2" & "Z" in payment references - get mixed up sometimes
+* No way to mark as having received but not yet cashed cheques
+* Bit difficult to select payment reference code for entry into other places
+* Can't extract data for specific ticket types/upgrades/etc.
+* Users account shows tickets but not upgrades
+* Payments page doesn't show very much profile information and can't jump directly to their account profile (only guest details page)
+* All searches are case sensitive - especially a problem when looking for people's names
+* Food allergies/dining requirements not asked for
+* Returning ticket within a payment doesn't recalculate payment total
+
+* Need to be able to remove and transfer addons from tickets, both admin end and customer end both before and after payment
+* Need general improvements to search, show search at top of some of the result pages
+* Payment 'history', allow charges to completed in multiple stages payments rather than lump sum - will need to track payment history
+* Make support details (i.e. 'If you are having problems please send us an email at webmaster@mayball.com or call us on 0845 805 1832') an editable property
+* Emails need to be generalised + support details included
+* Pagination of results

@@ -1,0 +1,76 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Users</tal:title>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable red container">
+            <div class="exp-head container">
+                <h3 class="pull-left">Users</h3>
+            </div>
+            <div class="exp-body">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <form action="${request.route_path('admin_users')}" method="GET" class="form-horizontal">
+                        <br />
+                        <div class="control-group">
+                            <label for="name" class="control-label">Search for user</label>
+                            <div class="controls">
+                                <select id="filter" name="filter">
+                                    <option disabled tal:attributes="selected python:(filter==None)">Filter...</option>
+                                    <option value="crsid" tal:attributes="selected python:(filter=='crsid')">By CRSid</option>
+                                    <option value="name" tal:attributes="selected python:(filter=='name')">By Name</option>
+                                    <option value="email" tal:attributes="selected python:(filter=='email')">By Email</option>
+                                    <option value="college" tal:attributes="selected python:(filter=='college')">By College</option>
+                                    <option value="username" tal:attributes="selected python:(filter=='username')">By Username</option>
+                                    <option value="group" tal:attributes="selected python:(filter=='group')">By Group</option>
+                                </select>
+                                <input type="text" id="value" name="value" placeholder="Search value..." value="${value}" />
+                                <button type="submit" id="submit" name="submit" value="submit" class="ll_btn" style="display:inline-block;">
+                                    <i class="icon-search"></i>
+                                    <span class="pull-right">Search</span>
+                                </button>
+                                <span class="help-block">Select the filter you wish to use and enter the text you wish to filter by and click "Search".</span>
+                            </div>
+                        </div>
+            
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <br />
+        
+        <table class="table table-bordered table-striped" tal:condition="len(users) > 0">
+            
+            <thead>
+                
+                <th class="span2">Username</th>
+                <th class="span3">Full Name</th>
+                <th class="span2">At Cambridge</th>
+				<th class="span1">Tickets</th>
+                <th>Actions</th>
+                
+            </thead>
+            
+            <tbody>
+            
+                <tr tal:repeat="user users">
+                    <td>${user.username}</td>
+                    <td tal:condition="user.profile != None">${user.profile.fullname}</td>
+                    <td tal:condition="user.profile == None"></td>
+                    <td>${'Yes' if user.profile != None and user.profile.raven_user else 'No'}</td>
+					<td>${len(user.tickets)}</td>
+	                <td><a href="${request.route_path('admin_view_user', user_id=user.__name__)}">View User</a>&nbsp;&nbsp;&nbsp;
+						<a href="${request.route_path('admin_user_group', user_id=user.__name__)}">Set Group</a>
+						<tal:nonraven tal:condition="python:(user.profile == None or not user.profile.raven_user)">&nbsp;&nbsp;&nbsp;
+						<a href="${request.route_path('admin_user_password', user_id=user.__name__)}">Set Password</a></tal:nonraven>&nbsp;&nbsp;&nbsp;
+						<a class="danger" href="#" onclick="javascript:if(confirm('Are you sure you want to delete ${user.username}?')) window.location.href='${request.route_path('admin_user_delete', user_id=user.__name__)}';">Delete User</a></td>
+                </tr>
+                
+            </tbody>
+            
+        </table>
+        <h4 style="text-align:center;" tal:condition="len(users) == 0">Nobody matched your query, please try again.</h4>
+        <br />
+        
+    </tal:content>
+</tal:macro>

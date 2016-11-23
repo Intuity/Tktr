@@ -1,0 +1,217 @@
+<tal:macro metal:use-macro="view.site_style">
+    <script metal:fill-slot="script">
+    var is_cam = false;
+    var email_input = null;
+    $(function() {
+        $("#atcambridge-yes").change(function() { is_cam = $("input[name=atcambridge]").is(":checked"); change_state(); });
+        $("#atcambridge-no").change(function() { is_cam = !$("input[name=atcambridge]").is(":checked"); change_state(); });
+        email_input = $("input[name=email]");
+		// Validate email
+		$("#email").change(function() {
+			validate_email();
+		});
+        // Preselect CRSid
+        $("#crsid").keyup(function() {
+            if(is_cam) {
+                $("#email").val($(this).val().replace(" ","") + "@cam.ac.uk");
+                validate_crsid();
+            }
+        });
+    });
+    function change_state() {
+        if(is_cam) {
+            $(".camsection").removeClass("hidden");
+			$("#email").val("");
+            $("input[name=email]").prop("disabled", true);
+        } else {
+            $(".camsection").addClass("hidden");
+			$("#email").val("");
+			$("#crsid").val("");
+            $("input[name=email]").prop("disabled", false);
+        }
+    }
+    function validate_crsid() {
+        var result = /^[a-z]+[0-9]+$/i.test($("input[name=crsid]").val());
+        if(result && $("input[name=crsid]").closest(".control-group").hasClass("error")) $("input[name=crsid]").closest(".control-group").removeClass("error");
+        else if(!result && !$("input[name=crsid]").closest(".control-group").hasClass("error")) $("input[name=crsid]").closest(".control-group").addClass("error");
+    }
+	function validate_email() {
+		var result = /^.*?@.*?\..*?/i.test($("#email").val());
+        if(result && $("#email").closest(".control-group").hasClass("error")) $("#email").closest(".control-group").removeClass("error");
+        else if(!result && !$("#email").closest(".control-group").hasClass("error")) $("#email").closest(".control-group").addClass("error");
+	}
+    function confirm_paid_change() {
+        if(confirm(
+            'Once you save your changes you will be unable to make any further modifications without paying the guest details alteration fee again. Are you sure you wish to continue?'
+        )) {
+            document.forms[0].submit();
+        }
+    }
+    </script>
+    <style metal:fill-slot="style">
+        #item-deformField5, #item-deformField6, #item-deformField7 { display:none; }
+        #item-deformField2 div { line-height:30px; }
+    </style>
+    <tal:content metal:fill-slot="content">
+        
+        <h1>Guest Profile</h1>
+        
+		<p>
+			Please fill in all of the following details about your guest. These details are kept in accordance with our privacy 
+            policy and are only used to ensure safety at the event. These details will be kept securely and will not be redistributed 
+            to any third parties. We reserve the right to void tickets and/or refuse entry to the ball if incorrect details are supplied.
+		</p>
+        <p tal:condition="post_purchase and view.details_fee_enabled">
+            Please note that once you click 'Save Changes' you will be unable to make any further modifications without paying 
+            the guest detail alteration fee of ${structure:view.format_price(view.details_fee)} again. If you do not want to make any 
+            changes at this exact moment and instead make change at a later time then click 'Cancel' and your purchase of one alteration 
+            will be left unused (although it will remain tied to this specific ticket).
+        </p>
+		<br />
+		<form class="form-horizontal" action="" method="POST" autocomplete="off" enctype="multipart/form-data">
+			
+			<div class="control-group">
+				<label class="control-label" for="title">Salutation:</label>
+				<div class="controls">
+					<select name="title" id="title" class="span2" onchange="if($(this).val() == 'Other') $('#othertitlebox').css('display','block'); else $('#othertitlebox').css('display','none');">
+						<option disabled="disabled" tal:attributes="selected 'selected' if len(title) == 0 else nothing">Select Salutation</option>
+						<option value="Mr" tal:attributes="selected 'selected' if title == 'Mr' else nothing">Mr</option>
+						<option value="Mrs" tal:attributes="selected 'selected' if title == 'Mrs' else nothing">Mrs</option>
+						<option value="Miss" tal:attributes="selected 'selected' if title == 'Miss' else nothing">Miss</option>
+						<option value="Ms" tal:attributes="selected 'selected' if title == 'Ms' else nothing">Ms</option>
+						<option value="Dr" tal:attributes="selected 'selected' if title == 'Dr' else nothing">Dr</option>
+				        <option value="Prof" tal:attributes="selected 'selected' if title == 'Prof' else nothing">Prof</option>
+				        <option value="Rev" tal:attributes="selected 'selected' if title == 'Rev' else nothing">Rev</option>
+						<option value="Other" tal:attributes="selected 'selected' if othertitle else nothing">Other</option>
+					</select>
+				</div>
+			</div>
+			
+			<div class="control-group" id="othertitlebox" style="display:${'block' if othertitle else 'none'};">
+				<label class="control-label" for="othertitle">Specify Salutation:</label>
+				<div class="controls">
+					<input type="text" name="othertitle" id="othertitle" value="${title}" />
+				</div>
+			</div>
+			
+			<div class="control-group">
+				<label class="control-label" for="forename">Forename:</label>
+				<div class="controls">
+					<input type="text" name="forename" id="forename" value="${forename}" />
+				</div>
+			</div>
+			
+			<div class="control-group">
+				<label class="control-label" for="fullname">Surname:</label>
+				<div class="controls">
+					<input type="text" name="surname" id="surname" value="${surname}" />
+				</div>
+			</div>
+			
+			<div class="control-group">
+				<label class="control-label" for="email">Email:</label>
+				<div class="controls">
+					<input type="text" name="email" id="email" value="${email if (atcambridge != 'yes') else (crsid + '@cam.ac.uk')}" tal:attributes="disabled 'disabled' if (atcambridge == 'yes') else nothing" />
+				</div>
+			</div>
+			
+			<div class="control-group">
+				<label class="control-label" for="dob_day">Date of Birth</label>
+				<div class="controls">
+					Day: 
+					<select class="span2" name="dob_day" id="dob_day">
+						<option tal:repeat="day range(1, 32)" value="${day}" tal:attributes="selected 'selected' if (dob_day != None and day == int(float(dob_day))) else nothing">${day}</option>
+					</select>
+					&nbsp;Month: 
+					<select class="span2" name="dob_month" id="dob_month">
+						<option tal:repeat="month range(1, 13)" value="${month}" tal:attributes="selected 'selected' if (dob_month != None and month == int(float(dob_month))) else nothing">${view.months[month-1]}</option>
+					</select>
+					&nbsp;Year: 
+					<select class="span2" name="dob_year" id="dob_year">
+						<option tal:repeat="year reversed(range(1900, int(view.current_year) + 1))" value="${year}" tal:attributes="selected 'selected' if (dob_year != None and year == int(float(dob_year))) else nothing">${year}</option>
+					</select>
+				</div>
+			</div>
+			
+			<div class="control-group" tal:condition="view.photo_required">
+				<label class="control-label" for="photofile">Photo:</label>
+				<div class="controls">
+					<input type="file" name="photofile" id="photofile" value="" />
+				</div>
+			</div>
+			
+			<div class="control-group">
+				<label class="control-label" for="photofile">Cambridge Member:</label>
+				<div class="controls">
+					<label class="radio inline">
+						<input type="radio" name="atcambridge" id="atcambridge-yes" value="yes" tal:attributes="checked 'checked' if (atcambridge == 'yes') else nothing">
+						Yes
+					</label>
+					<label class="radio inline">
+						<input type="radio" name="atcambridge" id="atcambridge-no" value="no" tal:attributes="checked 'checked' if (atcambridge != 'yes') else nothing">
+						No
+					</label>
+				</div>
+			</div>
+			
+			<div class="camsection hidden" tal:attributes="class 'camsection hidden' if (atcambridge != 'yes') else 'camsection'">
+				
+				<div class="control-group">
+					<label class="control-label" for="crsid">CRSid:</label>
+					<div class="controls">
+						<input type="text" name="crsid" id="crsid" value="${crsid}" />
+					</div>
+				</div>
+				
+				<div class="control-group">
+					<label class="control-label" for="college">College:</label>
+					<div class="controls">
+						<select name="college" id="college">
+							<option value="pleaseselect" tal:attributes="selected 'selected' if (college == None or len(college) < 3) else nothing">Please select...</option>
+							<option tal:repeat="college_key view.college_keys" value="${college_key}" tal:attributes="selected 'selected' if (college != None and college_key == college) else nothing">${view.college_dict[college_key]}</option>
+						</select>
+					</div>
+				</div>
+				
+				<div class="control-group">
+					<label class="control-label" for="gradstatus">University Membership:</label>
+					<div class="controls">
+						<select name="grad_status" id="grad_status">
+							<option value="pleaseselect" tal:attributes="selected 'selected' if (grad_status == None or len(grad_status) < 3) else nothing">Please select...</option>
+							<option tal:repeat="stat_key view.grad_status_keys" value="${stat_key}" tal:attributes="selected 'selected' if (grad_status != None and stat_key == grad_status) else nothing">${view.grad_status_dict[stat_key]}</option>
+						</select>
+					</div>
+				</div>
+				
+			</div>
+                        
+            <tal:prepurchase tal:condition="not:post_purchase">
+            <a href="${request.route_path('order_details')}" class="ll_btn pull-left">
+               <i class="icon-arrow-left"></i>
+               <span class="pull-right">Cancel</span>
+            </a>
+			</tal:prepurchase>  
+			   
+            <tal:postpurchase tal:condition="post_purchase">
+            <a href="${request.route_path('ticket_details', tick_id=tick_id)}" class="ll_btn pull-left">
+               <i class="icon-arrow-left"></i>
+               <span class="pull-right">Cancel</span>
+            </a>
+			</tal:postpurchase>
+
+            <tal:charge tal:condition="(post_purchase and view.details_fee_enabled)">
+            <button type="button" class="pull-right ll_btn success" onclick="javascript:confirm_paid_change();">
+                <i class="icon-ok"></i><span class="pull-right">Save Changes</span>
+            </button>
+            </tal:charge>
+            <tal:nocharge tal:condition="(not post_purchase or not view.details_fee_enabled)">
+            <button type="submit" class="pull-right ll_btn success" name="submit" id="submit" value="submit">
+                <i class="icon-ok"></i><span class="pull-right">Save Changes</span>
+            </button>
+            </tal:nocharge>
+            <div class="clearbar"></div>
+			
+		</form>
+        
+    </tal:content>
+</tal:macro>

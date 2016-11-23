@@ -1,0 +1,106 @@
+<tal:macro metal:use-macro="view.site_style">
+    <script type="text/javascript" metal:fill-slot="script">
+	var tickets = {
+		<tal:ticket tal:repeat="ticket view.session_tickets">"${ticket.__name__}": {
+			"price": ${ticket.tick_type.cost},
+			"addons": {}
+		},</tal:ticket>
+	};
+	function countup_addons() {
+		var total = 0;
+		for(var tick_key in tickets) {
+			var ticket = tickets[tick_key];
+			total += ticket["price"];
+			for(var add_key in ticket.addons) {
+				var addon = ticket.addons[add_key];
+				total += addon["price"];
+			}
+		}
+		// Format price
+		$("#ordertotal").html("&pound;" + (total / 100.0).toFixed(2));
+	}
+	function change_addon(checkbox) {
+		var checked = $(checkbox).prop("checked");
+		var exclusive = $(checkbox).data("exclusive") == "exclusive";
+		var price = parseInt($(checkbox).data("price"));
+		// Get the ticket
+		var tick_key = $(checkbox).prop("name").split("_addon")[0];
+		var ticket = tickets[tick_key];
+		if (ticket == null) return;
+		// Check the addon state
+		var addon_key = $(checkbox).prop("id").split("_")[1];
+		var addon = ticket.addons[addon_key];
+		if(addon == null && checked) { // Add-on was previously unpicked
+			if(exclusive) {
+				for(var add_key in ticket.addons) {
+					if(ticket.addons[add_key].exclusive) {
+						$(checkbox).attr("checked", false).attr("disabled", true);
+						return;
+					}
+				}
+				// If we are exclusive then disable any others
+				$("input[name='" + $(checkbox).prop("name") + "']").each(function() {
+					if($(this).prop("id").split("_")[1] != addon_key && $(this).data("exclusive") == "exclusive") {
+						$(this).attr("checked", false).attr("disabled", true);
+					}
+				});
+			}
+			// If we've got here add the new add-on
+			ticket.addons[addon_key] = {
+				"exclusive": exclusive,
+				"price": price
+			};
+		} else if(!checked) { // Add-on has already been picked
+			if(exclusive) {
+				$("input[name='" + $(checkbox).prop("name") + "']").each(function() {
+					if($(this).data("exclusive") == "exclusive") {
+						$(this).attr("checked", false).attr("disabled", false);
+					}
+				});
+			}
+			delete ticket.addons[addon_key];
+		}
+		countup_addons();
+	}
+ 	</script>
+    <tal:content metal:fill-slot="content">
+        
+        <h1>Add-ons</h1>
+		Please select the add-ons you wish to purchase for each ticket by checking the boxes associated with each ticket below. Some add-ons may be mutually exclusive to others (i.e. you can't purchase them both) and hence when you check one box others may become greyed out. You won't be able to remove or add add-ons after you have completed your purchase, so make sure to choose the correct options! 
+        <br /><br />
+        
+        <div class="alert alert-info" id="alert" style="background-color:#F5F5F5; border-radius:0;" tal:condition="exists:error">
+            <strong>Sorry!</strong> <span id="errormsg">${error}</span>
+        </div>
+        
+        <form action="" method="POST">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <th class="span3">Ticket</th>
+                    <th>Add-ons</th>
+                </thead>
+                <tbody>
+                    <tr tal:repeat="ticket view.session_tickets">
+                        <td>"${ticket.tick_type.name}" Ticket ${view.session_tickets.index(ticket) + 1}</td>
+						<td>
+							Base price ${structure:view.format_price(ticket.tick_type.cost)}
+							<br /><br />
+                            <label class="checkbox" tal:repeat="addon python:(sorted(ticket.tick_type.addons.values(), key=lambda x: x.cost))">
+								<input type="checkbox" id="${ticket.__name__ + '_' + addon.__name__}_addon" name="${ticket.__name__}_addons" value="${addon.__name__}" tal:attributes="disabled 'disabled' if addon.soldout else nothing; checked 'checked' if (ticket.addons != None and addon.__name__ in ticket.addons) else nothing" data-exclusive="${'exclusive' if addon.exclusive else 'open'}" data-price="${addon.cost}" onclick="change_addon(this);" />${addon.name} : ${structure:"Sold Out!" if addon.soldout else view.format_price(addon.cost)}<span style="color:#F00" tal:condition="addon.remaining < 10 and addon.remaining > 0"> - Only ${addon.remaining} left!</span><br />
+								<span style="color:#666">${addon.description} <i tal:condition="addon.exclusive">(Exclusive)</i></span>
+							</label>
+						</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3 class="pull-right">Total: <span id="ordertotal">${structure:view.total}</span></h3>
+			<div class="clearbar"></div>
+            <a href="/buy" class="ll_btn pull-left"><i class="icon-arrow-left"></i><span class="pull-right">Back</span></a>
+            <button type="submit" name="submit" id="submit" value="submit" class="ll_btn pull-right"><i class="icon-arrow-right"></i><span class="pull-right">Next</span></button>
+        </form>
+         
+        <div class="clearbar"></div>
+        <br />
+        
+    </tal:content>
+</tal:macro>

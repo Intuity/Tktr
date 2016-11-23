@@ -1,0 +1,85 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Groups</tal:title>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable red unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Help</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <p>
+                        A group is a collection of users that share the same privileges as each other. The groups name can be anything, all it does is enable a user to easily identify one group from the next. The privilege level is very important in determining what each user can do. 
+                        <ul>
+                            <li>A "Basic" user can login, edit their profile and purchase tickets.</li>
+                            <li>A "Committee" user can do everything a "Basic" user can and also see revenue and ticket sale reports, they can also release and retract tickets and create, edit and delete ticket types.</li>
+                            <li>An "Administrator" has access to everything both a "Basic" and "Committee" user can do, but can also manage users and groups and manage settings like whether ticket purchase is open or closed.</li>
+                        </ul>
+                    </p>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        <br />
+        <div class="expandable red container">
+            <div class="exp-head container">
+                <h3 class="pull-left">${('Edit "' + name + '"') if edit else 'Add'} Group</h3>
+            </div>
+            <div class="exp-body">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <form action="" method="POST" class="form-horizontal">
+                        <br />
+                        <div class="control-group">
+                            <label for="name" class="control-label">Name</label>
+                            <div class="controls">
+                                <input type="text" id="name" name="name" value="${name if edit else nothing}" />
+                                <span class="help-block">This is the name of the group you are creating.</span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="name" class="control-label">Privilege Level</label>
+                            <div class="controls">
+                                <select name="privilege">
+                                    <option value="basic" tal:attributes="selected 'selected' if privilege != 'admin' and privilege != 'committee' else nothing">Basic</option>
+									<option value="staff" tal:attributes="selected 'selected' if privilege == 'staff' else nothing">Staff</option>
+                                    <option value="committee" tal:attributes="selected 'selected' if privilege == 'committee' else nothing">Committee</option>
+                                    <option value="admin" tal:attributes="selected 'selected' if privilege == 'admin' else nothing">Administration</option>
+                                </select>
+                                <span class="help-block">This is the privilege level that the group will have.</span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="name" class="control-label">Access Code</label>
+                            <div class="controls">
+                                <input type="text" id="access_code" name="access_code" value="${access_code if edit else nothing}" />
+                                <span class="help-block">If a string is entered here, then if a user enters it whilst signing up, their account will automatically be placed into this group. They will then qualify for any discounts this group offers. If this box is left blank then this feature will be disabled. This string must be only alphanumeric (a-z, 0-9), lowercase characters without spaces.</span>
+                            </div>
+                        </div>
+                        
+                        <a href="${request.route_path('admin_accounts')}" class="ll_btn pull-left">
+                           <i class="icon-arrow-left"></i>
+                           <span class="pull-right">Cancel</span>
+                        </a>
+                        
+                        <button type="submit" class="pull-right ll_btn success" name="submit" id="submit" value="submit" tal:condition="not:edit">
+                            <i class="icon-plus-sign"></i><span class="pull-right">Add</span>
+                        </button>
+                        <button type="submit" class="pull-right ll_btn success" name="submit" id="submit" value="submit" tal:condition="edit">
+                            <i class="icon-ok"></i><span class="pull-right">Update</span>
+                        </button>
+                        <div class="clearbar"></div>
+            
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="clearbar"></div>
+        <br /><br />
+        
+    </tal:content>
+</tal:macro>

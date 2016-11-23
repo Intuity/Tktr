@@ -1,0 +1,135 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Sales</tal:title>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable green container">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Payments Search</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <form action="${request.route_path('admin_payments')}" method="GET" class="form-horizontal">
+                        <br />
+                        <div class="control-group">
+                            <label for="name" class="control-label">Search for payment</label>
+                            <div class="controls">
+                                <select id="filter" name="filter" onchange="javascript:$('#value').prop('disabled', false);changeFilterType(this);">
+                                    <option selected disabled>Filter...</option>
+                                    <option value="status">By Payment Status</option>
+                                    <option value="refcode">By Reference Code</option>
+                                    <option value="crsid">By CRSid</option>
+                                    <option value="name">By Name</option>
+                                    <option value="email">By Email</option>
+                                    <option value="username">By Username</option>
+                                </select> 
+                                <input type="text" id="filtervalue" name="filtervalue" placeholder="Search value..." disabled="disabled" />
+                                <select id="filtervalue-status" name="filtervalue-status" class="hidden">
+                                    <option value="all">All</option>
+                                    <option value="paid">Paid</option>
+                                    <option value="unpaid">Unpaid</option>
+                                    <option value="expiring">Expiring</option>
+                                    <option value="expired">Expired</option>
+                                </select>
+                                <button type="submit" id="submit" name="submit" value="submit" class="ll_btn" style="display:inline-block;">
+                                    <i class="icon-search"></i>
+                                    <span class="pull-right">Search</span>
+                                </button>
+                                <span class="help-block">Select the filter you wish to use and enter the text you wish to filter by and click "Search".</span>
+                            </div>
+                        </div>
+            
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="clearline"></div>
+        
+        <h3 class="pull-left">Payment: <a href="${request.route_path('admin_single_payment', ref_code=payment.__name__)}">${payment.ref_code}</a></h3>
+		<a href="#" onclick="javascript:if(confirm('Are you sure you want to delete this stage? This will nullify any amount paid within this stage.')) window.location.href = '?action=delete';" class="ll_btn danger pull-right" style="margin-top:12px;margin-left:5px;">
+           <i class="icon-remove"></i>
+           <span class="pull-right">Delete Stage</span> 
+        </a>
+        <a href="${request.route_path('admin_payment_enter', ref_code=payment.__name__)}" class="ll_btn success pull-right" style="margin-top:12px;margin-left:5px;">
+           <i class="icon-money"></i>
+           <span class="pull-right">Enter Payment</span> 
+        </a>
+		<div class="clearbar"></div>
+        <h4 class="pull-left">Viewing Payment Stage ${payment.history.index(stage) + 1}</h4>
+        <h4 class="pull-right">
+            <a tal:condition="payment.history.index(stage) > 0" href="${view.request.route_path('admin_payment_stage', ref_code=payment.__name__, stage_index=(payment.history.index(stage) - 1))}"><i class="icon-arrow-left"></i> Previous Stage</a> &nbsp;&nbsp; 
+            <a tal:condition="(payment.history.index(stage) + 1) < len(payment.history)" href="${view.request.route_path('admin_payment_stage', ref_code=payment.__name__, stage_index=(payment.history.index(stage) + 1))}">Next Stage <i class="icon-arrow-right"></i></a>
+        </h4>
+        <div class="clearbar"></div><br />
+        <table style="width:550px;font-size:18px;" class="pull-left" tal:define="method view.get_payment_method(stage.method)">
+            <tbody>
+                <tal:userexists tal:condition="stage.stage_owner in view.request.root.users">
+                    <tr>
+                        <td class="span3" style="padding:5px;padding-left:0px;">Stage Owner Username:</td>
+                        <td style="padding:5px;"><a href="${request.route_path('admin_view_user', user_id=view.request.root.users[stage.stage_owner].__name__)}">${stage.stage_owner}</a></td>
+                    </tr>
+                    <tr>
+                        <td class="span3" style="padding:5px;padding-left:0px;">Stage Owner Account Exists:</td>
+                        <td style="padding:5px;">Yes</td>
+                    </tr>
+                    <tr>
+                        <td class="span3" style="padding:5px;padding-left:0px;">Stage Owner Fullname:</td>
+                        <td style="padding:5px;">${view.request.root.users[stage.stage_owner].profile.fullname}</td>
+                    </tr>
+                </tal:userexists>
+                <tal:nouserexists tal:condition="stage.stage_owner not in view.request.root.users">
+                    <tr>
+                        <td class="span3" style="padding:5px;padding-left:0px;">Stage Owner Username:</td>
+                        <td style="padding:5px;">${stage.stage_owner}</td>
+                    </tr>
+                    <tr>
+                        <td class="span3" style="padding:5px;padding-left:0px;">Stage Owner Account Exists:</td>
+                        <td style="padding:5px;">No</td>
+                    </tr>
+                </tal:nouserexists>
+                <tr>
+                    <td class="span3" style="padding:5px;padding-left:0px;">Stage Method:</td>
+                    <td style="padding:5px;">${method.name if not stage.transfer and method != None else 'Ticket Transfer'}</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;padding-left:0px;">Stage Status:</td>
+                    <td style="padding:5px;">${stage.status}</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;padding-left:0px;">Opened Date:</td>
+                    <td style="padding:5px;">${payment.opened_date.strftime("%d/%m/%Y - %H:%M")}</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;padding-left:0px;">Stage Date:</td>
+                    <td style="padding:5px;">${stage.date.strftime("%d/%m/%Y - %H:%M")}</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;padding-left:0px;">Amount Paid:</td>
+                    <td style="padding:5px;">${structure:view.format_price(stage.amount_paid)}</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;padding-left:0px;">Amount Outstanding After:</td>
+                    <td style="padding:5px;">${structure:view.format_price(payment.amount_remaining)}</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;padding-left:0px;">Method Fee:</td>
+                    <td style="padding:5px;">${structure:view.format_price(stage.processing_charge)}</td>
+                </tr>
+                <tal:stripe>
+                    <tr>
+                        <td class="span3" style="padding:5px;padding-left:0px;">Stripe Last 4 Digits:</td>
+                        <td style="padding:5px;">${stage.method_properties['last_four'] if 'last_four' in stage.method_properties else '-'}</td>
+                    </tr>
+                    <tr>
+                        <td class="span3" style="padding:5px;padding-left:0px;">Stripe Transaction ID:</td>
+                        <td style="padding:5px;">${stage.method_properties['ref_code'] if 'ref_code' in stage.method_properties else '-'}</td>
+                    </tr>
+                </tal:stripe>
+            </tbody>
+        </table>
+        
+        <div class="clearbar"></div><br />
+        
+    </tal:content>
+</tal:macro>

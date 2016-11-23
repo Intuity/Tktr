@@ -1,0 +1,162 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Tickets</tal:title>
+	<script type="text/javascript" metal:fill-slot="script">
+	Tick.admin.available_tickets = [
+	<tal:ticktype tal:repeat="type view.all_ticket_types">
+		 {
+			"id": "${type.__parent__.__name__}",
+			"name": "${type.name}",
+			"description": "${type.description}",
+			"addons": {
+				<tal:addontype tal:repeat="addon type.addons.values()">
+				"${addon.__name__}": "${addon.name}",
+				</tal:addontype>
+			}
+		},
+	</tal:ticktype>
+	];
+	</script>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable pink unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Help</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <p>You can use this form to export reports of ticket sales, including details on their type, upgrades and status. You can also filter what tickets you export, for example you can filter out all of the dining upgraded tickets sold to alumni.</p>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        <br />
+        <div class="expandable pink container">
+            <div class="exp-head container">
+                <h3 class="pull-left">Tickets Report</h3>
+            </div>
+            <div class="exp-body">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <form action="" method="POST" class="form-horizontal">
+                        <br />
+            
+                        <div class="control-group">
+                            <label for="tickettype" class="control-label">Filter by Ticket Type</label>
+                            <div class="controls">
+                                <select id="tickettype" name="tickettype" class="span3" onchange="Tick.admin.select_report_type(this);">
+									<option value="any" selected="selected">Any Ticket Type</option>
+									<option tal:repeat="type view.all_ticket_types" value="${type.__parent__.__name__}">${type.name}</option>
+								</select>
+                                <span class="help-block">The type of ticket you want to filter to.</span>
+                            </div>
+                        </div>
+						
+                        <div class="control-group">
+                            <label for="ticketupgrade" class="control-label">Filter by Addon Type</label>
+                            <div class="controls">
+                                <select id="ticketupgrade" name="ticketupgrade" class="span3" disabled="disabled">
+									<option value="any" selected="selected">Any Addon</option>
+								</select>
+                                <span class="help-block">The type of upgrade for the ticket you are filtering to, you must select the ticket type first.</span>
+                            </div>
+                        </div>
+						
+                        <div class="control-group">
+                            <label for="paystatus" class="control-label">Payment Status</label>
+                            <div class="controls">
+                                <select id="paystatus" name="paystatus" class="span3">
+									<option value="any" selected="selected">Any Payment Status</option>
+                                    <option value="paid">Paid</option>
+                                    <option value="unpaid">Unpaid</option>
+                                    <option value="expiring">Expiring</option>
+                                    <option value="expired">Expired</option>
+								</select>
+                                <span class="help-block">The type of upgrade for the ticket you are filtering to, you must select the ticket type first.</span>
+                            </div>
+                        </div>
+            
+                        <div class="control-group">
+                            <label for="cost" class="control-label">Export Fields</label>
+                            <div class="controls" id="tickchoice">
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_salutation" name="opt_salutation" /> Guest's Salutation
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" checked="checked" id="opt_fullname" name="opt_fullname" /> Guest's Full Name
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_crsid" name="opt_crsid" /> Guest's CRSid
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" checked="checked" id="opt_email" name="opt_email" /> Guest's Email Address
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_phone_num" name="opt_phone_num" /> Guest's Phone Number
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_dob" name="opt_dob" /> Guest's Date of Birth
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_college" name="opt_college" /> Guest's College
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_grad" name="opt_grad" /> Guest's Graduate Status
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_owner_fullname" name="opt_owner_fullname" /> Owners's Fullname
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_owner_forename" name="opt_owner_forename" /> Owners's Forename
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_owner_surname" name="opt_owner_surname" /> Owners's Surname
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_owner_crsid" name="opt_owner_crsid" /> Owners's CRSid
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_payref" name="opt_payref" /> Purchase Reference Code
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" checked="checked" id="opt_tickref" name="opt_tickref" /> Ticket Reference Code
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" checked="checked" id="opt_type" name="opt_type" /> Ticket Type
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" checked="checked" id="opt_addons" name="opt_addons" /> Addons
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_total_cost" name="opt_total_cost" /> Total Ticket Cost
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_purchase_date" name="opt_purchase_date" /> Purchase Date
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_pay_complete" name="opt_pay_complete" /> Payment Completed
+								</label>
+								<span class="help-block" id="tickchoiceinfo">Whichever options are ticked will be included in the report when it is exported as separate columns.</span>
+                            </div>
+                        </div>
+                        
+                        <a href="${request.route_path('admin_tickets')}" class="ll_btn pull-left">
+                           <i class="icon-arrow-left"></i>
+                           <span class="pull-right">Cancel</span>
+                        </a>
+                        
+                        <button type="submit" class="pull-right ll_btn success" name="submit" id="submit" value="submit">
+                            <i class="icon-save"></i><span class="pull-right">Export</span>
+                        </button>
+                        <div class="clearbar"></div>
+            
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="clearbar"></div>
+        <br /><br />
+        
+    </tal:content>
+</tal:macro>

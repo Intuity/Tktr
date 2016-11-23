@@ -1,0 +1,23 @@
+<tal:macro metal:use-macro="view.site_style">
+    <tal:content metal:fill-slot="content">
+        
+        <h1 class="pull-left">Cookie Policy</h1>
+		
+		<div class="clearline"></div>
+		<h5><a href="/">Back to homepage</a></h5>
+		
+		<tal:headlines tal:condition="document.headline_points and len(document.headline_points) > 0">
+		<h3>Important Points</h3>
+		<ul>
+			<li tal:repeat="point document.headline_points" style="font-size:16px;">${point}</li>
+		</ul>
+		</tal:headlines>
+		
+		<h3>The Full Policy</h3>
+		
+		${structure:document.main_body}
+		
+		<br /><br />
+		
+    </tal:content>
+</tal:macro>

@@ -1,0 +1,18 @@
+<tal:macro metal:use-macro="view.site_style">
+    <tal:content metal:fill-slot="content">
+        
+        <h1>Setup Ticketing</h1>
+        <br />
+        <h3>All Done</h3>
+		<p>
+            Everything is now setup and ready for action, click 'Go to Login' to enter the administration system. You'll need to login as "admin" using the password you set earlier.
+        </p>
+        <br /><br />
+    
+		<div class="clearbar"></div>
+        <a href="${view.request.route_path('admin_login')}?user=admin" class="ll_btn pull-right"><i class="icon-user"></i><span class="pull-right">Go to Login</span></a>
+     
+        <div class="clearbar"></div>
+        <br />
+    </tal:content>
+</tal:macro>

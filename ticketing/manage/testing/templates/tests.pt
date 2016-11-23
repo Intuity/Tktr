@@ -1,0 +1,34 @@
+<tal:macro metal:use-macro="load:../../templates/admin_template.pt">
+    <tal:title metal:fill-slot="title">Tests</tal:title>
+    <tal:content metal:fill-slot="admin_content">
+    
+        <div class="expandable blue container">
+            <div class="exp-head container">
+                <h3 class="pull-left">Test Functions</h3>
+            </div>
+            <div class="exp-body">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    
+                    <p>
+                       These functions should only be used for testing the functionality of the system, they should not be used in a deployment environment as they will disrupt normal operation. 
+                    </p>
+                    
+                    <a href="${view.request.route_path('tests_setup_tickets')}" class="ll_btn danger pull-left">
+                       <i class="icon-exclamation-sign"></i> Setup Many Tickets 
+                    </a>
+                    
+                    <div class="clearbar"></div><br />
+                    
+                    <a href="${view.request.route_path('tests_setup_payments')}" class="ll_btn danger pull-left">
+                       <i class="icon-exclamation-sign"></i> Setup Many Payments 
+                    </a>
+                    
+                    <div class="clearbar"></div>
+                    
+                </div>
+            </div>
+        </div>
+        
+    </tal:content>
+</tal:macro>

@@ -1,0 +1,45 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Users</tal:title>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable red unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Help</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <p>
+                        Show below are the usernames and passwords of the accounts you automatically generated. You may download the entire list for use in mail-merging by clicking the "Download CSV" button. You will not be able to retrieve the passwords later as they are not stored as readable text, so please make note of them now. Note that while usernames are case <strong>insensitive</strong>, passwords are case <strong>sensitive</strong>.
+                    </p>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        <br />
+        <h2 class="pull-left">Added Users</h2>
+		<a href="?type=csv" class="ll_btn pull-right" style="margin-top:13px;">
+			<i class="pull-left icon-save"></i>
+			<span class="pull-right">Download CSV</span>
+		</a>
+		<div class="clearline"></div>
+		<table class="table table-bordered table-striped">
+			<thead>
+				<th class="span3">Username</th>
+				<th class="span3">Password</th>
+				<th>Group Name</th>
+			</thead>
+			<tbody>
+				<tr tal:repeat="user usernames">
+					<td>${user}</td>
+					<td>${users[user]}</td>
+					<td>${group.name}</td>
+				</tr>
+			</tbody>
+		</table>
+        <div class="clearbar"></div>
+        <br /><br />
+        
+    </tal:content>
+</tal:macro>

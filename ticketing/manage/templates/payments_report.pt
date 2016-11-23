@@ -1,0 +1,113 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Payments</tal:title>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable green unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Help</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <p>You can use this form to export reports of ticket sales, including details on their type, upgrades and status. You can also filter what tickets you export, for example you can filter out all of the dining upgraded tickets sold to alumni.</p>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        <br />
+        <div class="expandable green container">
+            <div class="exp-head container">
+                <h3 class="pull-left">Payments Report</h3>
+            </div>
+            <div class="exp-body">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <form action="" method="POST" class="form-horizontal">
+                        <br />
+						
+                        <div class="control-group">
+                            <label for="numtickets" class="control-label">Payment Status</label>
+                            <div class="controls">
+                                <select id="paystatus" name="paystatus" class="span3">
+									<option value="any" selected="selected">Any Payment Status</option>
+                                    <option value="paid">Paid</option>
+                                    <option value="unpaid">Unpaid</option>
+                                    <option value="expiring">Expiring</option>
+                                    <option value="expired">Expired</option>
+								</select>
+                                <span class="help-block">The type of upgrade for the ticket you are filtering to, you must select the ticket type first.</span>
+                            </div>
+                        </div>
+            
+                        <div class="control-group">
+                            <label for="cost" class="control-label">Export Fields</label>
+                            <div class="controls" id="tickchoice">
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_salutation" name="opt_salutation" /> Salutation
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" checked="checked" id="opt_fullname" name="opt_fullname" /> Full Name
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_crsid" name="opt_crsid" /> CRSid
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" checked="checked" id="opt_email" name="opt_email" /> Email Address
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_phone_num" name="opt_phone_num" /> Phone Number
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_dob" name="opt_dob" /> Date of Birth
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_college" name="opt_college" /> College
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_grad" name="opt_grad" /> Graduate Status
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" checked="checked" id="opt_payref" name="opt_payref" /> Purchase Reference Code
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" checked="checked" id="opt_tickets" name="opt_tickets" /> Tickets in Payment
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" checked="checked" id="opt_total_cost" name="opt_total_cost" /> Total Payment
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" id="opt_opened_date" name="opt_opened_date" /> Purchase Date
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" checked="checked" id="opt_pay_date" name="opt_pay_date" /> Payment Completed Date
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" checked="checked" id="opt_pay_complete" name="opt_pay_complete" /> Payment Completed
+								</label>
+								<label class="checkbox">
+									<input type="checkbox" value="export" checked="checked" id="opt_payment_method" name="opt_payment_method" /> Payment Method
+								</label>
+								<span class="help-block" id="tickchoiceinfo">Whichever options are ticked will be included in the report when it is exported as separate columns.</span>
+                            </div>
+                        </div>
+                        
+                        <a href="${request.route_path('admin_tickets')}" class="ll_btn pull-left">
+                           <i class="icon-arrow-left"></i>
+                           <span class="pull-right">Cancel</span>
+                        </a>
+                        
+                        <button type="submit" class="pull-right ll_btn success" name="submit" id="submit" value="submit">
+                            <i class="icon-save"></i><span class="pull-right">Export</span>
+                        </button>
+                        <div class="clearbar"></div>
+            
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="clearbar"></div>
+        <br /><br />
+        
+    </tal:content>
+</tal:macro>

@@ -1,0 +1,86 @@
+<tal:macro metal:use-macro="view.site_style">
+    <tal:content metal:fill-slot="content">
+        
+        <h1 class="pull-left">Transfer Payment</h1>
+        <div class="clearline"></div>
+		<p>
+			To complete the ticket transfer you will need to pay the transfer fee of ${structure:view.format_price(view.transfer_fee)}. The payment may only be made via debit or credit card using Stripe. Fill the form below and click "Pay Via Stripe" to complete your payment. The ticket transfer will be made immediately if the payment is successful.
+		</p>
+		<p>
+			Stripe is a secure, online payment service for processing transactions from Visa or MasterCard credit or debit cards. We do not store any information on your debit or credit cards on our servers, all processing is done by Stripe. For more information on Stripe visit www.stripe.com.
+		</p>
+		<div class="clearline"></div>
+        <h3>Ticket: ${ticket.__name__}</h3>
+		<table class="table table-bordered">
+			<tbody>
+				<tr tal:condition="recipient in view.request.root.users">
+					<td class="span5">Recipient's name:</td>
+					<td>${view.request.root.users[recipient].profile.fullname}</td>
+				</tr>
+				<tr>
+					<td class="span5">Recipient's username:</td>
+					<td>${recipient}</td>
+				</tr>
+				<tr>
+					<td class="span5">Ticket Type:</td>
+					<td>${ticket.tick_type.name}</td>
+				</tr>
+				<tr>
+					<td class="span5">Ticket Cost:</td>
+					<td>
+                        ${structure:view.format_price(ticket.tick_type.cost)}
+                        <tal:addoncost tal:condition="ticket.addon_cost > 0">
+                        (+ ${structure:view.format_price(ticket.addon_cost)} of addons)
+                        </tal:addoncost>
+                    </td>
+				</tr>
+				<tr>
+					<td class="span5">Ticket Addons:</td>
+					<td>
+						<tal:addon tal:repeat="addon ticket.addons.values()" tal:condition="len(ticket.addons) > 0">${addon.name}<br /></tal:addon>
+						<tal:noaddon tal:condition="len(ticket.addons) == 0">No addons</tal:noaddon>
+					</td>
+				</tr>
+				<tr>
+					<td class="span5">Guest Name:</td>
+					<td>${ticket.guest_info.fullname if ticket.guest_info else 'No Name Entered'}</td>
+				</tr>
+			</tbody>
+		</table>
+		<h3>Payment Via Stripe</h3>
+		<h4>You will be charged ${structure:view.format_price(view.transfer_fee)} for this transfer.</h4>
+        <div class="alert alert-error hidden" id="alert" style="background-color:#F5F5F5; border-radius:0;" tal:condition="not:exists:error">
+            <strong>Sorry!</strong> <span id="errormsg"></span>
+        </div>
+        <div class="alert alert-error" id="alert" style="background-color:#F5F5F5; border-radius:0;" tal:condition="exists:error">
+            <strong>Sorry!</strong> <span id="errormsg">${error}</span>
+        </div>
+        <br /><br />
+        
+        <div style="text-align:center;width:100%;" tal:define="stripe view.get_payment_method('stripe')">
+            <form id="payment-form" class="form-horizontal" action="" method="POST">
+                <script
+                    src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                    data-key="${stripe.settings['STRIPEAPIPUBLICKEY'].value}"
+                    data-email="${view.user.profile.email}"
+                    data-currency="GBP"
+                    data-amount="${penny_total}"
+                    data-name="${stripe.settings['ORGNAME'].value}"
+                    data-description="Single Ticket Transfer (${structure:view.format_price(penny_total)})"
+                    data-image="/static/img/StripeCrest.png"
+                    data-label="Make Payment Via Stripe"
+                    data-zip-code="true"
+                    data-allow-remember-me="false">
+                </script>
+				  <input type="hidden" id="username" name="username" value="${recipient}" />
+	        </form>
+		</div>
+        <br /><br />
+        <a id="backlink" href="${request.route_path('transfer_ticket', tick_id=ticket.__name__)}" class="ll_btn pull-left">
+            <i class="icon-arrow-left"></i><span class="pull-right">Back</span>
+        </a>
+		
+		<br /><br /><br />
+        
+    </tal:content>
+</tal:macro>

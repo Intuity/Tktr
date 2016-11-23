@@ -1,0 +1,41 @@
+<tal:macro metal:use-macro="view.site_style">
+    <tal:content metal:fill-slot="content">
+        
+        <h1>Pay For Your Tickets</h1>
+        Your order comes to ${structure:view.total} and you can pay for your tickets in a number of ways. All of the tickets that you selected must be purchased in one way (i.e. you cannot pay part of your order via one method and the rest by a second). Select the method of payment you wish to use below to continue. Please note that for some payment methods there is a <strong>${view.payment_window} day window</strong> in which you must complete your payment, otherwise your tickets will be returned to the pool.
+        
+        <div class="clearbar"></div>
+        <br />
+        
+        <table class="table table-striped table-bordered">
+            <thead>
+                <th class="span9">Payment Method</th>
+                <th>Actions</th>
+            </thead>
+            <tbody>
+                
+                <tr tal:repeat="method methods">
+                    <td>
+                        <h4 style="margin:0 0 5px 0;padding:0;">${method.name}</h4>
+                        <span style="color:#666">${method.customer_description}</span>
+                        <i style="color:#C00" tal:condition="method.deadlined"> This payment method has a ${view.payment_window} day payment window.</i>
+                    </td>
+                    <td style="line-height:80px;vertical-align:middle;">
+                        <a href="${request.route_path('pay_for_tickets')}?method=${method.__name__}" class="ll_btn pull-left" id="pay-stripe">
+                            <i class="icon-money"></i><span class="pull-right">Pay by ${method.short_name}</span>
+                        </a>
+                    </td>
+                </tr>
+                    
+            </tbody>
+        </table>
+        
+        <a href="${request.route_path('order_details')}" class="ll_btn pull-left">
+            <i class="icon-arrow-left"></i><span class="pull-right">Back</span>
+        </a>
+        
+        <div class="clearbar"></div>
+        <br />
+        
+    </tal:content>
+</tal:macro>

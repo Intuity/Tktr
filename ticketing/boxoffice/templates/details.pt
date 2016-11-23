@@ -1,0 +1,72 @@
+<tal:macro metal:use-macro="view.site_style">
+    <tal:content metal:fill-slot="content">
+        
+        <h1>Order Details</h1>
+        <tal:guest_details tal:condition="view.guest_details_required">
+		<tal:noticket tal:condition="view.user_ticket() == None">
+        Please select your ticket and enter details for any guests you are bringing to the event. One ticket purchased by you must be allocated to yourself and the details for all other tickets must be completed to proceed. Please note that we reserve the right to void ticket purchases and/or refuse entry to the event if incorrect information is supplied.
+		</tal:noticket>
+		<tal:ticket tal:condition="view.user_ticket() != None">
+		Please enter the details for all of your guest tickets before continuing. As you have already purchased a ticket, you do not need to allocate one to yourself. Please note we reserve the right to void ticket purchases and/or refuse entry to the event if incorrect information is supplied.
+		</tal:ticket>
+        </tal:guest_details>
+        <tal:no_guest_details tal:condition="not:view.guest_details_required">
+        Please check that your order is correct before proceeding, including the total amount that is to be charged. If you choose to pay by Stripe (debit/credit card payment) then you will not be able to change your order after this stage, however if you choose to pay by another method you may be able to cancel tickets from your order at a later point in time.
+        </tal:no_guest_details>
+        <br /><br />
+        
+        <div class="alert alert-info" id="alert" style="background-color:#F5F5F5; border-radius:0;" tal:condition="exists:error">
+            <strong>Sorry!</strong> <span id="errormsg">${error}</span>
+        </div>
+        
+        <form action="" method="POST">
+            <table class="table table-bordered table-striped">
+                <!-- Guest Details Enabled -->
+                <thead tal:condition="view.guest_details_required">
+                    <th class="span3">Type</th>
+                    <th class="span2" style="text-align:right;">Cost</th>
+                    <th class="span3">Guest</th>
+                    <th>Actions</th>
+                </thead>
+                <!-- Guest Details Disabled -->
+                <thead tal:condition="not:view.guest_details_required">
+                    <th>Type</th>
+                    <th class="span3" style="text-align:right;">Cost</th>
+                </thead>
+                <tbody>
+                    <tr tal:repeat="ticket view.session_tickets">
+                        <td>
+							${ticket.tick_type.name}
+							<tal:addon tal:condition="ticket.addons" tal:repeat="addon ticket.addons.values()"> + ${addon.name}</tal:addon>
+						</td>
+                        <td style="text-align:right;">${structure:view.format_price(ticket.total_cost)}</td>
+                        <tal:guest_details tal:condition="view.guest_details_required">
+                        <td tal:condition="python:(ticket.guest_info == None)">Not yet assigned</td>
+                        <td tal:condition="python:(ticket.guest_info == ticket.owner.profile)">Yourself</td>
+                        <td tal:condition="python:(ticket.guest_info != ticket.owner.profile and ticket.guest_info != None)">${ticket.guest_info.fullname}</td>
+						<tal:noticket tal:condition="view.user_ticket() == None">
+                        <td tal:condition="not:python:(ticket.guest_info == ticket.owner.profile)">
+							<a href="?mark=${ticket.__name__}">Mark as My Ticket</a> or <a href="${request.route_path('guest_info')}?tick=${ticket.__name__}" tal:condition="python:(ticket.guest_info == None)">Set Guest Information</a><a href="${request.route_path('guest_info')}?tick=${ticket.__name__}" tal:condition="python:(ticket.guest_info != None)">Edit Guest Information</a>
+						</td>
+                        <td tal:condition="python:(ticket.guest_info == ticket.owner.profile)"></td>
+						</tal:noticket>
+						<tal:ticket tal:condition="view.user_ticket() != None">
+						<td>
+							<a href="${request.route_path('guest_info')}?tick=${ticket.__name__}" tal:condition="python:(ticket.guest_info == None)">Set Guest Information</a><a href="${request.route_path('guest_info')}?tick=${ticket.__name__}" tal:condition="python:(ticket.guest_info != None)">Edit Guest Information</a>
+						</td>
+						</tal:ticket>
+                        </tal:guest_details>
+                    </tr>
+                </tbody>
+            </table>
+            <h3 class="pull-right">Total: <span id="ordertotal">${structure:view.total}</span></h3>
+            <div class="clearbar"></div>
+            <a href="${request.route_path('addons') if addons else request.route_path('buy_tickets')}" class="ll_btn pull-left"><i class="icon-arrow-left"></i><span class="pull-right">Back</span></a>
+            <button type="submit" name="submit" id="submit" value="submit" class="ll_btn pull-right" tal:attributes="disabled 'disabled' if needs_info else nothing"><i class="icon-arrow-right"></i><span class="pull-right">Next</span></button>
+        </form>
+         
+        <div class="clearbar"></div>
+        <br />
+        
+    </tal:content>
+</tal:macro>

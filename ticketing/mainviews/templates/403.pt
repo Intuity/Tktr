@@ -1,0 +1,8 @@
+<tal:macro metal:use-macro="view.site_style">
+    <tal:content metal:fill-slot="content">
+        
+        <h1>Hold on...</h1>
+        <h3>Sorry you don't have the permissions to see that.</h3>
+        
+    </tal:content>
+</tal:macro>

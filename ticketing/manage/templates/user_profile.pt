@@ -1,0 +1,165 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Tickets</tal:title>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable red unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Help</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <p>
+                        These are the details of the user you selected, including all of the tickets that they have purchased and all of the payments that they have made. From this view you can reassign, void and query tickets by using the actions provided.
+                    </p>
+					<p>
+						From this view you may also delete a user or move them into another group. If you move them into another group their permissions may change, so please take care. When you move a user into a different group, any filters that were setup to place the user into a specific group will be automatically clear. Deletion of a user is permanent and will orphan all of their tickets - please take extreme care!
+					</p>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        
+        <br />
+        
+        <h3 class="pull-left">${chosen_user.profile.fullname if chosen_user.profile.fullname != None and len(chosen_user.profile.fullname) > 0 else chosen_user.username}</h3>
+		<a href="#" class="ll_btn danger pull-right" style="margin-top:10px;" onclick="javascript:if(confirm('Are you sure you want to delete ${chosen_user.username}?')) window.location.href='${request.route_path('admin_user_delete', user_id=chosen_user.__name__)}';"><i class="icon-remove"></i><span class="pull-right">Delete</span></a>
+		<a href="${request.route_path('admin_user_group', user_id=chosen_user.__name__)}" class="ll_btn pull-right" style="margin-top:10px;margin-right:10px;"><i class="icon-arrow-right"></i><span class="pull-right">Change Group</span></a>
+		<a href="${request.route_path('admin_user_password', user_id=chosen_user.__name__)}" class="ll_btn pull-right" style="margin-top:10px;margin-right:10px;" tal:condition="chosen_user.profile == None or not chosen_user.profile.raven_user"><i class="icon-lock"></i><span class="pull-right">Set Password</span></a>
+		<a href="${request.route_path('admin_user_profile_edit', user_id=chosen_user.__name__)}" class="ll_btn pull-right" style="margin-top:10px;margin-right:10px;"><i class="icon-pencil"></i><span class="pull-right">Edit Profile</span></a>
+		<a href="${request.route_path('admin_notes', mode='user', id=chosen_user.__name__)}" class="ll_btn pull-right" style="margin-top:10px;margin-right:10px;" tal:condition="view.is_admin"><i class="icon-pencil"></i><span class="pull-right">Edit Notes</span></a>
+        <a href="?action=sendtickets" class="ll_btn pull-right" style="margin-top:10px;margin-right:10px;" tal:condition="view.is_admin"><i class="icon-envelope"></i><span class="pull-right">Send Tickets</span></a>
+		<div class="clearline"></div>
+        <div style="background-color:white;border:1px solid #666;width:206px;" class="pull-left" tal:condition="view.photo_required">
+            <img src="/profile/photo" width="200" style="margin:3px;" />
+        </div>
+        <table style="width:550px;margin-left:20px;font-size:18px;" class="pull-left">
+            <tbody>
+                <tr>
+                    <td class="span3" style="padding:5px;">Salutation:</td>
+                    <td style="padding:5px;">${chosen_user.profile.title}</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;">Email:</td>
+                    <td style="padding:5px;">${chosen_user.profile.email}</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;">Phone Number:</td>
+                    <td style="padding:5px;">${chosen_user.profile.phone_number}</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;">Date of Birth:</td>
+                    <td style="padding:5px;">${chosen_user.profile.dob.strftime("%d/%m/%Y") if (chosen_user.profile.dob != None) else '-'}</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;">Cambridge Member:</td>
+                    <td style="padding:5px;">${'Yes' if chosen_user.profile.raven_user else 'No'}</td>
+                </tr>
+                <tal:cambridge tal:condition="chosen_user.profile.raven_user">
+                <tr>
+                    <td class="span3" style="padding:5px;">College:</td>
+                    <td style="padding:5px;">${view.college_name(chosen_user.profile.college)}</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;">University Membership:</td>
+					<td style="padding:5px;">${view.graduate_status(chosen_user.profile.grad_status)}</td>
+                </tr>
+                </tal:cambridge>
+				<tr tal:condition="python:(chosen_user.profile != None and not chosen_user.profile.raven_user)">
+					<td class="span3" style="padding:5px;display:block;">Postal Address:</td>
+					<td style="padding:5px;" tal:condition="chosen_user.profile.address" tal:define="address chosen_user.profile.address">
+						${address.line_one}<br />
+						${address.line_two}<br />
+						${address.county}<br />
+						${address.city}<br />
+						${address.country}<br />
+						${address.postal_code}
+					</td>
+					<td style="padding:5px;" tal:condition="not:chosen_user.profile.address">No Address Set</td>
+				</tr>
+				<tr>
+					<td class="span3" style="padding:5px;">Has Ticket:</td>
+					<td style="padding:5px;">${'No' if (view.user_ticket(chosen_user) == None) else 'Yes'}</td>
+				</tr>
+                <tr>
+                    <td class="span3" style="padding:5px;">Total Tickets Purchased:</td>
+                    <td style="padding:5px;">${chosen_user.total_tickets}</td>
+                </tr>
+				<tr>
+					<td class="span3" style="padding:5px;">Notes</td>
+					<td style="padding:5px;">${structure:chosen_user.notes}</td>
+				</tr>
+            </tbody>
+        </table>
+		
+        <div class="clearline"></div>
+		
+        <br /><br />
+        
+		<h1 class="pull-left">Tickets</h1>
+		
+        <div class="clearline"></div>
+		
+        <table class="table table-bordered table-striped" tal:condition="len(chosen_user.tickets) > 0">
+            <thead>
+                <th class="span3">Ticket Holder</th>
+                <th class="span2">Ticket Type</th>
+                <th class="span2">Ticket Cost</th>
+                <th class="span2">Status</th>
+                <th>Actions</th>
+            </thead>
+            <tbody>
+                <tal:block tal:repeat="ticket chosen_user.tickets">
+                <tr tal:condition="python:ticket.payment != None">
+                    <!--Guest Name-->
+                    <td tal:condition="python:(ticket.guest_info != None and ticket.guest_info != ticket.owner.profile)">${ticket.guest_info.fullname}</td>
+                    <td tal:condition="python:(ticket.guest_info == ticket.owner.profile)">Their Ticket</td>
+                    <td tal:condition="not:python:(ticket.guest_info != None)">Incomplete</td>
+					<!--Other-->
+                    <td>${ticket.tick_type.name}<tal:addon tal:condition="ticket.addons" tal:repeat="addon ticket.addons.values()"> + ${addon.name}</tal:addon></td>
+                    <td>${structure:view.format_price(ticket.tick_type.cost)}</td>
+                    <!--Status-->
+                    <td tal:condition="not:ticket.payment.paid">Unpaid</td>
+                    <td tal:condition="ticket.payment.paid">Confirmed</td>
+                    <td><a href="${request.route_path('admin_ticket_guest_info', ticket_id=ticket.id_code)}">Ticket Information</a></td>
+                </tr>
+                </tal:block>
+            </tbody>
+        </table>
+        <h4 style="text-align:center;" tal:condition="len(chosen_user.tickets) == 0"><br />This user has not purchased any tickets.</h4>
+		
+        <div class="clearline"></div>
+        
+		<h1 class="pull-left">Payments</h1>
+		
+        <div class="clearline"></div>
+		
+        <table class="table table-bordered table-striped" tal:condition="len(chosen_user.tickets) > 0">
+            <thead>
+                <th class="span3">Reference ID</th>
+                <th class="span3">Latest Method</th>
+                <th class="span2">Outstanding</th>
+                <th class="span2">Total</th>
+                <th>Status</th>
+            </thead>
+            <tbody>
+                <tal:block tal:repeat="payment chosen_user.payments">
+                <tr>
+                    <td><a href="${request.route_path('admin_single_payment', ref_code=payment.ref_code)}">${payment.ref_code}</a></td>
+                    <td>${view.get_payment_method(payment.history[-1].method).name}</td>
+                    <td>${structure:view.format_price(payment.amount_remaining)}</td>
+                    <td>${structure:view.format_price(payment.total)}</td>
+                    <td style="padding:5px;" tal:condition="python:(payment.paid)">Payment Completed</td>
+                    <td style="padding:5px;" tal:condition="python:(not payment.expiring(view.payment_window) and not payment.expired(view.payment_window) and not payment.paid)">Awaiting Payment</td>
+                    <td style="padding:5px;" tal:condition="python:(payment.expiring(view.payment_window) and not payment.expired(view.payment_window))">Payment Deadline Close</td>
+                    <td style="padding:5px;" tal:condition="python:(payment.expired(view.payment_window))">Payment Deadline Passed</td>
+                </tr>
+                </tal:block>
+            </tbody>
+        </table>
+		
+        <h4 style="text-align:center;" tal:condition="len(chosen_user.payments) == 0"><br />This user has not made any purchases.</h4>
+        
+    </tal:content>
+</tal:macro>

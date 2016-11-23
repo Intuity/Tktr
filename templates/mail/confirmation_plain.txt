@@ -1,0 +1,23 @@
+!!EVENTNAME!!
+
+Dear !!NAME!!,
+Thank you for purchasing tickets for !!EVENTNAME!!. A purchase receipt is included below for your records.
+    
+!!TICKETINSTRUCTIONS!!
+	
+!!AUTOINCLUDEDTEXT!!
+
+Your Name: !!NAME!!
+Your Purchase Reference: !!REFERENCE!!
+Order Date: !!DATE!!
+Payment Method: !!METHOD!!
+Paid: !!PAID!!
+Payment Due By: !!DUEDATE!!
+Tickets included: !!COUNT!!
+
+!!PLAINTICKETS!!
+
+Processing + !!PROCESSING!!
+Total !!TOTAL!!
+    
+!!AUTOINCLUDEDCONTACT!!

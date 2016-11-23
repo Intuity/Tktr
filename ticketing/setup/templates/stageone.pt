@@ -1,0 +1,21 @@
+<tal:macro metal:use-macro="view.site_style">
+    <tal:content metal:fill-slot="content">
+        
+        <h1>Setup Ticketing</h1>
+        <br />
+        <h3>Database Setup</h3>
+		<p tal:condition="setup">
+            <i class="icon-ok-circle"></i> Your database has been setup successfully - this means that you can now carry on to the next step!
+        </p>
+		<p tal:condition="not:setup">
+            Hang on - it looks like your database has already been setup. If you're not expecting this then you need to get in touch with support, otherwise if you've already started the setup procedure and just not finished then click 'Next Step' below to continue.
+        </p>
+        <br /><br />
+        
+		<div class="clearbar"></div>
+        <a href="${view.request.route_path('setup_stagetwo')}" class="ll_btn pull-right"><i class="icon-arrow-right"></i><span class="pull-right">Next Step</span></a>
+         
+        <div class="clearbar"></div>
+        <br />
+    </tal:content>
+</tal:macro>

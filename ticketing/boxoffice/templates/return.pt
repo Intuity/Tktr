@@ -1,0 +1,69 @@
+<tal:macro metal:use-macro="view.site_style">
+    <tal:content metal:fill-slot="content">
+        
+        <h1>Return Tickets</h1>
+        <p>
+            If you have not yet completed the purchase of a ticket, you may return it to the ticket pool. If you have completed 
+            the payment then you cannot return tickets but you may exchange them with another person. Exchanged tickets will be 
+            included as part of your ticket count, therefore if you have purchased the maximum number of tickets you cannot then 
+            purchase more by reassigning your original purchase to a third party. Returning tickets will decrement your ticket 
+            count, so you may then repurchase the tickets at a later date.
+        </p>
+		
+		<p>
+            If you are sure you want to return the selected ticket then click the "Return Ticket" button below. Note that once you 
+            have returned the ticket you cannot then re-acquire it without going back through the full purchase process.
+        </p>
+		
+		<p>
+            <strong>If you return your own ticket, then all of your guest tickets will automatically be returned as well</strong> 
+            as you must have a ticket of your own in order to purchase or hold guest tickets.
+        </p>
+		
+		<h3>Selected Ticket</h3>
+		<table class="table table-bordered">
+			<tbody>
+				<tr tal:condition="view.guest_details_required">
+					<td class="span5">Ticket Holder:</td>
+					<td>${ticket.guest_info.fullname}</td>
+				</tr>
+				<tr tal:condition="view.guest_details_required">
+					<td class="span5">Your Own Ticket:</td>
+					<td>${'Yes' if ticket.guest_info == ticket.owner.profile else 'No'}</td>
+				</tr>
+				<tr>
+					<td class="span5">Ticket ID:</td>
+					<td>${ticket.__name__}</td>
+				</tr>
+				<tr>
+					<td class="span5">Payment ID:</td>
+					<td>${ticket.payment.__name__}</td>
+				</tr>
+				<tr>
+					<td class="span5">Ticket Type:</td>
+					<td>${ticket.tick_type.name}</td>
+				</tr>
+				<tr>
+					<td class="span5">Ticket Cost:</td>
+					<td>${structure:view.format_price(ticket.tick_type.cost)}</td>
+				</tr>
+			</tbody>
+		</table>
+		
+		<div class="clearline"></div>
+        
+		<form action="" method="POST">
+            <a class="ll_btn pull-left" href="${request.route_path('user_profile')}">
+                <i class="icon-remove"></i><span class="pull-right">Cancel</span>
+            </a>
+
+            <button type="submit" class="ll_btn pull-right danger">
+                <i class="icon-arrow-right"></i><span class="pull-right">Return Ticket</span>
+            </button>
+		</form>
+		
+		<div class="clearline"></div>
+		<br />
+		
+    </tal:content>
+</tal:macro>

@@ -1,0 +1,21 @@
+!!EVENTNAME!!
+
+Dear !!NAME!!,
+Your payment method for the following order has been successfully changed.
+	
+!!AUTOINCLUDEDTEXT!!
+
+Your name: !!NAME!!
+Your purchase reference: !!REFERENCE!!
+Order Date: !!DATE!!
+Payment Method: !!METHOD!!
+Paid: !!PAID!!
+Payment Due By: !!DUEDATE!!
+Tickets included: !!COUNT!!
+
+!!PLAINTICKETS!!
+
+Processing + !!PROCESSING!!
+Total !!TOTAL!!
+    
+!!AUTOINCLUDEDCONTACT!!

@@ -1,0 +1,107 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Tickets</tal:title>
+	<script type="text/javascript" metal:fill-slot="script">
+	Tick.admin.available_tickets = [
+	<tal:ticktype tal:repeat="type view.all_ticket_types"><tal:typecondition tal:condition="len(type.__parent__.tickets) > 0">
+		 {
+			"id": "${type.__parent__.__name__}",
+			"name": "${type.name}",
+			"addons": {
+				<tal:addontype tal:repeat="addon type.addons.values()"><tal:addoncondition tal:condition="addon.remaining > 0">
+				"${addon.__name__}": "${addon.name}",
+				</tal:addoncondition></tal:addontype>
+			}
+		},
+	</tal:typecondition></tal:ticktype>
+	];
+	</script>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable pink unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Help</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <p>You can use this form to allocate tickets to guests directly, rather than them having to complete a full purchase. Payments will be logged for each allocation of tickets but they will be marked as free.</p>
+					<p>The receiving person will need an account, so make sure they have one before you try to allocate tickets otherwise the allocation will fail. If the person receiving the allocated tickets does not have a ticket of their own, then the first ticket will be automatically assigned to them. All other tickets will be given blank guest details that need to be filled in at a later date. Remember that guests will be unable to enter the ball unless the guest details match their identification.</p>
+					<p>Tickets will be allocated from the requisite ticket pool and if the quantity of tickets available is not great enough then the allocation will fail. The tickets being allocated must be able to be allocated to the group of the user (i.e. you won't be able to allocate alumnus tickets to a student account).</p>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        <br />
+        <div class="expandable pink container">
+            <div class="exp-head container">
+                <h3 class="pull-left">Allocate Tickets</h3>
+            </div>
+            <div class="exp-body">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <form action="" method="POST" class="form-horizontal">
+                        <br />
+                        <div class="control-group">
+                            <label for="username" class="control-label">Receiving Username</label>
+                            <div class="controls">
+                                <input type="text" id="username" name="username" onkeyup="window.ticketing.check_username(this.value);" /> <span id="usernamecheck"></span>
+                                <span class="help-block">This is the username of the individual who will receive the allocated tickets. If this account doesn't exist the allocation will fail.</span>
+                            </div>
+                        </div>
+            
+                        <div class="control-group">
+                            <label for="numtickets" class="control-label">Number of Tickets</label>
+                            <div class="controls">
+                                <select id="numtickets" name="numtickets" class="span2" onchange="Tick.admin.select_quantity(this.value);">
+									<option disabled="disabled" selected="selected">Choose...</option>
+									<option value="1">1</option>
+									<option value="2">2</option>
+									<option value="3">3</option>
+									<option value="4">4</option>
+									<option value="5">5</option>
+									<option value="6">6</option>
+									<option value="7">7</option>
+									<option value="8">8</option>
+									<option value="9">9</option>
+									<option value="10">10</option>
+								</select>
+                                <span class="help-block">This is the number of tickets that should be allocated to the individual.</span>
+                            </div>
+                        </div>
+            
+                        <div class="control-group">
+                            <label for="cost" class="control-label">Ticket Choices</label>
+                            <div class="controls" id="tickchoice">
+								<span class="help-block" id="tickchoiceinfo">Once you have selected a quantity of tickets to allocate you will be able to choose their types and add-ons here.</span>
+                            </div>
+                        </div>
+            
+                        <div class="control-group">
+                            <label for="cost" class="control-label">Mark as Gift</label>
+                            <div class="controls" id="tickchoice">
+								<label class="checkbox" for="gift">
+									<input type="checkbox" name="gift" id="gift" value="gift" /> This order is not charged for, accounted as free.
+								</label>
+                            </div>
+                        </div>
+                        
+                        <a href="${request.route_path('admin_tickets')}" class="ll_btn pull-left">
+                           <i class="icon-arrow-left"></i>
+                           <span class="pull-right">Cancel</span>
+                        </a>
+                        
+                        <button type="submit" class="pull-right ll_btn success" name="submit" id="submit" value="submit">
+                            <i class="icon-ticket"></i><span class="pull-right">Allocate</span>
+                        </button>
+                        <div class="clearbar"></div>
+            
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="clearbar"></div>
+        <br /><br />
+        
+    </tal:content>
+</tal:macro>

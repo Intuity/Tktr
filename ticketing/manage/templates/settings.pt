@@ -1,0 +1,497 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Settings</tal:title>
+    <tal:script metal:fill-slot="script">
+    <link href="/static/css/bootstrap-datepicker3.min.css" rel="stylesheet">
+    <script type="text/javascript" src="/static/js/bootstrap-datepicker.min.js"></script>
+    <script type="text/javascript" src="/static/js/locales/bootstrap-datepicker.en-GB.min.js"></script>
+    <script type="text/javascript">
+    window.addEventListener('load', function() {
+        $(".datepicker").datepicker({
+            language: "en-GB",
+            autoclose: true
+        });
+    });
+    </script>
+    </tal:script>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable blue unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Help</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+					<p>Policies &amp; agreements allows you to setup documents that customers will have to agree to in order to purchase tickets. For each of them you can setup the full policy/agreement but also a number of headline points that you want to make especially clear to anyone using the system.</p>
+                    <p>The queue is a way of controlling the maximum number of people able to concurrently buy tickets. A lower number means less server stress and a lower chance of double-allocation for a ticket. If you are expecting a high purchase rate it is recommended to enable queueing.</p>
+                    <p>Customer control allows you to limit the people able to buy tickets to a pre-defined community. This feature can be used for internal release of tickets within a college before opening up purchase to the entire university.</p>
+                    <p>Purchase limit allows you to limit the number of tickets a single person can purchase. This enables fairer distribution of tickets across the entire community.</p>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+		
+		<br />
+        
+        <form class="form-horizontal" action="" method="POST">
+		
+	        <div class="expandable blue container">
+	            <div class="exp-head container">
+	                <h3 class="pull-left">Policies &amp; Agreements</h3>
+	            </div>
+	            <div class="exp-body">
+	                <div class="breakerline"></div>
+	                <div class="inner">
+	                    <div class="control-group">
+	                        <label for="org_name" class="control-label">Purchase Agreement</label>
+	                        <div class="controls" style="line-height:30px;height:30px;">
+	                            <a href="${request.route_path('admin_document', doc_code='PURCHASEAGREEMENT')}" tal:condition="not:purchase_agreement">Click here to setup a purchase agreement.</a>
+								<a href="${request.route_path('admin_document', doc_code='PURCHASEAGREEMENT')}" tal:condition="purchase_agreement">Click here to edit the purchase agreement.</a>
+	                        </div>
+	                    </div>
+				
+	                    <div class="control-group">
+	                        <label for="pay_account_num" class="control-label">Privacy Policy</label>
+	                        <div class="controls" style="line-height:30px;height:30px;">
+	                            <a href="${request.route_path('admin_document', doc_code='PRIVACYPOLICY')}" tal:condition="not:privacy_policy">Click here to setup a privacy policy.</a>
+								<a href="${request.route_path('admin_document', doc_code='PRIVACYPOLICY')}" tal:condition="privacy_policy">Click here to edit the privacy policy.</a>
+	                        </div>
+	                    </div>
+				
+	                    <div class="control-group">
+	                        <label for="pay_sort_code" class="control-label">Cookie Policy</label>
+	                        <div class="controls" style="line-height:30px;height:30px;">
+	                            <a href="${request.route_path('admin_document', doc_code='COOKIEPOLICY')}" tal:condition="not:cookie_policy">Click here to setup a cookie policy.</a>
+								<a href="${request.route_path('admin_document', doc_code='COOKIEPOLICY')}" tal:condition="cookie_policy">Click here to edit the cookie policy.</a>
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+			
+			<br />
+        
+	        <div class="expandable blue container">
+	            <div class="exp-head container">
+	                <h3 class="pull-left">Event Details</h3>
+	            </div>
+	            <div class="exp-body">
+	                <div class="breakerline"></div>
+	                <div class="inner">
+                        <br />
+                        <div class="control-group">
+                            <label for="event_name" class="control-label">Event Name</label>
+                            <div class="controls">
+                                <input type="text" name="event_name" id="event_name" value="${settings.event_name}" />
+                                <span class="help-block">The name of the event, will be used across the site including in the title of the site.</span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="concurrent" class="control-label">Guest Details Required</label>
+                            <div class="controls">
+                                <label class="checkbox">
+									<input type="checkbox" id="guest_details_required" name="guest_details_required" value="guest_details_required" tal:attributes="checked 'checked' if settings.guest_details_required else nothing" /> Require guest details to be entered
+								</label>
+                                <span class="help-block">
+                                    By requiring guest details to be entered a name, email address and date of birth will be required for every ticket purchased through the system. Disabling this also disables the check for minimum age requirements as the information is no longer provided.
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="minimum_age" class="control-label">Minimum Age</label>
+                            <div class="controls">
+                                <select class="span2" name="minimum_age" id="minimum_age">
+                                    <option tal:repeat="age range(0, 101)" value="${age}" tal:attributes="selected 'selected' if (settings.minimum_age != None and age == int(float(settings.minimum_age))) else nothing">${age}</option>
+                                </select>
+                                <span class="help-block">The minimum age guests must be on the date of the event.</span>
+                            </div>
+                        </div>
+					
+                        <div class="control-group">
+                            <label for="event_day" class="control-label">Event Date</label>
+                            <div class="controls">
+                                <input id="event_date" name="event_date" type="text" class="form-control datepicker" placeholder="Event date..." value="${settings.event_date.strftime('%d/%m/%Y')}" />
+                                <span class="help-block">The date of the event.</span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="public_signup_enabled" class="control-label">Public Ticketing</label>
+                            <div class="controls">
+                                <label class="checkbox">
+									<input type="checkbox" id="public_signup_enabled" name="public_signup_enabled" value="public_signup_enabled" tal:attributes="checked 'checked' if settings.public_signup_enabled else nothing" /> Enable public ticketing and sign-up
+								</label>
+                                <span class="help-block">
+                                    By enabling public ticketing any member of the public can sign-up for an account and purchase tickets through the system.
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="account_lock_down" class="control-label">Account Detail Lockdown</label>
+                            <div class="controls">
+                                <label class="checkbox">
+									<input type="checkbox" id="account_lock_down" name="account_lock_down" value="account_lock_down" tal:attributes="checked 'checked' if settings.account_lock_down else nothing" /> Lock down account details
+								</label>
+                                <span class="help-block">
+                                    By locking down account details you will stop any account holders from being able to edit their own guest details. Administrators can still
+                                    edit guest details through the control panel.
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="concurrent" class="control-label">Ticket Download</label>
+                            <div class="controls">
+                                <label class="checkbox">
+									<input type="checkbox" id="ticket_download_enabled" name="ticket_download_enabled" value="ticket_download_enabled" tal:attributes="checked 'checked' if settings.ticket_download_enabled else nothing" /> Enable ticket downloading
+								</label>
+                                <span class="help-block">
+                                    By enabling ticket download, customers can download and print-out PDF tickets for the event. They will also be able to download iOS Passbook compatible tickets that can be used directly from their phones.
+                                </span>
+                            </div>
+                        </div>
+                        
+	                    <div class="control-group">
+	                        <label for="body" class="control-label">Error Contact Information</label>
+	                        <div class="controls">
+								<textarea class="fullsize" rows="3" name="error_contact_info" id="error_contact_info">${settings['error_contact_info']}</textarea>
+                                <span class="help-block">In any error messages that are shown, this piece of text will be included. It is recommended for this text to include contact details for a member of the ticketing team.</span>
+	                        </div>
+	                    </div>
+                        
+	                </div>
+	            </div>
+	        </div>
+			
+			<br />
+        
+	        <div class="expandable blue container">
+	            <div class="exp-head container">
+	                <h3 class="pull-left">Payment Details</h3>
+	            </div>
+	            <div class="exp-body">
+	                <div class="breakerline"></div>
+	                <div class="inner">
+                        <br />
+					
+                        <div class="control-group">
+                            <label for="payment_window" class="control-label">Payment Window</label>
+                            <div class="controls">
+                                <input type="text" name="payment_window" id="payment_window" value="${settings.payment_window}" />
+                                <span class="help-block">The number of days you allow for customers to complete payment for their purchase.</span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="concurrent" class="control-label">Charge for Transfers</label>
+                            <div class="controls">
+                                <label class="checkbox">
+                                    <input type="checkbox" id="transfer_fee_enabled" name="transfer_fee_enabled" value="transfer_fee_enabled" tal:attributes="checked 'checked' if settings.transfer_fee_enabled else nothing" /> Require ownership transfer fee
+                                </label>
+                                <span class="help-block">
+                                    With the ownership transfer fee enabled, for a customer to move ownership of a ticket from their account to another person's account they must pay the ownership transfer fee set below.
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="transfer_fee" class="control-label">Ownership Transfer Fee</label>
+                            <div class="controls">
+                                <div class="input-prepend">
+                                    <span class="add-on">&pound;</span>
+                                    <input type="text" class="span2" name="transfer_fee" id="transfer_fee" value="${view.format_price(settings.transfer_fee, symbol=False)}" />
+                                </div>
+                                <span class="help-block">The obligatory fee charged when an individual wishes to transfer ownership of a ticket to another party.</span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="concurrent" class="control-label">Charge for Alterations</label>
+                            <div class="controls">
+                                <label class="checkbox">
+                                    <input type="checkbox" id="details_fee_enabled" name="details_fee_enabled" value="details_fee_enabled" tal:attributes="checked 'checked' if settings.details_fee_enabled else nothing" /> Require guest details alternation fee
+                                </label>
+                                <span class="help-block">
+                                    With the guest details alteration fee enabled, for a customer to change the details of a guest ticket they must pay the details alteration fee set below. Alterations to guest details can still be made
+                                    through the administration interface at no cost, hence if a small change needs to be made then it can be performed manually by a committee member.
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="transfer_fee" class="control-label">Details Alteration Fee</label>
+                            <div class="controls">
+                                <div class="input-prepend">
+                                    <span class="add-on">&pound;</span>
+                                    <input type="text" class="span2" name="details_fee" id="details_fee" value="${view.format_price(settings.details_fee, symbol=False)}" />
+                                </div>
+                                <span class="help-block">The obligatory fee charged when an individual wishes to change the guest details of a ticket.</span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label class="control-label">Payment Methods</label>
+                            <div class="controls">
+                                <label class="checkbox" tal:repeat="method payment_methods"><input type="checkbox" id="pm_enable_${method.__name__}" name="pm_enable_${method.__name__}" value="yes" tal:attributes="checked 'checked' if method.enabled else nothing" /> ${method.name}</label>
+                                <span class="help-block">Ticked methods represent those that are currently enabled for ticket payments.<br />Stripe payments must be enabled for ticket transfers to be enabled.</span><br />
+                                <a href="${request.route_path('admin_payment_settings')}">Manage Payment Methods</a>
+                                <span class="help-block">Select and setup different payment options for ticket purchasers.</span>
+                            </div>
+                        </div>
+                        
+	                </div>
+	            </div>
+	        </div>
+        
+	        <br />
+        
+	        <div class="expandable blue container">
+	            <div class="exp-head container">
+	                <h3 class="pull-left">Automatic Email Messages</h3>
+	            </div>
+	            <div class="exp-body">
+	                <div class="breakerline"></div>
+	                <div class="inner">
+                        During normal operation, the ticketing system may send multiple automatic emails to customers informing them of the status of their ticket purchase and other related information. Below you can include a standard end to each message (including the signature name) and a set of contact details to include at the very bottom of the message.
+                        <br /><br />
+					
+	                    <div class="control-group">
+	                        <label for="body" class="control-label">Included Text</label>
+	                        <div class="controls">
+								<textarea class="fullsize" rows="3" name="email_included_text" id="email_included_text">${settings['email_included_text']}</textarea>
+                                <span class="help-block">This text will be included at the bottom of each email message and can include any relevant information to the event. The same text will be included in all emails sent out.</span>
+	                        </div>
+	                    </div>
+                        
+	                    <div class="control-group">
+	                        <label for="body" class="control-label">Contact Details</label>
+	                        <div class="controls">
+								<textarea class="fullsize" rows="3" name="email_contact_text" id="email_contact_text">${settings['email_contact_text']}</textarea>
+                                <span class="help-block">These contact details will be included in every automated email sent out and should provide an easy way for customers to get in touch with a member of staff that can help with their query.</span>
+	                        </div>
+	                    </div>
+                        
+	                </div>
+	            </div>
+	        </div>
+        
+	        <br />
+        
+            <div class="expandable blue unselectable">
+                <div class="exp-head container">
+                    <h3 class="pull-left">Queue Settings</h3>
+                    <div class="ll_switch unselectable pull-right blue" id="switch_queue">
+                        <div class="onstate" tal:attributes="class 'onstate' if settings.queue_enabled else 'onstate hidden'">
+                            <div class="off" onclick="Tick.admin.switch($(this).closest('.ll_switch'), 'off');">Off</div>
+                            <div class="on">On</div>
+                        </div>
+                        <div class="offstate hidden" tal:attributes="class 'offstate hidden' if settings.queue_enabled else 'offstate'">
+                            <div class="off">Off</div>
+                            <div class="on" onclick="Tick.admin.switch($(this).closest('.ll_switch'), 'on');">On</div>
+                        </div>
+                    </div>
+                    <h4 class="pull-right">Queue:</h4>
+                </div>
+                <div class="exp-body container collapse in" tal:attributes="class 'exp-body container collapse in' if settings.queue_enabled else 'exp-body container collapse'">
+                    <div class="breakerline"></div>
+                    <div class="inner">
+                        
+                        <input id="queue_enabled" name="queue_enabled" class="enabled" type="hidden" value="yes" tal:condition="settings.queue_enabled" />
+                        <input id="queue_enabled" name="queue_enabled" class="enabled" type="hidden" value="no" tal:condition="not:settings.queue_enabled" />
+                    
+                        <div class="control-group">
+                            <label for="sessiontime" class="control-label">Maximum Session Time</label>
+                            <div class="controls">
+                                <input id="maxsessiontime" name="maxsessiontime" type="text" value="${settings.maxsessiontime}" class="span1" /> mins
+                                <span class="help-block">
+                                    The maximum amount of time a customer has to complete their purchase
+                                </span>
+                            </div>
+                        </div>
+                    
+                        <div class="control-group">
+                            <label for="concurrent" class="control-label">Concurrent Customers</label>
+                            <div class="controls">
+                                <input id="concurrentcustomers" name="concurrentcustomers" type="text" value="${settings.concurrentcustomers}" class="span1" /> customers
+                                <span class="help-block">
+                                    The number of people allowed to purchase tickets simultaneously
+                                </span>
+                            </div>
+                        </div>
+						
+						<div class="control-group">
+							<div class="controls">
+								<a href="${request.route_path('admin_queue')}" class="ll_btn pull-right"><i class="icon-group"></i> <span class="pull-right">Monitor Queue</span></a>
+							</div>
+						</div>
+                        
+                    </div>
+                </div>
+                <div class="clearline"></div>
+            </div>
+            
+            <br />
+            
+            <div class="expandable blue unselectable">
+                <div class="exp-head container">
+                    <h3 class="pull-left">Customer Control</h3>
+                    <div class="ll_switch unselectable pull-right blue" id="switch_queue">
+                        <div class="onstate" tal:attributes="class 'onstate' if settings.control_enabled else 'onstate hidden'">
+                            <div class="off" onclick="Tick.admin.switch($(this).closest('.ll_switch'), 'off');">Off</div>
+                            <div class="on">On</div>
+                        </div>
+                        <div class="offstate hidden" tal:attributes="class 'offstate hidden' if settings.control_enabled else 'offstate'">
+                            <div class="off">Off</div>
+                            <div class="on" onclick="Tick.admin.switch($(this).closest('.ll_switch'), 'on');">On</div>
+                        </div>
+                    </div>
+                    <h4 class="pull-right">Control:</h4>
+                </div>
+                <div class="exp-body container collapse in" tal:attributes="class 'exp-body container collapse in' if settings.control_enabled else 'exp-body container collapse'">
+                    <div class="breakerline"></div>
+                    <div class="inner">
+                        
+                        <input id="control_enabled" name="control_enabled" class="enabled" type="hidden" value="yes" tal:condition="settings.control_enabled" />
+                        <input id="control_enabled" name="control_enabled" class="enabled" type="hidden" value="no" tal:condition="not:settings.control_enabled" />
+                    
+                        <div class="control-group">
+                            <label for="concurrent" class="control-label">Select Groups</label>
+                            <div class="controls">
+                                <label class="checkbox" tal:repeat="group_key request.root.groups">
+									<input type="checkbox" id="selgroup" name="selgroup" value="${group_key}" tal:attributes="checked 'checked' if group_key in control_groups else nothing" /> ${request.root.groups[group_key].name}
+								</label>
+                                <span class="help-block">
+                                    The groups you want to allow to purchase tickets.
+                                </span>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                <div class="clearline"></div>
+            </div>
+            
+            <br />
+            
+            <div class="expandable blue unselectable">
+                <div class="exp-head container">
+                    <h3 class="pull-left">Purchase Limits</h3>
+                    <div class="ll_switch unselectable pull-right blue" id="switch_queue">
+                        <div class="onstate" tal:attributes="class 'onstate' if settings.limit_enabled else 'onstate hidden'">
+                            <div class="off" onclick="Tick.admin.switch($(this).closest('.ll_switch'), 'off');">Off</div>
+                            <div class="on">On</div>
+                        </div>
+                        <div class="offstate hidden" tal:attributes="class 'offstate hidden' if settings.limit_enabled else 'offstate'">
+                            <div class="off">Off</div>
+                            <div class="on" onclick="Tick.admin.switch($(this).closest('.ll_switch'), 'on');">On</div>
+                        </div>
+                    </div>
+                    <h4 class="pull-right">Limit:</h4>
+                </div>
+                <div class="exp-body container collapse in" tal:attributes="class 'exp-body container collapse in' if settings.limit_enabled else 'exp-body container collapse'">
+                    <div class="breakerline"></div>
+                    <div class="inner">
+                        
+                        <input id="limit_enabled" name="limit_enabled" class="enabled" type="hidden" value="yes" tal:condition="settings.limit_enabled" />
+                        <input id="limit_enabled" name="limit_enabled" class="enabled" type="hidden" value="no" tal:condition="not:settings.limit_enabled" />
+                    
+                        <div class="control-group">
+                            <label for="maxtickets" class="control-label">Maximum tickets</label>
+                            <div class="controls">
+                                <input id="maxtickets" name="maxtickets" type="text" value="${settings.maxtickets}" class="span1" /> tickets
+                                <span class="help-block">
+                                    The maximum number of tickets an individual can purchase.
+                                </span>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                <div class="clearline"></div>
+            </div>
+            
+            <br />
+			
+            <div class="expandable blue unselectable">
+                <div class="exp-head container">
+                    <h3 class="pull-left">Check-In Activation</h3>
+                    <div class="ll_switch unselectable pull-right blue" id="switch_checkin">
+                        <div class="onstate" tal:attributes="class 'onstate' if settings.checkin_enabled else 'onstate hidden'">
+                            <div class="off" onclick="Tick.admin.switch($(this).closest('.ll_switch'), 'off');">Off</div>
+                            <div class="on">On</div>
+                        </div>
+                        <div class="offstate hidden" tal:attributes="class 'offstate hidden' if settings.checkin_enabled else 'offstate'">
+                            <div class="off">Off</div>
+                            <div class="on" onclick="Tick.admin.switch($(this).closest('.ll_switch'), 'on');">On</div>
+                        </div>
+                    </div>
+                    <h4 class="pull-right">Check-In:</h4>
+                </div>
+                <div class="exp-body container collapse in" tal:attributes="class 'exp-body container collapse in' if settings.checkin_enabled else 'exp-body container collapse'">
+                    <div class="breakerline"></div>
+                    <div class="inner">
+                        
+                        <input id="checkin_enabled" name="checkin_enabled" class="enabled" type="hidden" value="yes" tal:condition="settings.checkin_enabled" />
+                        <input id="checkin_enabled" name="checkin_enabled" class="enabled" type="hidden" value="no" tal:condition="not:settings.checkin_enabled" />
+                        
+                        During check-in, an override password allows a supervisor or ball official to overstep the requirement that the ticket holder enters with the guest. One of the pre-set passwords must be entered in order to enact the override.<br /><br />
+                        
+                        <div class="control-group">
+                            <label for="overrideone" class="control-label">Override Password 1</label>
+                            <div class="controls">
+                                <input id="overrideone" name="overrideone" type="password" value="${settings.overrideone}" class="span3" />
+                                <span class="help-block">
+                                    Leave blank to disable.
+                                </span>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label for="overridetwo" class="control-label">Override Password 2</label>
+                            <div class="controls">
+                                <input id="overridetwo" name="overridetwo" type="password" value="${settings.overridetwo}" class="span3" />
+                                <span class="help-block">
+                                    Leave blank to disable.
+                                </span>
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label for="overridethree" class="control-label">Override Password 3</label>
+                            <div class="controls">
+                                <input id="overridethree" name="overridethree" type="password" value="${settings.overridethree}" class="span3" />
+                                <span class="help-block">
+                                    Leave blank to disable.
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="guest_details_required" class="control-label">Full Payment Lookup</label>
+                            <div class="controls">
+                                <label class="checkbox">
+									<input type="checkbox" id="checkin_show_all" name="checkin_show_all" value="checkin_show_all" tal:attributes="checked 'checked' if settings.checkin_show_all else nothing" /> Show All Tickets
+								</label>
+                                <span class="help-block">
+                                    By enabling the system to show all tickets, when looking up a payment reference code at check-in all tickets that the user has purchased will be shown. If disabled, only the tickets within the requested payment will be shown.
+                                </span>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                <div class="clearline"></div>
+            </div>
+            
+            <br />
+            
+            <button type="submit" class="ll_btn pull-right" id="submit" name="submit" value="submit">
+                <i class="icon-save"></i><span class="pull-right">Save</span>
+            </button>
+            <br />
+        </form>
+        
+    </tal:content>
+</tal:macro>

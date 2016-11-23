@@ -1,0 +1,127 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Sales</tal:title>
+    <script metal:fill-slot="script" type="text/javascript">
+    function changeFilterType(selector) {
+        if($(selector).val() == 'status') {
+            $("#filtervalue").addClass("hidden");
+            $("#filtervalue-status").removeClass("hidden");
+        } else {
+            $("#filtervalue").removeClass("hidden");
+            $("#filtervalue-status").addClass("hidden");
+        }
+        $("#filtervalue").val("").prop('disabled', false);
+    }
+    </script>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable green unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Help</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <p>
+                        Once you have made a search for a payment you will be presented with a list of one or more matching payments. Use the links on the right hand side of each row to view more information and to confirm or reject the payment. The status column gives you a fast hint as to the status of the payment.
+                    </p>
+                    <p>
+                        A green checkmark (<i class="icon-ok-sign green"></i>) means that the payment has been confirmed and hence is complete, an amber line (<i class="icon-minus-sign orange"></i>) means that the payment has not yet been received/confirmed but it has only been a short time since the order was made and a red exclamation mark (<i class="icon-warning-sign red"></i>) means that the payment period is expiring and a red cross (<i class="icon-remove-sign red"></i>) means that the payment has expired. Click "View" to find out more about the exact payment status.
+                    </p>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        
+        <br />
+        
+        <div class="expandable green container">
+            <div class="exp-head container">
+                <h3 class="pull-left">Payments Search</h3>
+            </div>
+            <div class="exp-body">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <form action="${request.route_path('admin_payments', _scheme='https')}" method="GET" class="form-horizontal">
+                        <br />
+                        <div class="control-group">
+                            <label for="name" class="control-label">Search for payment</label>
+                            <div class="controls">
+                                <select id="filter" name="filter" onchange="javascript:changeFilterType(this);">
+                                    <option tal:attributes="selected python:(filter==None or len(filter) == 0)" disabled="disabled">Filter...</option>
+                                    <option value="status" tal:attributes="selected python:(filter=='status')">By Payment Status</option>
+                                    <option value="refcode" tal:attributes="selected python:(filter=='refcode')">By Reference Code</option>
+                                    <option value="crsid" tal:attributes="selected python:(filter=='crsid')">By CRSid</option>
+                                    <option value="name" tal:attributes="selected python:(filter=='name')">By Name</option>
+                                    <option value="email" tal:attributes="selected python:(filter=='email')">By Email</option>
+                                    <option value="username" tal:attributes="selected python:(filter=='username')">By Username</option>
+                                </select> 
+                                <input type="text" id="filtervalue" name="filtervalue" placeholder="Search value..." value="${value}" tal:attributes="class 'hidden' if filter == 'status' else nothing" />
+                                <select id="filtervalue-status" name="filtervalue-status" tal:attributes="class 'hidden' if filter != 'status' else nothing">
+                                    <option value="all" tal:attributes="selected python:(value==None)">All</option>
+                                    <option value="paid" tal:attributes="selected python:(value=='paid')">Paid</option>
+                                    <option value="unpaid" tal:attributes="selected python:(value=='unpaid')">Unpaid</option>
+                                    <option value="expiring" tal:attributes="selected python:(value=='expiring')">Expiring</option>
+                                    <option value="expired" tal:attributes="selected python:(value=='expired')">Expired</option>
+                                </select>
+                                <button type="submit" id="submit" name="submit" value="submit" class="ll_btn" style="display:inline-block;">
+                                    <i class="icon-search"></i>
+                                    <span class="pull-right">Search</span>
+                                </button>
+                                <span class="help-block">Select the filter you wish to use and enter the text you wish to filter by and click "Search".</span>
+                            </div>
+                        </div>
+            
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <br />
+        
+        <table class="table table-bordered table-striped" tal:condition="len(payments) > 0">
+            
+            <thead>
+                
+                <th class="span3">Full Name</th>
+                <th class="span1">Guests</th>
+                <th class="span2 align-right">Total</th>
+                <th class="span2 align-right">Order Date</th>
+                <th class="span1">Status</th>
+                <th>Actions</th>
+                
+            </thead>
+            
+            <tbody>
+            
+                <tr tal:repeat="payment payments">
+                    <td>${payment.owner.profile.fullname if payment.owner.profile and payment.owner.profile.fullname else "-"}</td>
+                    <td>${len(payment.tickets)}</td>
+                    <td class="align-right">${structure:view.format_price(payment.total)}</td>
+                    <td class="align-right">${payment.opened_date.strftime("%d/%m/%Y")}</td>
+					<tal:comment tal:condition="nothing"><!-- Status Indicator --></tal:comment>
+                    <td class="statuscell" tal:condition="payment.expired(view.payment_window)"><i class="icon-remove-sign red"></i></td>
+                    <td class="statuscell" tal:condition="python:(payment.expiring(view.payment_window) and not payment.expired(view.payment_window))"><i class="icon-warning-sign red"></i></td>
+                    <td class="statuscell" tal:condition="python:(not payment.paid and not payment.expiring(view.payment_window))"><i class="icon-minus-sign orange"></i></td>
+                    <td class="statuscell" tal:condition="payment.paid"><i class="icon-ok-sign green"></i></td>
+                    <td>
+                        <a href="${request.route_path('admin_single_payment', ref_code=payment.ref_code)}">View</a>&nbsp;&nbsp;&nbsp;&nbsp;<tal:notpaid tal:condition="not:payment.paid"><a href="${request.route_path('admin_payment_enter', ref_code=payment.__name__)}" class="success">Enter Payment</a>&nbsp;&nbsp;&nbsp;&nbsp;</tal:notpaid><a href="${request.route_path('admin_payment_reject', ref_code=payment.__name__)}" class="danger">Reject</a>
+                    </td>
+                </tr>
+                
+            </tbody>
+            
+        </table>
+        <h4 style="text-align:center;" tal:condition="len(payments) == 0">No payments matched your query, please try again.</h4>
+        <div class="pagination pagination-centered" tal:condition="total_pages > 0">
+            <ul>
+                <li tal:attributes="class 'disabled' if current_page == 1 else nothing"><a tal:attributes="href ('?filter=' + filter + '&filtervalue=' + value + '&page=' + str(current_page - 1)) if current_page != 1 else nothing">&laquo;</a></li>
+                <li tal:repeat="pg_num range(1, total_pages + 1)" tal:attributes="class 'active' if pg_num == current_page else nothing"><a href="?filter=${filter}&filtervalue=${value}&page=${pg_num}">${pg_num}</a></li>
+                <li tal:attributes="class 'disabled' if current_page == total_pages else nothing"><a tal:attributes="href ('?filter=' + filter + '&filtervalue=' + value + '&page=' + str(current_page + 1)) if current_page != total_pages else nothing">&raquo;</a></li>
+            </ul>
+        </div>
+        <h6 style="text-align:center;" tal:condition="len(payments) > 0">Displaying ${len(payments)} payments</h6>
+        <br />
+        
+    </tal:content>
+</tal:macro>

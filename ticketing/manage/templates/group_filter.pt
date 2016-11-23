@@ -1,0 +1,98 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">User Filter</tal:title>
+	<tal:subtitle metal:fill-slot="subtitle">For ${group.name}</tal:subtitle>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable red unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Help</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <p>A user filter allows you to select which group users are automatically added to based on their username when logging in. This is especially useful for Raven authentication where not all accounts pre-exist on the system and they can be automatically filtered during creation.</p>
+					
+					<p>To configure the user filter, upload a plain text file which contains one username per line. The system will parse this and display all of the filtered users below. It will also check during upload whether any users already exist that are defined by the filter and pull them into the correct group. It will <strong>not</strong> remove users from this group if they are not in the filter.</p>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+		
+		<br />
+        
+        <div class="expandable red container">
+            <div class="exp-head container">
+                <h3 class="pull-left">Upload Filter File</h3>
+            </div>
+            <div class="exp-body">
+                <div class="breakerline"></div>
+                <div class="inner">
+					<form class="form-horizontal" method="POST" action="?action=upload" enctype="multipart/form-data">
+	                    <div class="control-group">
+							<label class="control-label">Upload File</label>
+							<div class="controls">
+								<input type="file" name="filterfile" id="filterfile" />
+	                            <span class="help-block">Select the groups able to purchase tickets of this type.</span>
+							</div>
+						</div>
+						
+						<button type="submit" class="ll_btn success pull-right"><i class="icon-ok"></i><span class="pull-right">Upload</span></button>
+						<div class="clearline"></div>
+					</form>
+                </div>
+            </div>
+        </div>
+		
+		<br />
+        
+        <div class="expandable red container">
+            <div class="exp-head container">
+                <h3 class="pull-left">Add a Single User</h3>
+            </div>
+            <div class="exp-body">
+                <div class="breakerline"></div>
+                <div class="inner">
+					<form class="form-horizontal" method="POST" action="?action=add">
+	                    <div class="control-group">
+							<label class="control-label">Username</label>
+							<div class="controls">
+								<input type="text" id="username" name="username" />
+	                            <span class="help-block">The username of the single user you want to add to the filter.</span>
+							</div>
+						</div>
+						
+						<button type="submit" class="ll_btn success pull-right"><i class="icon-ok"></i><span class="pull-right">Add User</span></button>
+						<div class="clearline"></div>
+					</form>
+                </div>
+            </div>
+        </div>
+		
+        <div class="clearbar"></div>
+		
+		<h1 class="pull-left">Filtered Users</h1>
+		<a href="#" onclick="javascript:if(confirm('Are you sure you want to remove all of the users from this filter?')) window.location.href = '?action=clear';" class="ll_btn danger pull-right" style="margin-top:15px;" tal:condition="len(group.user_filter) > 0"><i class="icon-remove"></i><span class="pull-right">Clear Filter</span></a>
+		
+        <div class="clearline"></div>
+		
+        <table class="table table-bordered table-striped" tal:condition="len(group.user_filter) > 0">
+            <thead>
+                <th class="span3">Username</th>
+                <th class="span2">User Exists</th>
+                <th>Actions</th>
+            </thead>
+            <tbody>
+                <tr tal:repeat="user group.user_filter">
+					<td>${user}</td>
+					<td>${'Yes' if user in group_users else 'No'}</td>
+					<td><a href="?action=remove&username=${user}" class="danger">Remove from filter</a></td>
+				</tr>
+            </tbody>
+        </table>
+		
+        <h4 style="text-align:center;" tal:condition="len(group.user_filter) == 0"><br />There are currently no users in this filter.</h4>
+		<br />
+		
+    </tal:content>
+</tal:macro>

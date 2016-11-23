@@ -1,0 +1,107 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Tickets</tal:title>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable pink unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Help</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    Ticket types are the different tickets that people are able to purchase through the system. The ticket type defines the name, description and cost of each ticket. Each ticket type has its own ticket pool, this is a set of tickets that have been released but not yet purchased. The "Released" column shows the total number of tickets of this type that have been made available for purchase, while the "In Pool" column shows the total number of tickets of this type that are still available for purchase.
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        <br />
+        <div class="expandable pink container">
+            <div class="exp-head container">
+                <h3 class="pull-left" tal:condition="python:(ticket_type == None)">Add Ticket Type</h3>
+                <h3 class="pull-left" tal:condition="not:python:(ticket_type == None)">Edit Ticket Type</h3>
+            </div>
+            <div class="exp-body">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <form action="" method="POST" class="form-horizontal">
+                        <br />
+                        <div class="control-group">
+                            <label for="name" class="control-label">Name</label>
+                            <div class="controls">
+                                <input type="text" id="name" name="name" value="${ticket_type.name if ticket_type != None else ''}" />
+                                <span class="help-block">This is the short name of the ticket type, for example "Basic Ticket".</span>
+                            </div>
+                        </div>
+            
+                        <div class="control-group">
+                            <label for="description" class="control-label">Description</label>
+                            <div class="controls">
+                                <input type="text" id="description" name="description" class="span8"  value="${ticket_type.description if ticket_type != None else ''}" />
+                                <span class="help-block">This is a longer description of the ticket and what comes with it.</span>
+                            </div>
+                        </div>
+            
+                        <div class="control-group">
+                            <label for="cost" class="control-label">Price</label>
+                            <div class="controls">
+                                <div class="input-prepend">
+                                    <span class="add-on">&pound;</span>
+                                    <input type="text" id="cost" name="cost" class="span2" value="${str((ticket_type.cost/100)) if ticket_type != None else ''}" />
+                                </div>
+                                <span class="help-block">This is the full cost of the ticket</span>
+                            </div>
+                        </div>
+            
+                        <div class="control-group">
+                            <label for="cost" class="control-label">Purchase Limit</label>
+                            <div class="controls">
+                                <input type="text" id="purchase_limit" name="purchase_limit" class="span2" value="${ticket_type.purchase_limit if ticket_type != None and ticket_type.purchase_limit > 0 else ''}" />
+                                <span class="help-block">If you only want a customer to be able to purchase a certain number of this type of ticket then enter it in the box, otherwise leave it blank.</span>
+                            </div>
+                        </div>
+            
+                        <div class="control-group">
+                            <label for="cost" class="control-label">Elegible Groups</label>
+                            <div class="controls">
+                                <label class="checkbox" tal:repeat="group_key request.root.groups">
+									<input type="checkbox" id="${group_key}-group" name="selgroup" value="${group_key}" tal:attributes="checked 'checked' if ticket_type != None and group_key in ticket_type.__parent__.groups else nothing" /> ${request.root.groups[group_key].name}
+								</label>
+                                <span class="help-block">Select the groups able to purchase tickets of this type.</span>
+                            </div>
+                        </div>
+            
+                        <div class="control-group">
+                            <label for="cost" class="control-label">Lock Down Details</label>
+                            <div class="controls">
+                                <label class="checkbox">
+                                    <input type="checkbox" id="locked_down" name="locked_down" value="locked_down" tal:attributes="checked 'checked' if ticket_type != None and ticket_type.locked_down else nothing" /> Lock Down
+                                </label>
+                                <span class="help-block">Enabling lock down will prevent guests owning this ticket type from changing their guests' details.</span>
+                            </div>
+                        </div>
+                        
+                        <a href="${request.route_path('admin_tickets')}" class="ll_btn pull-left">
+                           <i class="icon-arrow-left"></i>
+                           <span class="pull-right">Cancel</span>
+                        </a>
+                        
+                        <button type="submit" class="pull-right ll_btn success" name="submit" id="submit" value="submit">
+                            <tal:add tal:condition="python:(ticket_type == None)">
+                            <i class="icon-plus-sign"></i><span class="pull-right">Add</span>
+                            </tal:add>
+                            <tal:edit tal:condition="not:python:(ticket_type == None)">
+                            <i class="icon-save"></i><span class="pull-right">Save</span>
+                            </tal:edit>
+                        </button>
+                        <div class="clearbar"></div>
+            
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="clearbar"></div>
+        <br /><br />
+        
+    </tal:content>
+</tal:macro>

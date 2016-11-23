@@ -1,0 +1,65 @@
+<tal:macro metal:use-macro="view.site_style">
+    <tal:content metal:fill-slot="content">
+        
+        <h1>Pay Via Stripe</h1>
+        <p>${method.customer_description}</p>
+        
+        <h3>Your Order Summary</h3>
+        <tal:macro metal:use-macro="view.ticket_pay_list"></tal:macro>
+        
+        <table style="width:400px;font-size:18px;font-weight:300;" class="table table-bordered">
+            <tbody>
+                <tr>
+                    <td style="width:200px;">Order subtotal</td>
+                    <td>${structure:subtotal}</td>
+                </tr>
+                <tr>
+                    <td>Processing charge</td>
+                    <td>${structure:processing}</td>
+                </tr>
+                <tr>
+                    <td>Order total</td>
+                    <td>${structure:total}</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="alert alert-danger hidden" id="alert" style="background-color:#F5F5F5; border-radius:0;" tal:condition="not:error">
+            <strong>Sorry!</strong> <span id="errormsg"></span>
+        </div>
+        <div class="alert alert-danger" id="alert" style="background-color:#F5F5F5; border-radius:0;" tal:condition="error">
+            <strong>Sorry!</strong> <span id="errormsg">${error}</span>
+        </div>
+        <br />
+		<div style="text-align:center;width:100%;">
+	        <form id="payment-form" class="form-horizontal" action="" method="POST">
+                <script
+                    src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                    data-key="${stripe_pub_key}"
+                    data-email="${view.user.profile.email}"
+                    data-currency="GBP"
+                    data-amount="${penny_total}"
+                    data-name="${org_name}"
+                    data-description="${pay_description}"
+                    data-image="/static/img/StripeCrest.png"
+                    data-label="Make Payment Via Stripe"
+                    data-zip-code="true"
+                    data-allow-remember-me="false">
+                </script>
+	        </form>
+		</div>
+        <br /><br />
+        <a id="backlink" href="${request.route_path('pay_for_tickets')}" class="ll_btn pull-left" tal:condition="not:alteration">
+            <i class="icon-arrow-left"></i><span class="pull-right">Back</span>
+        </a>
+        <a href="${request.route_path('alter_payment', tick_id=payment.tickets[0].__name__)}" class="ll_btn pull-left" tal:condition="alteration">
+            <i class="icon-arrow-left"></i><span class="pull-right">Back</span>
+        </a>
+        
+        <br />
+        
+        <div class="clearbar"></div>
+        <br />
+        
+    </tal:content>
+</tal:macro>

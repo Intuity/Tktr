@@ -1,0 +1,131 @@
+<tal:macro metal:use-macro="view.site_style">
+    <tal:content metal:fill-slot="content">
+        
+        <h1>Ticket Payment History</h1><br />
+        <div style="background-color:white;border:1px solid #666;width:206px;" class="pull-left" tal:condition="view.photo_required">
+            <img src="${request.route_path('guest_profile_photo', tick_id=ticket.__name__)}" width="200" style="margin:3px;" />
+        </div>
+
+		<a href="${request.route_path('user_profile')}" class="ll_btn pull-left">
+			<i class="icon-arrow-left pull-left"></i>
+			<span class="pull-right">Back</span>
+		</a>
+        
+		<tal:unpaid tal:condition="not:ticket.payment.paid">
+		<a href="${request.route_path('return_tickets', tick_id=ticket.__name__)}" class="ll_btn pull-right">
+			<i class="icon-arrow-right pull-left"></i>
+			<span class="pull-right">Return Tickets</span>
+		</a>
+		<a href="${request.route_path('alter_payment', tick_id=ticket.__name__)}" class="ll_btn pull-right" style="margin-right:10px;">
+			<i class="icon-credit-card pull-left"></i>
+			<span class="pull-right">Change Payment Method</span>
+		</a>
+		</tal:unpaid>
+		<div class="clearline"></div>
+        
+        <h3>Payment: ${ticket.payment.__name__}</h3>
+		
+		<tal:currentmethod tal:condition="len(ticket.payment.history) > 0" tal:define="pay_method view.get_payment_method(ticket.payment.history[0].method)">
+		<h4>Current Payment Method</h4>
+		You have chosen to pay for these tickets via <strong>${pay_method.name}</strong>, the details of the payment method including any instructions can be found below.<br /><br />
+		${pay_method.customer_description}<br />
+		<tal:banktransfer tal:condition="pay_method.name == 'Bank Transfer'">
+		<br />
+        <table style="font-size:18px;font-weight:300;" class="table table-bordered">
+            <tbody>
+                <tr>
+                    <td style="width:200px;">Reference Code</td>
+                    <td>${ticket.payment.__name__}</td>
+                </tr>
+                <tr>
+                    <td>To Pay</td>
+                    <td>${pay_method.get_value('ORGNAME')}</td>
+                </tr>
+                <tr>
+                    <td>Account Number</td>
+                    <td>${pay_method.get_value('BANKACCOUNTNUMBER')}</td>
+                </tr>
+                <tr>
+                    <td>Sort Code</td>
+                    <td>${pay_method.get_value('BANKSORTCODE')}</td>
+                </tr>
+            </tbody>
+        </table>
+		</tal:banktransfer>
+		<tal:cheque tal:condition="pay_method.name == 'Cheque'">
+		<br />
+        <table style="font-size:18px;font-weight:300;" class="table table-bordered">
+            <tbody>
+                <tr>
+                    <td style="width:200px;">Reference Code</td>
+                    <td>${ticket.payment.__name__}</td>
+                </tr>
+                <tr>
+                    <td>To Pay</td>
+                    <td>${pay_method.get_value('ORGNAME')}</td>
+                </tr>
+            </tbody>
+        </table>
+		</tal:cheque>
+		</tal:currentmethod>
+		
+        <h4>Tickets Included In Payment</h4>
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th class="span3">Ticket ID</th>
+                    <th>Guest</th>
+                    <th class="span2">Addons</th>
+                    <th class="span2">Addon Cost</th>
+                    <th class="span2">Total Cost</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr tal:repeat="tick ticket.payment.tickets">
+                    <td>${tick.__name__}</td>
+                    <td>${(tick.guest_info.title + ' ' + tick.guest_info.fullname) if tick.guest_info else '-'}</td>
+                    <td>
+                        <ul>
+                            <li tal:repeat="addon tick.addons.values()">${addon.name}</li>
+                        </ul>
+                    </td>
+                    <td>
+                        ${structure:view.format_price(tick.addon_cost)}
+                    </td>
+                    <td>
+                        ${structure:view.format_price(tick.total_cost)}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <h4>Payment History</h4>
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th class="span2">Date</th>
+                    <th class="span2">Method</th>
+                    <th class="span2">Amount Due</th>
+                    <th class="span2">Amount Paid</th>
+                    <th class="span2">Method Fee</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr tal:repeat="stage ticket.payment.history[::-1]">
+                    <td>${stage.date.strftime("%d/%m/%Y")}</td>
+                    <td>${view.get_payment_method(stage.method).name}</td>
+                    <td>${structure:view.format_price(stage.amount_remaining)}</td>
+                    <td>${structure:view.format_price(stage.amount_paid)}</td>
+                    <td>${structure:view.format_price(stage.processing_charge)}</td>
+                    <td>${stage.status}</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>
+            Please note that the history may not update immediately to reflect payments you have made, especially where some human interaction is 
+            needed to confirm receipt of a payment.
+        </p>
+        <br />
+        
+    </tal:content>
+</tal:macro>

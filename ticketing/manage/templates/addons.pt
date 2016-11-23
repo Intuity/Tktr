@@ -1,0 +1,66 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Ticket Add-ons</tal:title>
+    <script metal:fill-slot="script" type="text/javascript">
+    function changeFilterType(selector) {
+        if($(selector).val() == 'status') {
+            $("#filtervalue").addClass("hidden");
+            $("#filtervalue-status").removeClass("hidden");
+        } else {
+            $("#filtervalue").removeClass("hidden");
+            $("#filtervalue-status").addClass("hidden");
+        }
+        $("#filtervalue").val("");
+    }
+    </script>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable pink unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Help</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    Add-ons allow customers to purchase additional experiences and benefits such as queue jump or dining, which are only available in limited quantities. Add-ons can also be used for charitable donations and other payments that are not restricted in quantity.
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        <a href="${request.route_path('admin_ticket_addon_create', tick_code=tick_type.__name__)}" class="ll_btn pull-right" style="margin-top:5px;" tal:condition="view.is_admin">
+            <i class="icon-plus-sign"></i>
+			<span class="pull-right">Create Add-On</span>
+        </a>
+        <br /><br />
+        <table class="table table-bordered table-striped">
+            <thead>
+                <th class="span2">Name</th>
+                <th class="span2">Price</th>
+                <th class="span2">Exclusive</th>
+                <th class="span2"># Allocated</th>
+                <th class="span2"># Remaining</th>
+                <th>Actions</th>
+            </thead>
+            <tbody>
+                <tr tal:repeat="addon tick_type.addons.values()">
+					<td>${addon.name}</td>
+					<td>${structure:view.format_price(addon.cost)}</td>
+					<td>${'Yes' if addon.exclusive else 'No'}
+					<td>${len(addon.allocated)}</td>
+					<td>${'Unlimited' if addon.unlimited else (addon.total_released - len(addon.allocated))}</td>
+					<td>
+						<tal:adminoptions tal:condition="view.is_admin">
+						<a href="${request.route_path('admin_ticket_addon_edit', tick_code=tick_type.__name__, addon_code=addon.__name__)}">Edit</a>&nbsp;&nbsp;&nbsp;
+						<a class="danger" onclick="if(confirm('Are you sure you want to retract all unpurchased add-ons? If the addon is unlimited this will make it limited and retract it.')) { window.location.href = '${request.route_path('admin_ticket_addon_retract', tick_code=tick_type.__name__, addon_code=addon.__name__)}' }" href="#">Retract</a>&nbsp;&nbsp;&nbsp;
+						<a href="#" onclick="if(confirm('Are you sure you want to delete this add-on type? All purchasers of this add-on will lose their upgrades.')) { window.location.href = '${request.route_path('admin_ticket_addon_delete', tick_code=tick_type.__name__, addon_code=addon.__name__)}' }" class="danger">Delete</a>
+						</tal:adminoptions>
+					</td>
+				</tr>
+            </tbody>
+        </table>
+        
+        <br />
+        
+        
+    </tal:content>
+</tal:macro>

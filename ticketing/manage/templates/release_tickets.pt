@@ -1,0 +1,65 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Tickets</tal:title>
+    <script metal:fill-slot="script" type="text/javascript">
+    $(function() {
+        $("#releaseform").submit(function(event) {
+            if($('#number').val() > 0 && confirm('Are you sure you want to release ' + parseInt($('#number').val()) + ' tickets?')) { 
+                $('#releaseform').get(0).submit(); 
+            }
+            return false;
+        });
+    });
+    </script>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable pink unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Help</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    Ticket types are the different tickets that people are able to purchase through the system. The ticket type defines the name, description and cost of each ticket. Each ticket type has its own ticket pool, this is a set of tickets that have been released but not yet purchased. The "Released" column shows the total number of tickets of this type that have been made available for purchase, while the "In Pool" column shows the total number of tickets of this type that are still available for purchase.
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        <br />
+        <div class="expandable pink container">
+            <div class="exp-head container">
+                <h3 class="pull-left">Release "${ticket_type.name}" Tickets</h3>
+            </div>
+            <div class="exp-body">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <form action="" method="POST" class="form-horizontal" id="releaseform">
+                        <br />
+                        <div class="control-group">
+                            <label for="number" class="control-label">Release</label>
+                            <div class="controls">
+                                <input type="text" id="number" name="number" class="span1" /> tickets
+                                <span class="help-block">This is the number of tickets of type "${ticket_type.name}" that you want to release.</span>
+                            </div>
+                        </div>
+                        
+                        
+                        <a href="${request.route_path('admin_tickets')}" class="ll_btn pull-left">
+                           <i class="icon-arrow-left"></i>
+                           <span class="pull-right">Cancel</span>
+                        </a>
+                        
+                        <button type="submit" class="pull-right ll_btn success" name="submit" id="submit" value="submit">
+                            <i class="icon-ticket"></i><span class="pull-right">Release</span>
+                        </button>
+                        <div class="clearbar"></div>
+            
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="clearbar"></div>
+        <br /><br />
+        
+    </tal:content>
+</tal:macro>

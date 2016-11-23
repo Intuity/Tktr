@@ -1,0 +1,64 @@
+<tal:macro metal:use-macro="view.site_style">
+    <tal:content metal:fill-slot="content">
+        
+        <h1 class="pull-left">Transfer Ticket</h1>
+        <div class="clearline"></div>
+		<p>
+			While you may not receive a refund once you have purchased a ticket, you may transfer it to another person. There is a <strong>compulsory fee of ${structure:view.format_price(view.transfer_fee)}</strong> for every ticket transfer you request. The receiving person <strong>must have their own account</strong> on the ticketing system, but they do not need to have purchased tickets. To create an account simply go to the front page of the ticketing system and sign in, you will be stepped through the account creation procedure.
+		</p>
+		<p>
+			Once the receiving person has an account simply enter their username in the "Receiving Username" box below and click "Next". You will then be taken to the payment page in order to pay the transfer fee.
+		</p>
+		<p>Please note that while you can transfer tickets, they still count towards your purchase limit. That is to say if you have purchased the maximum number of tickets and then you transfer them, you will not then be able to purchase more tickets until the purchase limit is increased or removed.
+		</p>
+		<div class="clearline"></div>
+        <h3>Ticket: ${ticket.__name__}</h3>
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td class="span5">Ticket Type:</td>
+					<td>${ticket.tick_type.name}</td>
+				</tr>
+				<tr>
+					<td class="span5">Ticket Cost:</td>
+					<td>${structure:view.format_price(ticket.tick_type.cost)}</td>
+				</tr>
+				<tr>
+					<td class="span5">Ticket Addons:</td>
+					<td>
+						<tal:addon tal:repeat="addon ticket.addons.values()" tal:condition="len(ticket.addons) > 0">${addon.name}<br /></tal:addon>
+						<tal:noaddon tal:condition="len(ticket.addons) == 0">No addons</tal:noaddon>
+					</td>
+				</tr>
+				<tr>
+					<td class="span5">Guest Name:</td>
+					<td>${ticket.guest_info.fullname if ticket.guest_info else 'No Name Entered'}</td>
+				</tr>
+			</tbody>
+		</table>
+		<h3>Transfer Details</h3>
+		<form class="form-horizontal" method="POST" action="">
+			<div class="control-group">
+				<label class="control-label">Receiving Username:</label>
+				<div class="controls">
+					<input type="text" id="username" name="username" onkeyup="window.ticketing.check_username(this.value);" /> <span id="usernamecheck"></span>
+				</div>
+			</div>
+		
+			<div class="clearline"></div>
+			<br /><br />
+			<a href="${request.route_path('user_profile')}" class="ll_btn pull-left">
+				<i class="icon-arrow-left pull-left"></i>
+				<span class="pull-right">Back</span>
+			</a>
+			<button type="submit" name="submit" class="ll_btn pull-right" value="submit">
+				<i class="icon-arrow-right"></i>
+				<span class="pull-right">Next</span>
+			</button>
+		
+			<div class="clearline"></div>
+			<br /><br />
+		</form>
+        
+    </tal:content>
+</tal:macro>

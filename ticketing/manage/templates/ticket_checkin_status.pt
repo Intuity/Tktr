@@ -1,0 +1,106 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Accounts</tal:title>
+    <script metal:fill-slot="script">
+    var is_cam = false;
+    var email_input = null;
+    $(function() {
+        $("#atcambridge-yes").change(function() { is_cam = $("input[name=atcambridge]").is(":checked"); change_state(); });
+        $("#atcambridge-no").change(function() { is_cam = !$("input[name=atcambridge]").is(":checked"); change_state(); });
+        email_input = $("input[name=email]");
+		// Validate email
+		$("#email").change(function() {
+			validate_email();
+		});
+        // Preselect CRSid
+        $("#crsid").keyup(function() {
+            if(is_cam) {
+                $("#email").val($(this).val().replace(" ","") + "@cam.ac.uk");
+                validate_crsid();
+            }
+        });
+    });
+    function change_state() {
+        if(is_cam) {
+            $(".camsection").removeClass("hidden");
+			$("#email").val("");
+            $("input[name=email]").prop("disabled", true);
+        } else {
+            $(".camsection").addClass("hidden");
+			$("#email").val("");
+			$("#crsid").val("");
+            $("input[name=email]").prop("disabled", false);
+        }
+    }
+    function validate_crsid() {
+        var result = /^[a-z]+[0-9]+$/i.test($("input[name=crsid]").val());
+        if(result && $("input[name=crsid]").closest(".control-group").hasClass("error")) $("input[name=crsid]").closest(".control-group").removeClass("error");
+        else if(!result && !$("input[name=crsid]").closest(".control-group").hasClass("error")) $("input[name=crsid]").closest(".control-group").addClass("error");
+    }
+	function validate_email() {
+		var result = /^.*?@.*?\..*?/i.test($("#email").val());
+        if(result && $("#email").closest(".control-group").hasClass("error")) $("#email").closest(".control-group").removeClass("error");
+        else if(!result && !$("#email").closest(".control-group").hasClass("error")) $("#email").closest(".control-group").addClass("error");
+	}
+    </script>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable red unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Help</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <p>
+                        These are the details of the user you selected, including all of the tickets that they have purchased and all of the payments that they have made. From this view you can reassign, void and query tickets by using the actions provided.
+                    </p>
+					<p>
+						From this view you may also delete a user or move them into another group. If you move them into another group their permissions may change, so please take care. When you move a user into a different group, any filters that were setup to place the user into a specific group will be automatically clear. Deletion of a user is permanent and will orphan all of their tickets - please take extreme care!
+					</p>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        
+        <br />
+        
+        <div class="expandable red">
+            <div class="exp-head container">
+                <h3 class="pull-left">Edit Check-In Status</h3>
+            </div>
+            <div class="exp-body container">
+                <div class="breakerline"></div>
+                <div class="inner">
+					<br />
+					<form class="form-horizontal" action="" method="POST" autocomplete="off" enctype="multipart/form-data">
+						
+						<div class="control-group">
+							<label class="control-label" for="title">New Status:</label>
+							<div class="controls">
+								<select name="checkedin" id="checkedin" class="span2">
+									<option value="true" tal:attributes="selected 'selected' if ticket.checkin_status else nothing">Checked-In</option>
+									<option value="false" tal:attributes="selected 'selected' if not ticket.checkin_status else nothing">Not Checked-In</option>
+								</select>
+							</div>
+						</div>
+						<br />
+                        
+			            <a href="${request.route_path('admin_ticket_guest_info', ticket_id=ticket.__name__)}" class="ll_btn pull-left">
+			               <i class="icon-arrow-left"></i>
+			               <span class="pull-right">Cancel</span>
+			            </a>
+            
+			            <button type="submit" class="pull-right ll_btn success" name="submit" id="submit" value="submit">
+			                <i class="icon-ok"></i><span class="pull-right">Save</span>
+			            </button>
+			            <div class="clearbar"></div>
+			
+					</form>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        
+    </tal:content>
+</tal:macro>

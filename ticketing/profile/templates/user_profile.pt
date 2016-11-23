@@ -1,0 +1,457 @@
+<tal:macro metal:use-macro="view.site_style">
+    <script metal:fill-slot="script">
+    var is_cam = false;
+    $(function() {
+		// Validate email
+		$("#email").change(function() {
+			validate_email();
+		});
+        // Preselect CRSid
+        $("#crsid").keyup(function() {
+            if(is_cam) {
+                $("#email").val($(this).val().replace(" ","") + "@cam.ac.uk");
+                validate_crsid();
+            }
+        });
+    });
+    function validate_crsid() {
+        var result = /^[a-z]+[0-9]+$/i.test($("input[name=crsid]").val());
+        if(result && $("input[name=crsid]").closest(".control-group").hasClass("error")) $("input[name=crsid]").closest(".control-group").removeClass("error");
+        else if(!result && !$("input[name=crsid]").closest(".control-group").hasClass("error")) $("input[name=crsid]").closest(".control-group").addClass("error");
+    }
+	function validate_email() {
+		var result = /^.*?@.*?\..*?/i.test($("#email").val());
+        if(result && $("#email").closest(".control-group").hasClass("error")) $("#email").closest(".control-group").removeClass("error");
+        else if(!result && !$("#email").closest(".control-group").hasClass("error")) $("#email").closest(".control-group").addClass("error");
+	}
+    </script>
+    <style metal:fill-slot="style">
+        #item-deformField5, #item-deformField6, #item-deformField7 { display:none; }
+        #item-deformField2 div { line-height:30px; }
+    </style>
+    <tal:content metal:fill-slot="content">
+        
+        <h1>Your Profile</h1>
+        
+		<p>
+			Please fill in all of the following details about yourself. These details are kept in accordance with our privacy policy and are only used to ensure safety at the event. These details will be kept securely and will not be redistributed to any third parties. We reserve the right to void tickets and/or refuse entry to the ball if incorrect details are supplied.
+		</p>
+		<p tal:condition="python:(view.user.profile == None or not view.user.profile.raven_user)">
+			As you are not purchasing these tickets as a current member of Cambridge University we also require a postal address in order to deliver your tickets to you. Your address will only be used for the delivery of tickets and will not be distributed to any third parties.
+		</p>
+		<br />
+		<form class="form-horizontal" action="" method="POST" autocomplete="off" enctype="multipart/form-data">
+			
+			<div class="control-group">
+				<label class="control-label" for="title">Salutation:</label>
+				<div class="controls">
+					<select name="title" id="title" class="span2" onchange="if($(this).val() == 'Other') $('#othertitlebox').css('display','block'); else $('#othertitlebox').css('display','none');">
+						<option disabled="disabled" tal:attributes="selected 'selected' if len(title) == 0 else nothing">Select Salutation</option>
+						<option value="Mr" tal:attributes="selected 'selected' if title == 'Mr' else nothing">Mr</option>
+						<option value="Mrs" tal:attributes="selected 'selected' if title == 'Mrs' else nothing">Mrs</option>
+						<option value="Miss" tal:attributes="selected 'selected' if title == 'Miss' else nothing">Miss</option>
+						<option value="Ms" tal:attributes="selected 'selected' if title == 'Ms' else nothing">Ms</option>
+						<option value="Dr" tal:attributes="selected 'selected' if title == 'Dr' else nothing">Dr</option>
+				        <option value="Prof" tal:attributes="selected 'selected' if title == 'Prof' else nothing">Prof</option>
+				        <option value="Rev" tal:attributes="selected 'selected' if title == 'Rev' else nothing">Rev</option>
+						<option value="Other" tal:attributes="selected 'selected' if othertitle else nothing">Other</option>
+					</select>
+				</div>
+			</div>
+			
+			<div class="control-group" id="othertitlebox" style="display:${'block' if othertitle else 'none'};">
+				<label class="control-label" for="othertitle">Specify Salutation:</label>
+				<div class="controls">
+					<input type="text" name="othertitle" id="othertitle" value="${title}" />
+				</div>
+			</div>
+			
+			<div class="control-group">
+				<label class="control-label" for="forename">Forename:</label>
+				<div class="controls">
+					<input type="text" name="forename" id="forename" value="${forename}" />
+				</div>
+			</div>
+			
+			<div class="control-group">
+				<label class="control-label" for="surname">Surname:</label>
+				<div class="controls">
+					<input type="text" name="surname" id="surname" value="${surname}" />
+				</div>
+			</div>
+			
+			<div class="control-group">
+				<label class="control-label" for="email">Email:</label>
+				<div class="controls">
+					<input type="text" name="email" id="email" value="${email}" tal:attributes="disabled 'disabled' if view.user.profile.raven_user else nothing" />
+				</div>
+			</div>
+			
+			<div class="control-group">
+				<label class="control-label" for="phone_number">Phone Number:</label>
+				<div class="controls">
+					<input type="text" name="phone_number" id="phone_number" value="${phone_number}" />
+				</div>
+			</div>
+			
+			<div class="control-group">
+				<label class="control-label" for="dob_day">Date of Birth</label>
+				<div class="controls">
+					Day: 
+					<select class="span2" name="dob_day" id="dob_day">
+						<option tal:repeat="day range(1, 32)" value="${day}" tal:attributes="selected 'selected' if (dob_day != None and day == int(float(dob_day))) else nothing">${day}</option>
+					</select>
+					&nbsp;Month: 
+					<select class="span2" name="dob_month" id="dob_month">
+						<option tal:repeat="month range(1, 13)" value="${month}" tal:attributes="selected 'selected' if (dob_month != None and month == int(float(dob_month))) else nothing">${view.months[month-1]}</option>
+					</select>
+					&nbsp;Year: 
+					<select class="span2" name="dob_year" id="dob_year">
+						<option tal:repeat="year reversed(range(1900, int(view.current_year) + 1))" value="${year}" tal:attributes="selected 'selected' if (dob_year != None and year == int(float(dob_year))) else nothing">${year}</option>
+					</select>
+				</div>
+			</div>
+			
+			<div class="control-group" tal:condition="view.photo_required">
+				<label class="control-label" for="photofile">Photo:</label>
+				<div class="controls">
+					<input type="file" name="photofile" id="photofile" />
+				</div>
+			</div>
+
+			<div class="camsection" tal:condition="python:(view.user.profile != None and view.user.profile.raven_user)">
+				<div class="control-group">
+					<label class="control-label" for="crsid">CRSid:</label>
+					<div class="controls">
+						<input type="text" name="crsid" id="crsid" value="${crsid}" tal:attributes="disabled 'disabled' if view.user.profile.raven_user else nothing" />
+					</div>
+				</div>
+				
+				<div class="control-group">
+					<label class="control-label" for="college">College:</label>
+					<div class="controls">
+						<select name="college" id="college">
+							<option value="pleaseselect" tal:attributes="selected 'selected' if (college == None or len(college) < 3) else nothing">Please select...</option>
+							<option tal:repeat="college_key view.college_keys" value="${college_key}" tal:attributes="selected 'selected' if (college != None and college_key == college) else nothing">${view.college_name(college_key)}</option>
+						</select>
+					</div>
+				</div>
+				
+				<div class="control-group">
+					<label class="control-label" for="gradstatus">University Membership:</label>
+					<div class="controls">
+						<select name="grad_status" id="grad_status">
+							<option value="pleaseselect" tal:attributes="selected 'selected' if (grad_status == None or len(grad_status) < 3) else nothing">Please select...</option>
+							<option tal:repeat="stat_key view.grad_status_keys" value="${stat_key}" tal:attributes="selected 'selected' if (grad_status != None and stat_key == grad_status) else nothing">${view.graduate_status(stat_key)}</option>
+						</select>
+					</div>
+				</div>
+				
+			</div>
+			
+			<tal:postaladdress tal:condition="python:(view.user.profile == None or not view.user.profile.raven_user)">
+			<h4>Postal Address</h4><br />
+			<div class="control-group">
+				<label class="control-label" for="lineone">Address Line One:</label>
+				<div class="controls">
+					<input type="text" name="lineone" id="lineone" value="${lineone}" />
+				</div>
+			</div>
+			
+			<div class="control-group">
+				<label class="control-label" for="linetwo">Address Line Two:</label>
+				<div class="controls">
+					<input type="text" name="linetwo" id="linetwo" value="${linetwo}" />
+					<span class="help-block" style="font-style:italic;">(Optional)</span>
+				</div>
+			</div>
+			
+			<div class="control-group">
+				<label class="control-label" for="city">Town/City:</label>
+				<div class="controls">
+					<input type="text" name="city" id="city" value="${city}" />
+				</div>
+			</div>
+			
+			<div class="control-group">
+				<label class="control-label" for="county">County:</label>
+				<div class="controls">
+					<input type="text" name="county" id="county" value="${county}" />
+				</div>
+			</div>
+			
+			<div class="control-group">
+				<label class="control-label" for="postal_code">Postal/Zip Code:</label>
+				<div class="controls">
+					<input type="text" name="postal_code" id="postal_code" value="${postal_code}" />
+				</div>
+			</div>
+			
+			<div class="control-group">
+				<label class="control-label" for="country">Country:</label>
+				<div class="controls">
+					<select id="country" name="country">
+						<option disabled="disabled" tal:attributes="selected 'selected' if country == None else nothing">Please select a country</option>
+						<option value="United Kingdom" tal:attributes="selected 'selected' if country == 'United Kingdom' else nothing">United Kingdom</option> 
+						<option value="United States" tal:attributes="selected 'selected' if country == 'United States' else nothing">United States</option>
+						<option value="Afghanistan" tal:attributes="selected 'selected' if country == 'Afghanistan' else nothing">Afghanistan</option> 
+						<option value="Albania" tal:attributes="selected 'selected' if country == 'Albania' else nothing">Albania</option> 
+						<option value="Algeria" tal:attributes="selected 'selected' if country == 'Algeria' else nothing">Algeria</option> 
+						<option value="American Samoa" tal:attributes="selected 'selected' if country == 'American Samoa' else nothing">American Samoa</option> 
+						<option value="Andorra" tal:attributes="selected 'selected' if country == 'Andorra' else nothing">Andorra</option> 
+						<option value="Angola" tal:attributes="selected 'selected' if country == 'Angola' else nothing">Angola</option> 
+						<option value="Anguilla" tal:attributes="selected 'selected' if country == 'Anguilla' else nothing">Anguilla</option> 
+						<option value="Antarctica" tal:attributes="selected 'selected' if country == 'Antarctica' else nothing">Antarctica</option> 
+						<option value="Antigua and Barbuda" tal:attributes="selected 'selected' if country == 'Antigua and Barbuda' else nothing">Antigua and Barbuda</option> 
+						<option value="Argentina" tal:attributes="selected 'selected' if country == 'Argentina' else nothing">Argentina</option> 
+						<option value="Armenia" tal:attributes="selected 'selected' if country == 'Armenia' else nothing">Armenia</option> 
+						<option value="Aruba" tal:attributes="selected 'selected' if country == 'Aruba' else nothing">Aruba</option> 
+						<option value="Australia" tal:attributes="selected 'selected' if country == 'Australia' else nothing">Australia</option> 
+						<option value="Austria" tal:attributes="selected 'selected' if country == 'Austria' else nothing">Austria</option> 
+						<option value="Azerbaijan" tal:attributes="selected 'selected' if country == 'Azerbaijan' else nothing">Azerbaijan</option> 
+						<option value="Bahamas" tal:attributes="selected 'selected' if country == 'Bahamas' else nothing">Bahamas</option> 
+						<option value="Bahrain" tal:attributes="selected 'selected' if country == 'Bahrain' else nothing">Bahrain</option> 
+						<option value="Bangladesh" tal:attributes="selected 'selected' if country == 'Bangladesh' else nothing">Bangladesh</option> 
+						<option value="Barbados" tal:attributes="selected 'selected' if country == 'Barbados' else nothing">Barbados</option> 
+						<option value="Belarus" tal:attributes="selected 'selected' if country == 'Belarus' else nothing">Belarus</option> 
+						<option value="Belgium" tal:attributes="selected 'selected' if country == 'Belgium' else nothing">Belgium</option> 
+						<option value="Belize" tal:attributes="selected 'selected' if country == 'Belize' else nothing">Belize</option> 
+						<option value="Benin" tal:attributes="selected 'selected' if country == 'Benin' else nothing">Benin</option> 
+						<option value="Bermuda" tal:attributes="selected 'selected' if country == 'Bermuda' else nothing">Bermuda</option> 
+						<option value="Bhutan" tal:attributes="selected 'selected' if country == 'Bhutan' else nothing">Bhutan</option> 
+						<option value="Bolivia" tal:attributes="selected 'selected' if country == 'Bolivia' else nothing">Bolivia</option> 
+						<option value="Bosnia and Herzegovina" tal:attributes="selected 'selected' if country == 'Bosnia and Herzegovina' else nothing">Bosnia and Herzegovina</option> 
+						<option value="Botswana" tal:attributes="selected 'selected' if country == 'Botswana' else nothing">Botswana</option> 
+						<option value="Bouvet Island" tal:attributes="selected 'selected' if country == 'Bouvet Island' else nothing">Bouvet Island</option> 
+						<option value="Brazil" tal:attributes="selected 'selected' if country == 'Brazil' else nothing">Brazil</option> 
+						<option value="British Indian Ocean Territory" tal:attributes="selected 'selected' if country == 'British Indian Ocean Territory' else nothing">British Indian Ocean Territory</option> 
+						<option value="Brunei Darussalam" tal:attributes="selected 'selected' if country == 'Brunei Darussalam' else nothing">Brunei Darussalam</option> 
+						<option value="Bulgaria" tal:attributes="selected 'selected' if country == 'Bulgaria' else nothing">Bulgaria</option> 
+						<option value="Burkina Faso" tal:attributes="selected 'selected' if country == 'Burkina Faso' else nothing">Burkina Faso</option> 
+						<option value="Burundi" tal:attributes="selected 'selected' if country == 'Burundi' else nothing">Burundi</option> 
+						<option value="Cambodia" tal:attributes="selected 'selected' if country == 'Cambodia' else nothing">Cambodia</option> 
+						<option value="Cameroon" tal:attributes="selected 'selected' if country == 'Cameroon' else nothing">Cameroon</option> 
+						<option value="Canada" tal:attributes="selected 'selected' if country == 'Canada' else nothing">Canada</option> 
+						<option value="Cape Verde" tal:attributes="selected 'selected' if country == 'Cape Verde' else nothing">Cape Verde</option> 
+						<option value="Cayman Islands" tal:attributes="selected 'selected' if country == 'Cayman Islands' else nothing">Cayman Islands</option> 
+						<option value="Central African Republic" tal:attributes="selected 'selected' if country == 'Central African Republic' else nothing">Central African Republic</option> 
+						<option value="Chad" tal:attributes="selected 'selected' if country == 'Chad' else nothing">Chad</option> 
+						<option value="Chile" tal:attributes="selected 'selected' if country == 'Chile' else nothing">Chile</option> 
+						<option value="China" tal:attributes="selected 'selected' if country == 'China' else nothing">China</option> 
+						<option value="Christmas Island" tal:attributes="selected 'selected' if country == 'Christmas Island' else nothing">Christmas Island</option> 
+						<option value="Cocos (Keeling) Islands" tal:attributes="selected 'selected' if country == 'Cocos (Keeling) Islands' else nothing">Cocos (Keeling) Islands</option> 
+						<option value="Colombia" tal:attributes="selected 'selected' if country == 'Colombia' else nothing">Colombia</option> 
+						<option value="Comoros" tal:attributes="selected 'selected' if country == 'Comoros' else nothing">Comoros</option> 
+						<option value="Congo" tal:attributes="selected 'selected' if country == 'Congo' else nothing">Congo</option> 
+						<option value="Congo, The Democratic Republic of The" tal:attributes="selected 'selected' if country == 'Congo, The Democratic Republic of The' else nothing">Congo, The Democratic Republic of The</option> 
+						<option value="Cook Islands" tal:attributes="selected 'selected' if country == 'Cook Islands' else nothing">Cook Islands</option> 
+						<option value="Costa Rica" tal:attributes="selected 'selected' if country == 'Costa Rica' else nothing">Costa Rica</option> 
+						<option value="Cote D'ivoire" tal:attributes="selected 'selected' if country == 'Cote D\'ivoire' else nothing">Cote D'ivoire</option> 
+						<option value="Croatia" tal:attributes="selected 'selected' if country == 'Croatia' else nothing">Croatia</option> 
+						<option value="Cuba" tal:attributes="selected 'selected' if country == 'Cuba' else nothing">Cuba</option> 
+						<option value="Cyprus" tal:attributes="selected 'selected' if country == 'Cyprus' else nothing">Cyprus</option> 
+						<option value="Czech Republic" tal:attributes="selected 'selected' if country == 'Czech Republic' else nothing">Czech Republic</option> 
+						<option value="Denmark" tal:attributes="selected 'selected' if country == 'Denmark' else nothing">Denmark</option> 
+						<option value="Djibouti" tal:attributes="selected 'selected' if country == 'Djibouti' else nothing">Djibouti</option> 
+						<option value="Dominica" tal:attributes="selected 'selected' if country == 'Dominica' else nothing">Dominica</option> 
+						<option value="Dominican Republic" tal:attributes="selected 'selected' if country == 'Dominican Republic' else nothing">Dominican Republic</option> 
+						<option value="Ecuador" tal:attributes="selected 'selected' if country == 'Ecuador' else nothing">Ecuador</option> 
+						<option value="Egypt" tal:attributes="selected 'selected' if country == 'Egypt' else nothing">Egypt</option> 
+						<option value="El Salvador" tal:attributes="selected 'selected' if country == 'El Salvador' else nothing">El Salvador</option> 
+						<option value="Equatorial Guinea" tal:attributes="selected 'selected' if country == 'Equatorial Guinea' else nothing">Equatorial Guinea</option> 
+						<option value="Eritrea" tal:attributes="selected 'selected' if country == 'Eritrea' else nothing">Eritrea</option> 
+						<option value="Estonia" tal:attributes="selected 'selected' if country == 'Estonia' else nothing">Estonia</option> 
+						<option value="Ethiopia" tal:attributes="selected 'selected' if country == 'Ethiopia' else nothing">Ethiopia</option> 
+						<option value="Falkland Islands (Malvinas)" tal:attributes="selected 'selected' if country == 'Falkland Islands (Malvinas)' else nothing">Falkland Islands (Malvinas)</option> 
+						<option value="Faroe Islands" tal:attributes="selected 'selected' if country == 'Faroe Islands' else nothing">Faroe Islands</option> 
+						<option value="Fiji" tal:attributes="selected 'selected' if country == 'Fiji' else nothing">Fiji</option> 
+						<option value="Finland" tal:attributes="selected 'selected' if country == 'Finland' else nothing">Finland</option> 
+						<option value="France" tal:attributes="selected 'selected' if country == 'France' else nothing">France</option> 
+						<option value="French Guiana" tal:attributes="selected 'selected' if country == 'French Guiana' else nothing">French Guiana</option> 
+						<option value="French Polynesia" tal:attributes="selected 'selected' if country == 'French Polynesia' else nothing">French Polynesia</option> 
+						<option value="French Southern Territories" tal:attributes="selected 'selected' if country == 'French Southern Territories' else nothing">French Southern Territories</option> 
+						<option value="Gabon" tal:attributes="selected 'selected' if country == 'Gabon' else nothing">Gabon</option> 
+						<option value="Gambia" tal:attributes="selected 'selected' if country == 'Gambia' else nothing">Gambia</option> 
+						<option value="Georgia" tal:attributes="selected 'selected' if country == 'Georgia' else nothing">Georgia</option> 
+						<option value="Germany" tal:attributes="selected 'selected' if country == 'Germany' else nothing">Germany</option> 
+						<option value="Ghana" tal:attributes="selected 'selected' if country == 'Ghana' else nothing">Ghana</option> 
+						<option value="Gibraltar" tal:attributes="selected 'selected' if country == 'Gibraltar' else nothing">Gibraltar</option> 
+						<option value="Greece" tal:attributes="selected 'selected' if country == 'Greece' else nothing">Greece</option> 
+						<option value="Greenland" tal:attributes="selected 'selected' if country == 'Greenland' else nothing">Greenland</option> 
+						<option value="Grenada" tal:attributes="selected 'selected' if country == 'Grenada' else nothing">Grenada</option> 
+						<option value="Guadeloupe" tal:attributes="selected 'selected' if country == 'Guadeloupe' else nothing">Guadeloupe</option> 
+						<option value="Guam" tal:attributes="selected 'selected' if country == 'Guam' else nothing">Guam</option> 
+						<option value="Guatemala" tal:attributes="selected 'selected' if country == 'Guatemala' else nothing">Guatemala</option> 
+						<option value="Guinea" tal:attributes="selected 'selected' if country == 'Guinea' else nothing">Guinea</option> 
+						<option value="Guinea-bissau" tal:attributes="selected 'selected' if country == 'Guinea-bissau' else nothing">Guinea-bissau</option> 
+						<option value="Guyana" tal:attributes="selected 'selected' if country == 'Guyana' else nothing">Guyana</option> 
+						<option value="Haiti" tal:attributes="selected 'selected' if country == 'Haiti' else nothing">Haiti</option> 
+						<option value="Heard Island and Mcdonald Islands" tal:attributes="selected 'selected' if country == 'Heard Island and Mcdonald Islands' else nothing">Heard Island and Mcdonald Islands</option> 
+						<option value="Holy See (Vatican City State)" tal:attributes="selected 'selected' if country == 'Holy See (Vatican City State)' else nothing">Holy See (Vatican City State)</option> 
+						<option value="Honduras" tal:attributes="selected 'selected' if country == 'Honduras' else nothing">Honduras</option> 
+						<option value="Hong Kong" tal:attributes="selected 'selected' if country == 'Hong Kong' else nothing">Hong Kong</option> 
+						<option value="Hungary" tal:attributes="selected 'selected' if country == 'Hungary' else nothing">Hungary</option> 
+						<option value="Iceland" tal:attributes="selected 'selected' if country == 'Iceland' else nothing">Iceland</option> 
+						<option value="India" tal:attributes="selected 'selected' if country == 'India' else nothing">India</option> 
+						<option value="Indonesia" tal:attributes="selected 'selected' if country == 'Indonesia' else nothing">Indonesia</option> 
+						<option value="Iran, Islamic Republic of" tal:attributes="selected 'selected' if country == 'Iran, Islamic Republic of' else nothing">Iran, Islamic Republic of</option> 
+						<option value="Iraq" tal:attributes="selected 'selected' if country == 'Iraq' else nothing">Iraq</option> 
+						<option value="Ireland" tal:attributes="selected 'selected' if country == 'Ireland' else nothing">Ireland</option> 
+						<option value="Israel" tal:attributes="selected 'selected' if country == 'Israel' else nothing">Israel</option> 
+						<option value="Italy" tal:attributes="selected 'selected' if country == 'Italy' else nothing">Italy</option> 
+						<option value="Jamaica" tal:attributes="selected 'selected' if country == 'Jamaica' else nothing">Jamaica</option> 
+						<option value="Japan" tal:attributes="selected 'selected' if country == 'Japan' else nothing">Japan</option> 
+						<option value="Jordan" tal:attributes="selected 'selected' if country == 'Jordan' else nothing">Jordan</option> 
+						<option value="Kazakhstan" tal:attributes="selected 'selected' if country == 'Kazakhstan' else nothing">Kazakhstan</option> 
+						<option value="Kenya" tal:attributes="selected 'selected' if country == 'Kenya' else nothing">Kenya</option> 
+						<option value="Kiribati" tal:attributes="selected 'selected' if country == 'Kiribati' else nothing">Kiribati</option> 
+						<option value="Korea, Democratic People's Republic of" tal:attributes="selected 'selected' if country == 'Korea, Democratic People\'s Republic of' else nothing">Korea, Democratic People's Republic of</option> 
+						<option value="Korea, Republic of" tal:attributes="selected 'selected' if country == 'Korea, Republic of' else nothing">Korea, Republic of</option> 
+						<option value="Kuwait" tal:attributes="selected 'selected' if country == 'Kuwait' else nothing">Kuwait</option> 
+						<option value="Kyrgyzstan" tal:attributes="selected 'selected' if country == 'Kyrgyzstan' else nothing">Kyrgyzstan</option> 
+						<option value="Lao People's Democratic Republic" tal:attributes="selected 'selected' if country == 'Lao People\'s Democratic Republic' else nothing">Lao People's Democratic Republic</option> 
+						<option value="Latvia" tal:attributes="selected 'selected' if country == 'Latvia' else nothing">Latvia</option> 
+						<option value="Lebanon" tal:attributes="selected 'selected' if country == 'Lebanon' else nothing">Lebanon</option> 
+						<option value="Lesotho" tal:attributes="selected 'selected' if country == 'Lesotho' else nothing">Lesotho</option> 
+						<option value="Liberia" tal:attributes="selected 'selected' if country == 'Liberia' else nothing">Liberia</option> 
+						<option value="Libyan Arab Jamahiriya" tal:attributes="selected 'selected' if country == 'Libyan Arab Jamahiriya' else nothing">Libyan Arab Jamahiriya</option> 
+						<option value="Liechtenstein" tal:attributes="selected 'selected' if country == 'Liechtenstein' else nothing">Liechtenstein</option> 
+						<option value="Lithuania" tal:attributes="selected 'selected' if country == 'Lithuania' else nothing">Lithuania</option> 
+						<option value="Luxembourg" tal:attributes="selected 'selected' if country == 'Luxembourg' else nothing">Luxembourg</option> 
+						<option value="Macao" tal:attributes="selected 'selected' if country == 'Macao' else nothing">Macao</option> 
+						<option value="Macedonia, The Former Yugoslav Republic of" tal:attributes="selected 'selected' if country == 'Macedonia, The Former Yugoslav Republic of' else nothing">Macedonia, The Former Yugoslav Republic of</option> 
+						<option value="Madagascar" tal:attributes="selected 'selected' if country == 'Madagascar' else nothing">Madagascar</option> 
+						<option value="Malawi" tal:attributes="selected 'selected' if country == 'Malawi' else nothing">Malawi</option> 
+						<option value="Malaysia" tal:attributes="selected 'selected' if country == 'Malaysia' else nothing">Malaysia</option> 
+						<option value="Maldives" tal:attributes="selected 'selected' if country == 'Maldives' else nothing">Maldives</option> 
+						<option value="Mali" tal:attributes="selected 'selected' if country == 'Mali' else nothing">Mali</option> 
+						<option value="Malta" tal:attributes="selected 'selected' if country == 'Malta' else nothing">Malta</option> 
+						<option value="Marshall Islands" tal:attributes="selected 'selected' if country == 'Marshall Islands' else nothing">Marshall Islands</option> 
+						<option value="Martinique" tal:attributes="selected 'selected' if country == 'Martinique' else nothing">Martinique</option> 
+						<option value="Mauritania" tal:attributes="selected 'selected' if country == 'Mauritania' else nothing">Mauritania</option> 
+						<option value="Mauritius" tal:attributes="selected 'selected' if country == 'Mauritius' else nothing">Mauritius</option> 
+						<option value="Mayotte" tal:attributes="selected 'selected' if country == 'Mayotte' else nothing">Mayotte</option> 
+						<option value="Mexico" tal:attributes="selected 'selected' if country == 'Mexico' else nothing">Mexico</option> 
+						<option value="Micronesia, Federated States of" tal:attributes="selected 'selected' if country == 'Micronesia, Federated States of' else nothing">Micronesia, Federated States of</option> 
+						<option value="Moldova, Republic of" tal:attributes="selected 'selected' if country == 'Moldova, Republic of' else nothing">Moldova, Republic of</option> 
+						<option value="Monaco" tal:attributes="selected 'selected' if country == 'Monaco' else nothing">Monaco</option> 
+						<option value="Mongolia" tal:attributes="selected 'selected' if country == 'Mongolia' else nothing">Mongolia</option> 
+						<option value="Montserrat" tal:attributes="selected 'selected' if country == 'Montserrat' else nothing">Montserrat</option> 
+						<option value="Morocco" tal:attributes="selected 'selected' if country == 'Morocco' else nothing">Morocco</option> 
+						<option value="Mozambique" tal:attributes="selected 'selected' if country == 'Mozambique' else nothing">Mozambique</option> 
+						<option value="Myanmar" tal:attributes="selected 'selected' if country == 'Myanmar' else nothing">Myanmar</option> 
+						<option value="Namibia" tal:attributes="selected 'selected' if country == 'Namibia' else nothing">Namibia</option> 
+						<option value="Nauru" tal:attributes="selected 'selected' if country == 'Nauru' else nothing">Nauru</option> 
+						<option value="Nepal" tal:attributes="selected 'selected' if country == 'Nepal' else nothing">Nepal</option> 
+						<option value="Netherlands" tal:attributes="selected 'selected' if country == 'Netherlands' else nothing">Netherlands</option> 
+						<option value="Netherlands Antilles" tal:attributes="selected 'selected' if country == 'Netherlands Antilles' else nothing">Netherlands Antilles</option> 
+						<option value="New Caledonia" tal:attributes="selected 'selected' if country == 'New Caledonia' else nothing">New Caledonia</option> 
+						<option value="New Zealand" tal:attributes="selected 'selected' if country == 'New Zealand' else nothing">New Zealand</option> 
+						<option value="Nicaragua" tal:attributes="selected 'selected' if country == 'Nicaragua' else nothing">Nicaragua</option> 
+						<option value="Niger" tal:attributes="selected 'selected' if country == 'Niger' else nothing">Niger</option> 
+						<option value="Nigeria" tal:attributes="selected 'selected' if country == 'Nigeria' else nothing">Nigeria</option> 
+						<option value="Niue" tal:attributes="selected 'selected' if country == 'Niue' else nothing">Niue</option> 
+						<option value="Norfolk Island" tal:attributes="selected 'selected' if country == 'Norfolk Island' else nothing">Norfolk Island</option> 
+						<option value="Northern Mariana Islands" tal:attributes="selected 'selected' if country == 'Northern Mariana Islands' else nothing">Northern Mariana Islands</option> 
+						<option value="Norway" tal:attributes="selected 'selected' if country == 'Norway' else nothing">Norway</option> 
+						<option value="Oman" tal:attributes="selected 'selected' if country == 'Oman' else nothing">Oman</option> 
+						<option value="Pakistan" tal:attributes="selected 'selected' if country == 'Pakistan' else nothing">Pakistan</option> 
+						<option value="Palau" tal:attributes="selected 'selected' if country == 'Palau' else nothing">Palau</option> 
+						<option value="Palestinian Territory, Occupied" tal:attributes="selected 'selected' if country == 'Palestinian Territory, Occupied' else nothing">Palestinian Territory, Occupied</option> 
+						<option value="Panama" tal:attributes="selected 'selected' if country == 'Panama' else nothing">Panama</option> 
+						<option value="Papua New Guinea" tal:attributes="selected 'selected' if country == 'Papua New Guinea' else nothing">Papua New Guinea</option> 
+						<option value="Paraguay" tal:attributes="selected 'selected' if country == 'Paraguay' else nothing">Paraguay</option> 
+						<option value="Peru" tal:attributes="selected 'selected' if country == 'Peru' else nothing">Peru</option> 
+						<option value="Philippines" tal:attributes="selected 'selected' if country == 'Philippines' else nothing">Philippines</option> 
+						<option value="Pitcairn" tal:attributes="selected 'selected' if country == 'Pitcairn' else nothing">Pitcairn</option> 
+						<option value="Poland" tal:attributes="selected 'selected' if country == 'Poland' else nothing">Poland</option> 
+						<option value="Portugal" tal:attributes="selected 'selected' if country == 'Portugal' else nothing">Portugal</option> 
+						<option value="Puerto Rico" tal:attributes="selected 'selected' if country == 'Puerto Rico' else nothing">Puerto Rico</option> 
+						<option value="Qatar" tal:attributes="selected 'selected' if country == 'Qatar' else nothing">Qatar</option> 
+						<option value="Reunion" tal:attributes="selected 'selected' if country == 'Reunion' else nothing">Reunion</option> 
+						<option value="Romania" tal:attributes="selected 'selected' if country == 'Romania' else nothing">Romania</option> 
+						<option value="Russian Federation" tal:attributes="selected 'selected' if country == 'Russian Federation' else nothing">Russian Federation</option> 
+						<option value="Rwanda" tal:attributes="selected 'selected' if country == 'Rwanda' else nothing">Rwanda</option> 
+						<option value="Saint Helena" tal:attributes="selected 'selected' if country == 'Saint Helena' else nothing">Saint Helena</option> 
+						<option value="Saint Kitts and Nevis" tal:attributes="selected 'selected' if country == 'Saint Kitts and Nevis' else nothing">Saint Kitts and Nevis</option> 
+						<option value="Saint Lucia" tal:attributes="selected 'selected' if country == 'Saint Lucia' else nothing">Saint Lucia</option> 
+						<option value="Saint Pierre and Miquelon" tal:attributes="selected 'selected' if country == 'Saint Pierre and Miquelon' else nothing">Saint Pierre and Miquelon</option> 
+						<option value="Saint Vincent and The Grenadines" tal:attributes="selected 'selected' if country == 'Saint Vincent and The Grenadines' else nothing">Saint Vincent and The Grenadines</option> 
+						<option value="Samoa" tal:attributes="selected 'selected' if country == 'Samoa' else nothing">Samoa</option> 
+						<option value="San Marino" tal:attributes="selected 'selected' if country == 'San Marino' else nothing">San Marino</option> 
+						<option value="Sao Tome and Principe" tal:attributes="selected 'selected' if country == 'Sao Tome and Principe' else nothing">Sao Tome and Principe</option> 
+						<option value="Saudi Arabia" tal:attributes="selected 'selected' if country == 'Saudi Arabia' else nothing">Saudi Arabia</option> 
+						<option value="Senegal" tal:attributes="selected 'selected' if country == 'Senegal' else nothing">Senegal</option> 
+						<option value="Serbia and Montenegro" tal:attributes="selected 'selected' if country == 'Serbia and Montenegro' else nothing">Serbia and Montenegro</option> 
+						<option value="Seychelles" tal:attributes="selected 'selected' if country == 'Seychelles' else nothing">Seychelles</option> 
+						<option value="Sierra Leone" tal:attributes="selected 'selected' if country == 'Sierra Leone' else nothing">Sierra Leone</option> 
+						<option value="Singapore" tal:attributes="selected 'selected' if country == 'Singapore' else nothing">Singapore</option> 
+						<option value="Slovakia" tal:attributes="selected 'selected' if country == 'Slovakia' else nothing">Slovakia</option> 
+						<option value="Slovenia" tal:attributes="selected 'selected' if country == 'Slovenia' else nothing">Slovenia</option> 
+						<option value="Solomon Islands" tal:attributes="selected 'selected' if country == 'Solomon Islands' else nothing">Solomon Islands</option> 
+						<option value="Somalia" tal:attributes="selected 'selected' if country == 'Somalia' else nothing">Somalia</option> 
+						<option value="South Africa" tal:attributes="selected 'selected' if country == 'South Africa' else nothing">South Africa</option> 
+						<option value="South Georgia and The South Sandwich Islands" tal:attributes="selected 'selected' if country == 'South Georgia and The South Sandwich Islands' else nothing">South Georgia and The South Sandwich Islands</option> 
+						<option value="Spain" tal:attributes="selected 'selected' if country == 'Spain' else nothing">Spain</option> 
+						<option value="Sri Lanka" tal:attributes="selected 'selected' if country == 'Sri Lanka' else nothing">Sri Lanka</option> 
+						<option value="Sudan" tal:attributes="selected 'selected' if country == 'Sudan' else nothing">Sudan</option> 
+						<option value="Suriname" tal:attributes="selected 'selected' if country == 'Suriname' else nothing">Suriname</option> 
+						<option value="Svalbard and Jan Mayen" tal:attributes="selected 'selected' if country == 'Svalbard and Jan Mayen' else nothing">Svalbard and Jan Mayen</option> 
+						<option value="Swaziland" tal:attributes="selected 'selected' if country == 'Swaziland' else nothing">Swaziland</option> 
+						<option value="Sweden" tal:attributes="selected 'selected' if country == 'Sweden' else nothing">Sweden</option> 
+						<option value="Switzerland" tal:attributes="selected 'selected' if country == 'Switzerland' else nothing">Switzerland</option> 
+						<option value="Syrian Arab Republic" tal:attributes="selected 'selected' if country == 'Syrian Arab Republic' else nothing">Syrian Arab Republic</option> 
+						<option value="Taiwan, Province of China" tal:attributes="selected 'selected' if country == 'Taiwan, Province of China' else nothing">Taiwan, Province of China</option> 
+						<option value="Tajikistan" tal:attributes="selected 'selected' if country == 'Tajikistan' else nothing">Tajikistan</option> 
+						<option value="Tanzania, United Republic of" tal:attributes="selected 'selected' if country == 'Tanzania, United Republic of' else nothing">Tanzania, United Republic of</option> 
+						<option value="Thailand" tal:attributes="selected 'selected' if country == 'Thailand' else nothing">Thailand</option> 
+						<option value="Timor-leste" tal:attributes="selected 'selected' if country == 'Timor-leste' else nothing">Timor-leste</option> 
+						<option value="Togo" tal:attributes="selected 'selected' if country == 'Togo' else nothing">Togo</option> 
+						<option value="Tokelau" tal:attributes="selected 'selected' if country == 'Tokelau' else nothing">Tokelau</option> 
+						<option value="Tonga" tal:attributes="selected 'selected' if country == 'Tonga' else nothing">Tonga</option> 
+						<option value="Trinidad and Tobago" tal:attributes="selected 'selected' if country == 'Trinidad and Tobago' else nothing">Trinidad and Tobago</option> 
+						<option value="Tunisia" tal:attributes="selected 'selected' if country == 'Tunisia' else nothing">Tunisia</option> 
+						<option value="Turkey" tal:attributes="selected 'selected' if country == 'Turkey' else nothing">Turkey</option> 
+						<option value="Turkmenistan" tal:attributes="selected 'selected' if country == 'Turkmenistan' else nothing">Turkmenistan</option> 
+						<option value="Turks and Caicos Islands" tal:attributes="selected 'selected' if country == 'Turks and Caicos Islands' else nothing">Turks and Caicos Islands</option> 
+						<option value="Tuvalu" tal:attributes="selected 'selected' if country == 'Tuvalu' else nothing">Tuvalu</option> 
+						<option value="Uganda" tal:attributes="selected 'selected' if country == 'Uganda' else nothing">Uganda</option> 
+						<option value="Ukraine" tal:attributes="selected 'selected' if country == 'Ukraine' else nothing">Ukraine</option> 
+						<option value="United Arab Emirates" tal:attributes="selected 'selected' if country == 'United Arab Emirates' else nothing">United Arab Emirates</option> 
+						<option value="United Kingdom" tal:attributes="selected 'selected' if country == 'United Kingdom' else nothing">United Kingdom</option> 
+						<option value="United States" tal:attributes="selected 'selected' if country == 'United States' else nothing">United States</option> 
+						<option value="United States Minor Outlying Islands" tal:attributes="selected 'selected' if country == 'United States Minor Outlying Islands' else nothing">United States Minor Outlying Islands</option> 
+						<option value="Uruguay" tal:attributes="selected 'selected' if country == 'Uruguay' else nothing">Uruguay</option> 
+						<option value="Uzbekistan" tal:attributes="selected 'selected' if country == 'Uzbekistan' else nothing">Uzbekistan</option> 
+						<option value="Vanuatu" tal:attributes="selected 'selected' if country == 'Vanuatu' else nothing">Vanuatu</option> 
+						<option value="Venezuela" tal:attributes="selected 'selected' if country == 'Venezuela' else nothing">Venezuela</option> 
+						<option value="Viet Nam" tal:attributes="selected 'selected' if country == 'Viet Nam' else nothing">Viet Nam</option> 
+						<option value="Virgin Islands, British" tal:attributes="selected 'selected' if country == 'Virgin Islands, British' else nothing">Virgin Islands, British</option> 
+						<option value="Virgin Islands, U.S." tal:attributes="selected 'selected' if country == 'Virgin Islands, U.S.' else nothing">Virgin Islands, U.S.</option> 
+						<option value="Wallis and Futuna" tal:attributes="selected 'selected' if country == 'Wallis and Futuna' else nothing">Wallis and Futuna</option> 
+						<option value="Western Sahara" tal:attributes="selected 'selected' if country == 'Western Sahara' else nothing">Western Sahara</option> 
+						<option value="Yemen" tal:attributes="selected 'selected' if country == 'Yemen' else nothing">Yemen</option> 
+						<option value="Zambia" tal:attributes="selected 'selected' if country == 'Zambia' else nothing">Zambia</option> 
+						<option value="Zimbabwe" tal:attributes="selected 'selected' if country == 'Zimbabwe' else nothing">Zimbabwe</option>
+					</select>
+				</div>
+			</div>
+			
+			<br />
+			</tal:postaladdress>
+                        
+            
+            <a href="${request.route_path('user_profile')}" class="ll_btn pull-left">
+               <i class="icon-arrow-left"></i>
+               <span class="pull-right">Cancel</span>
+            </a>
+            
+            <button type="submit" class="pull-right ll_btn success" name="submit" id="submit" value="submit">
+                <i class="icon-ok"></i><span class="pull-right">Save</span>
+            </button>
+            <div class="clearbar"></div>
+			
+		</form>
+        
+    </tal:content>
+</tal:macro>

@@ -1,0 +1,209 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Sales</tal:title>
+    <script metal:fill-slot="script" type="text/javascript">
+    function changeFilterType(selector) {
+        if($(selector).val() == 'status') {
+            $("#filtervalue").addClass("hidden");
+            $("#filtervalue-status").removeClass("hidden");
+        } else {
+            $("#filtervalue").removeClass("hidden");
+            $("#filtervalue-status").addClass("hidden");
+        }
+        $("#filtervalue").val("").prop('disabled', false);
+    }
+    </script>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable green container">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Payments Search</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <form action="${request.route_path('admin_payments', _scheme='https')}" method="GET" class="form-horizontal">
+                        <br />
+                        <div class="control-group">
+                            <label for="name" class="control-label">Search for payment</label>
+                            <div class="controls">
+                                <select id="filter" name="filter" onchange="javascript:$('#value').prop('disabled', false);changeFilterType(this);">
+                                    <option selected disabled>Filter...</option>
+                                    <option value="status">By Payment Status</option>
+                                    <option value="refcode">By Reference Code</option>
+                                    <option value="crsid">By CRSid</option>
+                                    <option value="name">By Name</option>
+                                    <option value="email">By Email</option>
+                                    <option value="username">By Username</option>
+                                </select> 
+                                <input type="text" id="filtervalue" name="filtervalue" placeholder="Search value..." disabled="disabled" />
+                                <select id="filtervalue-status" name="filtervalue-status" class="hidden">
+                                    <option value="all">All</option>
+                                    <option value="paid">Paid</option>
+                                    <option value="unpaid">Unpaid</option>
+                                    <option value="expiring">Expiring</option>
+                                    <option value="expired">Expired</option>
+                                </select>
+                                <button type="submit" id="submit" name="submit" value="submit" class="ll_btn" style="display:inline-block;">
+                                    <i class="icon-search"></i>
+                                    <span class="pull-right">Search</span>
+                                </button>
+                                <span class="help-block">Select the filter you wish to use and enter the text you wish to filter by and click "Search".</span>
+                            </div>
+                        </div>
+            
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="clearline"></div>
+        
+        <h3 class="pull-left">Payment: ${payment.ref_code}</h3>
+		<a href="${request.route_path('admin_payment_reject', ref_code=payment.__name__)}" class="ll_btn danger pull-right" style="margin-top:12px;margin-left:5px;">
+           <i class="icon-remove"></i>
+           <span class="pull-right">Reject Payment</span> 
+        </a>
+        <tal:notpaid tal:condition="not:payment.paid">
+        <a href="${request.route_path('admin_payment_change', ref_code=payment.__name__)}" class="ll_btn pull-right" style="margin-top:12px;margin-left:5px;">
+           <i class="icon-cog"></i>
+           <span class="pull-right">Change Method</span> 
+        </a>
+        <a href="${request.route_path('admin_payment_enter', ref_code=payment.__name__)}" class="ll_btn success pull-right" style="margin-top:12px;margin-left:5px;">
+           <i class="icon-money"></i>
+           <span class="pull-right">Enter Payment</span> 
+        </a>
+        </tal:notpaid>
+		<a href="${request.route_path('admin_notes', mode='payment', id=payment.__name__)}" class="ll_btn pull-right" style="margin-top:12px;" tal:condition="view.is_admin"><i class="icon-pencil"></i><span class="pull-right">Edit Notes</span></a>
+		<a href="?action=sendtickets" class="ll_btn pull-right" style="margin-right:5px;margin-top:12px;" tal:condition="payment.paid"><i class="icon-envelope"></i><span class="pull-right">Send Tickets</span></a>
+        <div class="clearbar"></div>
+        <table style="width:550px;font-size:18px;" class="pull-left">
+            <tbody>
+                <tr>
+                    <td class="span3" style="padding:5px;padding-left:0px;">Owner Fullname:</td>
+                    <td style="padding:5px;">${payment.owner.profile.fullname if payment.owner.profile and payment.owner.profile.fullname else "-"}</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;padding-left:0px;">Owner Username:</td>
+                    <td style="padding:5px;"><a href="${request.route_path('admin_view_user', user_id=payment.owner.__name__)}">${payment.owner.username}</a></td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;padding-left:0px;">Opened Date:</td>
+                    <td style="padding:5px;">${payment.opened_date.strftime("%d/%m/%Y - %H:%M")}</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;padding-left:0px;">Total:</td>
+                    <td style="padding:5px;">${structure:view.format_price(payment.total)}</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;padding-left:0px;">Processing Fee:</td>
+                    <td style="padding:5px;">${structure:view.format_price(payment.processing)}</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;padding-left:0px;">Amount Paid to Date:</td>
+                    <td style="padding:5px;">${structure:view.format_price(payment.amount_paid)}</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;padding-left:0px;">Amount Outstanding to Date:</td>
+                    <td style="padding:5px;">${structure:view.format_price(payment.amount_remaining)}</td>
+                </tr>
+                <tal:paid tal:condition="payment.paid">
+                <tr>
+                    <td class="span3" style="padding:5px;padding-left:0px;">Status:</td>
+                    <td style="padding:5px;">Payment Received</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;padding-left:0px;">Completion Date:</td>
+                    <td style="padding:5px;">${payment.completed_date.strftime("%d/%m/%Y") if payment.completed_date else '-'}</td>
+                </tr>
+                </tal:paid>
+                <tal:notpaid tal:condition="not:payment.paid">
+                <tr>
+                    <td class="span3" style="padding:5px;padding-left:0px;">Status:</td>
+                    <td style="padding:5px;" tal:condition="python:(not payment.expiring(view.payment_window) and not payment.expired(view.payment_window))">Awaiting Payment</td>
+                    <td style="padding:5px;" tal:condition="python:(payment.expiring(view.payment_window) and not payment.expired(view.payment_window))">Payment Deadline Close</td>
+                    <td style="padding:5px;" tal:condition="python:(payment.expired(view.payment_window))">Payment Deadline Passed</td>
+                </tr>
+                <tr>
+                    <td class="span3" style="padding:5px;padding-left:0px;">Due Date:</td>
+                    <td style="padding:5px;">${view.due_date(payment.opened_date, view.payment_window).strftime("%d/%m/%Y")}</td>
+                </tr>
+                </tal:notpaid>
+				<tr>
+					<td class="span3" style="padding:5px;padding-left:0px;">Notes</td>
+					<td style="padding:5px;">${structure:payment.notes}</td>
+				</tr>
+            </tbody>
+        </table>
+
+        <div class="clearbar"></div>
+        <br />
+        <h3>Included Tickets</h3>
+        <div class="clearbar"></div>
+        <table class="table table-bordered table-striped">
+            <thead tal:condition="view.guest_details_required">
+                <th class="span3">Ticket Holder</th>
+                <th class="span2">At Cambridge</th>
+                <th class="span3">Ticket Type</th>
+                <th class="span1 align-right">Cost</th>
+                <th>Actions</th>
+            </thead>
+            <thead tal:condition="not:view.guest_details_required">
+                <th>Ticket Type</th>
+                <th class="span3 align-right">Cost</th>
+                <th class="span4">Actions</th>
+            </thead>
+            <tbody>
+                <tr tal:repeat="ticket payment.tickets">
+                    <td tal:condition="view.guest_details_required">${ticket.guest_info.fullname if ticket.guest_info and ticket.guest_info.fullname else "-"}</td>
+                    <td tal:condition="view.guest_details_required" class="span2">${'Yes' if ticket.guest_info != None and ticket.guest_info.raven_user else 'No'}</td>
+                    <td>${ticket.tick_type.name}<tal:addon tal:condition="ticket.addons" tal:repeat="addon ticket.addons.values()"> + ${addon.name}</tal:addon></td>
+	                <td class="align-right">${structure:view.format_price(ticket.total_cost)}</td>
+                    <td>
+                        <a href="${request.route_path('admin_ticket_guest_info', ticket_id=ticket.id_code)}">Ticket Information</a>
+                        &nbsp;&nbsp;&nbsp;
+                        <a class="danger" href="${request.route_path('admin_ticket_remove', ref_code=payment.__name__, tick_id=ticket.id_code)}">
+                            Remove Ticket
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="clearbar"></div>
+        <h3>Payment History</h3>
+        <table class="table table-bordered table-striped">
+            
+            <thead>
+                
+                <tr>
+                    <th class="span2">Date</th>
+                    <th class="span2">Method</th>
+                    <th class="span2">Amount Due</th>
+                    <th class="span2">Amount Paid</th>
+                    <th class="span2">Method Fee</th>
+                    <th>Status</th>
+                    <th>Details</th>
+                </tr>
+                
+            </thead>
+            
+            <tbody>
+            
+                <tr tal:repeat="stage payment.history[::-1]">
+                    <tal:def tal:define="method view.get_payment_method(stage.method)">
+                    <td>${stage.date.strftime("%d/%m/%Y")}</td>
+                    <td>${method.name if not stage.transfer and method != None else 'Transfer/Alteration'}</td>
+                    <td>${structure:view.format_price(stage.amount_remaining)}</td>
+                    <td>${structure:view.format_price(stage.amount_paid)}</td>
+                    <td>${structure:view.format_price(stage.processing_charge)}</td>
+                    <td>${stage.status}</td>
+                    <td><a href="${view.request.route_path('admin_payment_stage', ref_code=payment.__name__, stage_index=payment.history.index(stage))}"><i class="icon-info-sign"></i> Details</a></td>
+                    </tal:def>
+                </tr>
+                
+            </tbody>
+            
+        </table>
+        
+    </tal:content>
+</tal:macro>

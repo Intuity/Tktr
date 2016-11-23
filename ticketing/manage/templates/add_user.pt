@@ -1,0 +1,141 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Users</tal:title>
+	<script type="text/javascript" metal:fill-slot="script">
+	var is_single = true;
+	function change_state() {
+		if(is_single) {
+			$("#singleuser-options").css("display", "block");
+			$("#multiuser-options").css("display", "none");
+		} else {
+			$("#singleuser-options").css("display", "none");
+			$("#multiuser-options").css("display", "block");
+		}
+	}
+	$(function() {
+        $("#singleuser-single").change(function() { is_single = $("#singleuser-single").is(":checked"); change_state(); });
+        $("#singleuser-bulk").change(function() { is_single = !$("#singleuser-bulk").is(":checked"); change_state(); });
+	});
+	</script>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable red unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Help</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <p>
+                        A user is an account that can purchase tickets according to the purchase limits and customer control in place upon its parent group. Every user must below to a parent group as this sets the user's privilege level.
+                    </p>
+					<p>
+						Adding a single user allows you to create one account at a time with a specified username and password. You can also choose which group the user is put into. The user will be created without a profile (i.e. no fullname, photo, email address etc.) but they will be asked to create one the first time they sign into the ticketing system.
+					</p>
+					<p>
+						Adding multiple users allows you to create many accounts at the same time with a common prefix. The usernames are automatically formed by the prefix, followed by the number they are in the sequence and finally followed by two random, alphanumberic characters. Again you can set the group to add all of the users into. When you click "+ Add", the users will all be created and then you will be taken to a page listing all of the usernames and the passwords assigned to them that you may export as a CSV file (spreadsheet format). If you have previously added a number of users with the same prefix, consider setting "Starting Point" to the final number of the previous run in order to create consistent usernames.
+					</p>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        <br />
+        <div class="expandable red container">
+            <div class="exp-head container">
+                <h3 class="pull-left">Add User</h3>
+            </div>
+            <div class="exp-body">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <form action="" method="POST" class="form-horizontal">
+                        <br />
+						<div class="control-group">
+							<label for="singleuser" class="control-label">Quantity</label>
+							<div class="controls">
+								<label class="radio inline">
+									<input type="radio" name="singleuser" id="singleuser-single" value="single" tal:attributes="checked 'checked' if single else nothing" />
+									Add a single user
+								</label>
+								<label class="radio inline">
+									<input type="radio" name="singleuser" id="singleuser-bulk" value="bulk" tal:attributes="checked 'checked' if not single else nothing" />
+									Add multiple users
+								</label>
+								<span class="help-block">Select whether you want to create a single user account or many automatically named user accounts.</span>
+							</div>
+						</div>
+						
+						<div id="singleuser-options">
+	                        <div class="control-group">
+	                            <label for="username" class="control-label">Username</label>
+	                            <div class="controls">
+	                                <input type="text" id="username" name="username" value="${username}" />
+	                                <span class="help-block">The username of the user you are creating (case insensitive).</span>
+	                            </div>
+	                        </div>
+						
+							<div class="control-group">
+								<label for="password" class="control-label">Password</label>
+								<div class="controls">
+									<input type="password" id="password" name="password" />
+									<span class="help-block">The password for the user you are creating (case sensitive).</span>
+								</div>
+							</div>
+						</div>
+						
+						<div id="multiuser-options" style="display:none;">
+	                        <div class="control-group">
+	                            <label for="userprefix" class="control-label">Username Prefix</label>
+	                            <div class="controls">
+	                                <input type="text" id="userprefix" name="userprefix" value="${userprefix}" />
+	                                <span class="help-block">The prefix that will be placed on the front of every username</span>
+	                            </div>
+	                        </div>
+						
+							<div class="control-group">
+								<label for="numberusers" class="control-label">Number of Accounts</label>
+								<div class="controls">
+									<input type="text" id="numberusers" name="numberusers" value="${numberusers}" />
+									<span class="help-block">The number of users to automatically generate.</span>
+								</div>
+							</div>
+						
+	                        <div class="control-group">
+	                            <label for="startingnumber" class="control-label">Starting Point</label>
+	                            <div class="controls">
+									<input type="text" id="startingnumber" name="startingnumber" value="${startingnumber}" />
+									<span class="help-block">The number to start counting from when adding users.</span>
+	                            </div>
+	                        </div>
+						</div>
+						
+                        <div class="control-group">
+                            <label for="group" class="control-label">Group</label>
+                            <div class="controls">
+                                <select name="group" id="group">
+                                    <option tal:repeat="group groups" tal:attributes="selected 'selected' if group.__name__ == selgroup or (groups.index(group) == 0 and selgroup == None) else nothing" value="${group.__name__}">
+										${group.name}
+									</option>
+                                </select>
+                                <span class="help-block">The group that the user(s) will be part of. This determines their privilege level.</span>
+                            </div>
+                        </div>
+                        
+                        <a href="${request.route_path('admin_accounts')}" class="ll_btn pull-left">
+                           <i class="icon-arrow-left"></i>
+                           <span class="pull-right">Cancel</span>
+                        </a>
+                        
+                        <button type="submit" class="pull-right ll_btn success" name="submit" id="submit" value="submit">
+                            <i class="icon-plus-sign"></i><span class="pull-right">Add</span>
+                        </button>
+                        <div class="clearbar"></div>
+            
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="clearbar"></div>
+        <br /><br />
+        
+    </tal:content>
+</tal:macro>

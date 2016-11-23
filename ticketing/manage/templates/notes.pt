@@ -1,0 +1,68 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Settings</tal:title>
+    <tal:script metal:fill-slot="script">
+	<script type="text/javascript" src="/static/js/tinymce/tinymce.min.js"></script>
+	<script type="text/javascript">
+	tinyMCE.init({
+		theme_advanced_font_sizes: "12px,13px,14px,16px",
+		font_size_style_values: "12px,13px,14px,16px",
+		selector: "#notes",
+		menubar: false,
+		statusbar: false,
+		height:200,
+		width:730,
+		toolbar: "bold underline italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | fontsizeselect",
+		content_css: "/admin/static/css/editor.css"
+	});
+	</script>
+	</tal:script>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable blue unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Help</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <p>
+                        Notes allow for additional details to be appended onto a ticket, payment or user account - these can be viewed from within the management interface and also show up at check-in for additional details. Make the changes you wish to the note shown below and then click "Save" to save the note.
+                    </p>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+		<br />
+		
+        <form class="form-horizontal" action="" method="POST">
+		
+	        <div class="expandable blue container">
+	            <div class="exp-head container">
+	                <h3 class="pull-left">Edit Notes</h3>
+	            </div>
+	            <div class="exp-body">
+	                <div class="breakerline"></div>
+	                <div class="inner">
+	                    <div class="control-group">
+	                        <label for="notes" class="control-label">Notes</label>
+	                        <div class="controls">
+	                            <textarea name="notes" id="notes" class="fullsize" rows="3">
+	                            	${notes}
+	                            </textarea>
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+			
+            <br />
+            
+            <button type="submit" class="ll_btn pull-right" id="submit" name="submit" value="submit">
+                <i class="icon-save"></i><span class="pull-right">Save</span>
+            </button>
+            <br />
+        </form>
+        
+    </tal:content>
+</tal:macro>

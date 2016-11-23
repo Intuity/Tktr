@@ -1,0 +1,136 @@
+<tal:macro metal:use-macro="load:admin_template.pt">
+    <tal:title metal:fill-slot="title">Ticket Add-ons</tal:title>
+    <script metal:fill-slot="script" type="text/javascript">
+    function changeFilterType(selector) {
+        if($(selector).val() == 'status') {
+            $("#filtervalue").addClass("hidden");
+            $("#filtervalue-status").removeClass("hidden");
+        } else {
+            $("#filtervalue").removeClass("hidden");
+            $("#filtervalue-status").addClass("hidden");
+        }
+        $("#filtervalue").val("");
+    }
+    </script>
+    <tal:content metal:fill-slot="admin_content">
+        
+        <div class="expandable pink unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Help</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    Add-ons allow customers to purchase additional experiences and benefits such as queue jump or dining, which are only available in limited quantities. Add-ons can also be used for charitable donations and other payments that are not restricted in quantity.
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        
+        <br />
+        
+        <div class="expandable pink container">
+            <div class="exp-head container">
+                <h3 class="pull-left" tal:condition="not:addon">Create Ticket Add-on</h3>
+                <h3 class="pull-left" tal:condition="addon">Edit Ticket Add-on "${addon.name}"</h3>
+            </div>
+            <div class="exp-body">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <form action="" method="POST" class="form-horizontal">
+                        <br />
+                        <div class="control-group">
+                            <label for="name" class="control-label">Name</label>
+                            <div class="controls">
+                                <input type="text" id="name" name="name" value="${addon.name if addon else nothing}" />
+                                <span class="help-block">This is the name of the ticket add-on for example "Dining" or "Queue-Jump".</span>
+                            </div>
+                        </div>
+            
+                        <div class="control-group">
+                            <label for="description" class="control-label">Description</label>
+                            <div class="controls">
+                                <input type="text" id="description" name="description" class="span8" value="${addon.description if addon else nothing}" />
+                                <span class="help-block">This should be a description of what benefits come with this add-on.</span>
+                            </div>
+                        </div>
+            
+                        <div class="control-group">
+                            <label for="cost" class="control-label">Price</label>
+                            <div class="controls">
+                                <div class="input-prepend">
+                                    <span class="add-on">&pound;</span>
+                                    <input type="text" id="cost" name="cost" class="span2" value="${view.format_price(addon.cost, False) if addon else nothing}" />
+                                </div>
+                                <span class="help-block">This is the cost of the ticket add-on.</span>
+                            </div>
+                        </div>
+            
+                        <div class="control-group">
+                            <label for="cost" class="control-label">Exclusive Add-on</label>
+                            <div class="controls">
+                                <label class="checkbox">
+									<input type="checkbox" id="exclusive" name="exclusive" value="exclusive" tal:attributes="checked 'checked' if addon != None and addon.exclusive else nothing" /> Should be an exclusive purchase.
+								</label>
+                                <span class="help-block">A customer may only purchase a maximum of one "exclusive" add-on, this is to prevent issues of someone purchasing both "queue-jump" and "VIP" which are incompatible. However a customer may purchase as many "un-exclusive" add-ons as they like - regardless of the number of "exclusive" add-ons they have purchased.</span>
+                            </div>
+                        </div>
+            
+                        <div class="control-group">
+                            <label for="cost" class="control-label">Unlimited Availability</label>
+                            <div class="controls">
+                                <label class="checkbox">
+									<input type="checkbox" id="unlimited" name="unlimited" value="unlimited" tal:attributes="checked 'checked' if addon != None and addon.unlimited else nothing" /> Quantity should be unlimited.
+								</label>
+                                <span class="help-block">If you are able to release an unlimited number of this type of add-on (for example a charitable donation add-on) then tick this box, otherwise enter the available quantity below.</span>
+                            </div>
+                        </div>
+            
+                        <div class="control-group">
+                            <label for="cost" class="control-label">Available Quantity</label>
+                            <div class="controls">
+                                <div class="input-prepend">
+                                    <span class="add-on">#</span>
+                                    <input type="text" id="quantity" name="quantity" class="span2" value="${addon.total_released if addon else nothing}" />
+                                </div>
+                                <span class="help-block">The number of add-ons that are initially available for purchase. If this is lowered after purchases have occurred, none of the purchases will be effected - even if the number is brought below the number that have been allocated.</span>
+                            </div>
+                        </div>
+            
+                        <div class="control-group">
+                            <label for="lockdown" class="control-label">Lock Down Editing</label>
+                            <div class="controls">
+                                <label class="checkbox">
+									<input type="checkbox" id="lockdown" name="lockdown" value="lockdown" tal:attributes="checked 'checked' if addon != None and addon.locked_down else nothing" /> Add-on should be locked down.
+								</label>
+                                <span class="help-block">If you want to stop guests being able to change their details for this ticket addon, then check the box.</span>
+                            </div>
+                        </div>
+						
+						<br />
+                        
+                        <a href="${request.route_path('admin_tickets_addons', tick_code=tick_type.__name__)}" class="ll_btn pull-left">
+                           <i class="icon-arrow-left"></i>
+                           <span class="pull-right">Cancel</span>
+                        </a>
+                        
+                        <button type="submit" class="pull-right ll_btn success" name="submit" id="submit" value="submit">
+                            <tal:add tal:condition="python:(addon == None)">
+                            <i class="icon-plus-sign"></i><span class="pull-right">Create</span>
+                            </tal:add>
+                            <tal:edit tal:condition="not:python:(addon == None)">
+                            <i class="icon-save"></i><span class="pull-right">Save</span>
+                            </tal:edit>
+                        </button>
+                        <div class="clearbar"></div>
+            
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="clearbar"></div>
+        <br /><br />
+        
+    </tal:content>
+</tal:macro>

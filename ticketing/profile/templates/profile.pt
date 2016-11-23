@@ -1,0 +1,103 @@
+<tal:macro metal:use-macro="view.site_style">
+    <tal:content metal:fill-slot="content">
+        
+        <h1>Welcome ${profile.fullname}</h1>
+        
+		<div class="pull-right" style="width:100%;height:50px;text-align:center;">
+	        <h4 style="margin-right:20px;display:inline-block;" tal:condition="not view.account_lock_down"><a class="actlink" href="${request.route_path('user_profile_edit')}"><i class="icon-pencil"></i> Edit Your Details</a></h4>
+	        <h4 style="margin-right:20px;display:inline-block;" tal:condition="python:(user.profile == None or not user.profile.raven_user)"><a class="actlink" href="${request.route_path('user_password')}"><i class="icon-lock"></i> Change Your Password</a></h4>
+	        <h4 style="margin-right:20px;display:inline-block;" tal:condition="view.can_checkin"><a class="actlink" href="${request.route_path('checkin')}"><i class="icon-ticket"></i> Check-In Guests</a></h4>
+	        <h4 style="margin-right:20px;display:inline-block;" tal:condition="view.can_manage"><a class="actlink" href="${request.route_path('admin_catch')}"><i class="icon-wrench"></i> Manage System</a></h4>
+	        <h4 style="display:inline-block;"><a class="actlink" href="${request.route_path('logout')}"><i class="icon-signout"></i> Logout</a></h4>
+		</div>
+        
+        <div class="clearline" style="border-top:1px solid #DDD;"></div>
+        
+		<h2 class="pull-left">Your Guests &amp; Tickets</h2>
+        <h3 class="pull-right">
+			<a href="${request.route_path('buy_tickets')}" class="actlink" tal:condition="view.can_buy"><i class="icon-ticket"></i> Buy Tickets</a><span style="color:#999;" tal:condition="view.can_buy and view.ticket_download_enabled"> | </span>
+            <a href="${request.route_path('ticket_download_all_method', method='pdf')}" class="actlink" tal:condition="view.ticket_download_enabled"><i class="icon-print"></i> Print Tickets</a>
+		</h3>
+		
+        <div class="clearline"></div>
+        
+        
+        <div class="ticketbox" tal:repeat="ticket user.tickets">
+            <div class="headline">
+                <div class="icon">
+                    <tal:block tal:condition="ticket.guest_info == ticket.owner.profile and view.guest_details_required">
+                    <img style="width:100px;margin-top:8px;" src="/static/img/TicketBackgroundRotatedMine.png" />
+                    </tal:block>
+                    <tal:block tal:condition="ticket.guest_info != ticket.owner.profile or not view.guest_details_required">
+                    <img style="width:100px;margin-top:8px;" src="/static/img/TicketBackgroundRotated.png" />
+                    </tal:block>
+                </div>
+                <div class="info">
+                    <span class="ticket_id">${ticket.__name__}</span>
+                    <h3 tal:condition="view.guest_details_required and ticket.guest_info != None">${ticket.guest_info.title} ${ticket.guest_info.fullname}</h3>
+                    <h3 style="font-style:italic;" tal:condition="view.guest_details_required and ticket.guest_info == None">No Guest Details Entered</h3>
+                    <h3 tal:condition="not view.guest_details_required">Guest Ticket</h3>
+                    <span class="ticket_type">
+                        ${ticket.tick_type.name}
+                        <tal:block tal:condition="ticket.guest_info == ticket.owner.profile and view.guest_details_required">
+                         (Your Ticket)
+                        </tal:block>
+						<tal:addon tal:condition="ticket.addons" tal:repeat="addon ticket.addons.values()"> + ${addon.name}</tal:addon>
+                    </span>
+                </div>
+                <div class="strip">
+                    <div class="item">
+                        <strong>Ticket Cost</strong>
+                    </div>
+                    <div class="item">
+                        ${structure:view.format_price(ticket.total_cost)}
+                    </div>
+                    <div class="item">
+                        <strong>Payment</strong>
+                    </div>
+                    <div class="item" style="width:20%;padding:8px 5px 0 5px;text-align:center;">
+                        <a href="${request.route_path('ticket_payment_history', tick_id=ticket.__name__)}">
+                            <span class="label label-warning" tal:condition="not:ticket.payment.paid">Currently Unpaid</span>
+                            <span class="label label-info" tal:condition="ticket.payment.paid">Payment Received</span>
+                        </a>
+                    </div>
+                    <tal:block tal:condition="not:ticket.payment.paid">
+                    <div class="item">
+                        <strong>Payment Due</strong>
+                    </div>
+                    <div class="item" style="width:17%;text-align:left;">
+                        ${ticket.payment.due_date(view.payment_window).strftime("%d/%m/%y")}
+                    </div>
+                    </tal:block>
+                    <tal:block tal:condition="ticket.payment.paid">
+                    <div class="item">
+                        <strong>Received</strong>
+                    </div>
+                    <div class="item" style="width:17%;">
+                        ${ticket.payment.completed_date.strftime("%d/%m/%y") if ticket.payment.completed_date else '-'}
+                    </div>
+                    </tal:block>
+                </div>
+            </div>
+            <div class="actions">
+                <tal:block tal:condition="ticket.guest_info != ticket.owner.profile or not view.guest_details_required">
+                <a href="${request.route_path('ticket_details', tick_id=ticket.__name__)}" class="ll_btn" tal:condition="ticket.payment.paid">
+                    ${'View Details' if ticket.tick_type.locked_down else 'Change Details'}
+                </a>
+                </tal:block>
+                <a href="${request.route_path('transfer_ticket', tick_id=ticket.__name__)}" class="ll_btn" tal:condition="ticket.payment.paid and not ticket.tick_type.locked_down">Transfer Ticket</a>
+                <a href="${request.route_path('alter_payment', tick_id=ticket.__name__)}" class="ll_btn" tal:condition="not:ticket.payment.paid">Make a Payment</a>
+                <a href="${request.route_path('ticket_payment_history', tick_id=ticket.__name__)}" class="ll_btn" tal:condition="not:ticket.payment.paid">View Payment History</a>
+                <a href="${request.route_path('return_tickets', tick_id=ticket.__name__)}" class="ll_btn danger" tal:condition="not:ticket.payment.paid">Return Ticket</a>
+                <tal:block tal:condition="ticket.guest_info != ticket.owner.profile and view.guest_details_required and ticket.payment.paid and not ticket.tick_type.locked_down">
+                    <a href="${request.route_path('ticket_make_mine', tick_id=ticket.__name__)}" class="ll_btn">Make This My Ticket</a>
+                </tal:block>
+            </div>
+        </div>
+        <br />
+        <h4 style="text-align:center;" tal:condition="len(user.tickets) == 0">You have not yet purchased any tickets, do you want to <a href="/buy">buy some</a>?</h4>
+        
+        <br />
+        
+    </tal:content>
+</tal:macro>
