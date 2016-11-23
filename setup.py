@@ -27,6 +27,7 @@ requires = [
     'qrcode',
     'requests',
     'selenium',
+    'six',
     'stripe',
     'transaction',
     'waitress',
