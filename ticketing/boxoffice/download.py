@@ -5,7 +5,6 @@ import qrcode
 import os
 import locale
 from ticketing.models import PROP_KEYS
-from ticketing.boxoffice.passbook.models import Pass, Barcode, EventTicket, BarcodeFormat, DateField, DateStyle, Alignment
 from datetime import datetime
 
 class TicketDownload(object):
@@ -13,54 +12,6 @@ class TicketDownload(object):
     
     def __init__(self, request):
         self.request = request
-
-    def passbook_pass(self, ticket):
-        # Make the pass
-        tick_info = EventTicket()
-        tick_info.addPrimaryField('name', ticket.guest_info.fullname, 'Name')
-        tick_info.addSecondaryField('type', ticket.tick_type.name, 'Type')
-        tick_info.addSecondaryField('payment_id', ticket.payment.__name__, 'Payment ID')
-        tick_info.addAuxiliaryField('price', u"\u00A3" + self.format_price(ticket.tick_type.cost, False), 'Price')
-        
-        date_field = DateField('date', PROP_KEYS.getProperty(self.request, PROP_KEYS.EVENT_DATE).isoformat() + "-00:00:00", 'Date')
-        date_field.timeStyle = DateStyle.NONE
-        date_field.textAlignment = Alignment.RIGHT
-        tick_info.auxiliaryFields.append(date_field)
-        
-        tick_info.addBackField('tsandcs', PROP_KEYS.getProperty(self.request, PROP_KEYS.PURCHASE_AGREEMENT).plaintext_body, 'Terms and Conditions')
-        
-        organisation = self.event_name
-        passTypeIdentifier = 'pass.com.sidneyarts.ticket'
-        teamIdentifier = '77LSJMCV2H'
-        
-        passfile = Pass(
-            tick_info,
-            passTypeIdentifier=passTypeIdentifier,
-            organizationName=organisation,
-            teamIdentifier=teamIdentifier
-        )
-        passfile.serialNumber = ticket.__name__
-        passfile.barcode = Barcode(
-            "id:" + ticket.__name__ + ":pay:" + ticket.payment.__name__ + ":owner:" + ticket.owner.profile.fullname + ":price:" + str(ticket.tick_type.cost) + ":type:" + ticket.tick_type.name,
-            format=BarcodeFormat.QR,
-            altText=ticket.__name__
-        )
-        
-        base = self.request.registry._settings["base_dir"]
-        
-        passfile.addFile('icon.png', open(base + "/data/passbook_icon.png", "r"))
-        passfile.addFile('icon@2x.png', open(base + "/data/passbook_icon@2x.png", "r"))
-        passfile.addFile('logo.png', open(base + "/data/passbook_logo.png", "r"))
-        passfile.addFile('logo@2x.png', open(base + "/data/passbook_logo@2x.png", "r"))
-        passfile.addFile('background.png', open(base + "/data/passbook_background.png", "r"))
-        passfile.addFile('background@2x.png', open(base + "/data/passbook_background@2x.png", "r"))
-        
-        return passfile.create(
-            base + "/data/keys/certificate.pem",
-            base + "/data/keys/key.pem",
-            base + "/data/keys/wwdr.pem",
-            "1234"
-        )
 
     def single_ticket_pdf(self, ticket):
         pdf = self.setup_pdf()

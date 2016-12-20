@@ -415,7 +415,7 @@ class ProfileEditing(BaseLayout):
         elif not self.ticket_download_enabled:
             self.request.session.flash("Ticket download is currently not enabled.", "error")
             return HTTPFound(location=self.request.route_path("user_profile"))
-        elif method not in ["pdf", "passbook"]:
+        elif method not in ["pdf"]:
             self.request.session.flash("Ticket download method does not exist.", "error")
             return HTTPFound(location=self.request.route_path("user_profile"))
         
@@ -450,29 +450,6 @@ class ProfileEditing(BaseLayout):
                 content_length=len(pdf),
                 body=pdf
             )
-            return resp
-        elif method == "passbook":
-            tick_id = self.request.matchdict["tick_id"]
-            ticket = None
-            # Find ticket
-            for tick in self.user.tickets:
-                if tick.__name__ == tick_id:
-                    ticket = tick
-                    break
-            # Safety
-            if ticket == None:
-                self.request.session.flash("Ticket does not exist.", "error")
-                return HTTPFound(location=self.request.route_path("user_profile"))
-            # Make the pass
-            pass_data = TicketDownload(self.request).passbook_pass(ticket)
-            
-            resp = Response(
-                content_type="application/vnd.apple.pkpass",
-                content_encoding="binary",
-                content_length=len(pass_data.getvalue()),
-                body=pass_data.getvalue()
-            )
-            pass_data.close()
             return resp
 
     @view_config(

@@ -10,8 +10,6 @@ requires = [
     'fpdf',
     'futures',
     'lepl',
-    'M2Crypto',
-    'passbook',
     'Pillow',
     'pyramid',
     'pyramid_beaker',
@@ -34,9 +32,9 @@ requires = [
     'ZODB3'
     ]
 
-setup(name='ticketing',
-      version='0.0',
-      description='ticketing',
+setup(name='Tktr',
+      version='1.0',
+      description='Ticketing platform for May Balls and June Events.',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[
         "Programming Language :: Python",

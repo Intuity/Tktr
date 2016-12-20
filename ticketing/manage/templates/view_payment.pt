@@ -74,7 +74,7 @@
         </a>
         </tal:notpaid>
 		<a href="${request.route_path('admin_notes', mode='payment', id=payment.__name__)}" class="ll_btn pull-right" style="margin-top:12px;" tal:condition="view.is_admin"><i class="icon-pencil"></i><span class="pull-right">Edit Notes</span></a>
-		<a href="?action=sendtickets" class="ll_btn pull-right" style="margin-right:5px;margin-top:12px;" tal:condition="payment.paid"><i class="icon-envelope"></i><span class="pull-right">Send Tickets</span></a>
+		<a href="?action=emailconfirm" class="ll_btn pull-right" style="margin-right:5px;margin-top:12px;" tal:condition="payment.paid"><i class="icon-envelope"></i><span class="pull-right">Resend Confirmation</span></a>
         <div class="clearbar"></div>
         <table style="width:550px;font-size:18px;" class="pull-left">
             <tbody>
