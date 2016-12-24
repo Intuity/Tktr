@@ -115,7 +115,7 @@
         <br />
 		<h3>Get In Touch</h3>
 		In case you need to get in touch with us, here are our details:<br />
-		Email <a href="mailto:webmaster@mayball.com">webmaster@mayball.com</a> or give us a phone on 0845 805 1832
+		${view.error_contact_info}
 		<br /><br /><br />
     </tal:content>
 </tal:macro>

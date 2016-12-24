@@ -474,3 +474,13 @@ a.actlink:hover, a.actlink:active { text-decoration:none; }
 .ticketdetails table tr td {
     width:25%;
 }
+
+.fulltextbox {
+    width:100%;
+    height:350px;
+    overflow-y:auto;
+    padding:20px;
+    box-sizing:border-box;
+    border:1px solid #EAEAEA;
+    background:#FCFCFC;
+}

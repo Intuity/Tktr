@@ -281,7 +281,7 @@
         
 	        <br />
         
-            <div class="expandable blue unselectable">
+            <!--div class="expandable blue unselectable">
                 <div class="exp-head container">
                     <h3 class="pull-left">Queue Settings</h3>
                     <div class="ll_switch unselectable pull-right blue" id="switch_queue">
@@ -334,7 +334,7 @@
                 <div class="clearline"></div>
             </div>
             
-            <br />
+            <br /-->
             
             <div class="expandable blue unselectable">
                 <div class="exp-head container">

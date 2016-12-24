@@ -14,7 +14,9 @@
 		
 		<h3>The Full Agreement</h3>
 		
-		${structure:document.main_body}
+        <div class="fulltextbox">
+    		${structure:document.main_body}
+        </div>
         
 		<h3>Your Agreement</h3>
 		
