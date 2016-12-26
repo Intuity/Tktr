@@ -1,11 +1,13 @@
 # Tktr
-A platform for ticketing events such as May Balls and June Events for Cambridge Colleges
+A powerful ticketing platform for May Balls, June Events and Arts Festivals (or any other type of event really...) for the University of
+Cambridge.
 
 **Sections:**
 
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Configuration](#configuration)
+- [First Run Setup](#first-run-setup)
 - [Troubleshooting](#troubleshooting)
  * ["Unsupported Locale" errors under Ubuntu](#unsupported-locale-errors-under-ubuntu)
 
@@ -14,9 +16,9 @@ It is strongly recommended that Tktr is installed on Ubuntu Server, as this is w
 and deployed previously - however it should be possible to install Tktr under any Linux distribution.
 To install and run Tktr you will need:
 
- - Python 2.7 installed
- - VirtualEnv
- - Packages (from Aptitude): build-essential libssl-dev swig libjpeg-dev python-dev virtualenv python-openssl
+- Python 2.7 installed
+- VirtualEnv
+- Packages (from Aptitude): build-essential libssl-dev swig libjpeg-dev python-dev virtualenv python-openssl
 
 
 ## Installation

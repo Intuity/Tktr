@@ -71,9 +71,13 @@
     
 
     <div class="container container-centered footer">
-        Copyright LightLogic ${view.current_year}<br />
-		<a href="${request.route_path('read_privacy_policy')}">Privacy Policy</a> | <a href="${request.route_path('read_purchase_agreement')}">Purchase Agreement</a> | <a href="${request.route_path('read_cookie_policy')}">Cookie Policy</a><br />
-		By using this website you agree to our cookie policy which you can access from the link above. The use of this website is voluntary and exists<br /> for you to purchase tickets for the event. If you do not agree to the terms of the cookie policy you should not use the website.
+        Powered by <a href="https://github.com/intuity/Tktr">Tktr</a><br />
+		<a href="${request.route_path('read_privacy_policy')}">Privacy Policy</a> | 
+        <a href="${request.route_path('read_purchase_agreement')}">Purchase Agreement</a> | 
+        <a href="${request.route_path('read_cookie_policy')}">Cookie Policy</a><br />
+		By using this website you agree to our cookie policy which you can access from the link above. The use of this website is 
+        voluntary and exists<br /> for you to purchase tickets for the event. If you do not agree to the terms of the cookie policy 
+        you should not use the website.
 		<br /><br />
     </div>
     

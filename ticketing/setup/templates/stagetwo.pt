@@ -13,6 +13,12 @@
         
         <form method="POST" action="" class="form-horizontal">
             <div class="control-group">
+                <label class="control-label" for="password_one">Username:</label>
+                <div class="controls">
+                    <input type="text" value="admin" disabled />
+                </div>
+            </div>
+            <div class="control-group">
                 <label class="control-label" for="password_one">Password:</label>
                 <div class="controls">
                     <input type="password" name="password_one" id="password_one" />

@@ -156,10 +156,14 @@
                         </div>
                         
 	                    <div class="control-group">
-	                        <label for="body" class="control-label">Error Contact Information</label>
+	                        <label for="body" class="control-label">Contact Information</label>
 	                        <div class="controls">
 								<textarea class="fullsize" rows="3" name="error_contact_info" id="error_contact_info">${settings['error_contact_info']}</textarea>
-                                <span class="help-block">In any error messages that are shown, this piece of text will be included. It is recommended for this text to include contact details for a member of the ticketing team.</span>
+                                <span class="help-block">
+                                    Whenever any error messages are displayed or the customer may have a query, the above contact details will
+                                    be included. It is recommended that such details are provided, and that the detailed lines of communication
+                                    are monitored regularly throughout ticketing.
+                                </span>
 	                        </div>
 	                    </div>
                         
@@ -280,61 +284,6 @@
 	        </div>
         
 	        <br />
-        
-            <!--div class="expandable blue unselectable">
-                <div class="exp-head container">
-                    <h3 class="pull-left">Queue Settings</h3>
-                    <div class="ll_switch unselectable pull-right blue" id="switch_queue">
-                        <div class="onstate" tal:attributes="class 'onstate' if settings.queue_enabled else 'onstate hidden'">
-                            <div class="off" onclick="Tick.admin.switch($(this).closest('.ll_switch'), 'off');">Off</div>
-                            <div class="on">On</div>
-                        </div>
-                        <div class="offstate hidden" tal:attributes="class 'offstate hidden' if settings.queue_enabled else 'offstate'">
-                            <div class="off">Off</div>
-                            <div class="on" onclick="Tick.admin.switch($(this).closest('.ll_switch'), 'on');">On</div>
-                        </div>
-                    </div>
-                    <h4 class="pull-right">Queue:</h4>
-                </div>
-                <div class="exp-body container collapse in" tal:attributes="class 'exp-body container collapse in' if settings.queue_enabled else 'exp-body container collapse'">
-                    <div class="breakerline"></div>
-                    <div class="inner">
-                        
-                        <input id="queue_enabled" name="queue_enabled" class="enabled" type="hidden" value="yes" tal:condition="settings.queue_enabled" />
-                        <input id="queue_enabled" name="queue_enabled" class="enabled" type="hidden" value="no" tal:condition="not:settings.queue_enabled" />
-                    
-                        <div class="control-group">
-                            <label for="sessiontime" class="control-label">Maximum Session Time</label>
-                            <div class="controls">
-                                <input id="maxsessiontime" name="maxsessiontime" type="text" value="${settings.maxsessiontime}" class="span1" /> mins
-                                <span class="help-block">
-                                    The maximum amount of time a customer has to complete their purchase
-                                </span>
-                            </div>
-                        </div>
-                    
-                        <div class="control-group">
-                            <label for="concurrent" class="control-label">Concurrent Customers</label>
-                            <div class="controls">
-                                <input id="concurrentcustomers" name="concurrentcustomers" type="text" value="${settings.concurrentcustomers}" class="span1" /> customers
-                                <span class="help-block">
-                                    The number of people allowed to purchase tickets simultaneously
-                                </span>
-                            </div>
-                        </div>
-						
-						<div class="control-group">
-							<div class="controls">
-								<a href="${request.route_path('admin_queue')}" class="ll_btn pull-right"><i class="icon-group"></i> <span class="pull-right">Monitor Queue</span></a>
-							</div>
-						</div>
-                        
-                    </div>
-                </div>
-                <div class="clearline"></div>
-            </div>
-            
-            <br /-->
             
             <div class="expandable blue unselectable">
                 <div class="exp-head container">
