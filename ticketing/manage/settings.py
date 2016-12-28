@@ -36,6 +36,7 @@ class Settings(BaseLayout):
         PROP.AUTO_EMAIL_INCLUDED_TEXT   : { "field": "email_included_text", "type": "text" },
         PROP.AUTO_EMAIL_CONTACT_DETAILS : { "field": "email_contact_text", "type": "text" },
         PROP.SIGNUP_ENABLED             : { "field": "public_signup_enabled", "type": "checkbox", "test_val": "public_signup_enabled" },
+        PROP.ALUMNI_RAVEN_ENABLED       : { "field": "alumnus_raven_enabled", "type": "checkbox", "test_val": "alumnus_raven_enabled" },
         PROP.ACCOUNT_LOCK_DOWN          : { "field": "account_lock_down", "type": "checkbox", "test_val": "account_lock_down" },
         PROP.ERROR_BOX_CONTACT_INFO     : { "field": "error_contact_info", "type": "text" },
         PROP.TICKET_DOWNLOAD_ENABLED    : { "field": "ticket_download_enabled", "type": "checkbox", "test_val": "ticket_download_enabled" },

@@ -122,6 +122,10 @@ class BaseLayout(object):
         return (PROP.SIGNUP_ENABLED in self.request.root.properties and self.request.root.properties[PROP.SIGNUP_ENABLED])
 
     @property
+    def alumni_raven_enabled(self):
+        return (PROP.ALUMNI_RAVEN_ENABLED in self.request.root.properties and self.request.root.properties[PROP.ALUMNI_RAVEN_ENABLED])
+
+    @property
     def account_lock_down(self):
         return (PROP.ACCOUNT_LOCK_DOWN in self.request.root.properties and self.request.root.properties[PROP.ACCOUNT_LOCK_DOWN])
 

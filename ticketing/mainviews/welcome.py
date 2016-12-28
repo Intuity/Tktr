@@ -3,7 +3,7 @@ from pyramid.security import remember, forget
 from pyramid.view import view_config
 
 from ticketing.macros.baselayout import BaseLayout
-from ticketing.models import Ticketing, User, salt_password, PROP_KEYS
+from ticketing.models import Ticketing, User, salt_password, PROP_KEYS, Group
 from ticketing.profile.models import UserProfile
 from ticketing.queue.queue import Queue
 
@@ -115,13 +115,18 @@ class Welcome(BaseLayout):
                     break
             # - If we didn't find a group then filter into generic Raven group
             if group == None:
-                group = self.context.groups["raven"]
+                # If a 'current' Raven member (an active student/staff member) filter into one group
+                if "raven_current" in self.request.session and self.request.session["raven_current"]:
+                    group = self.context.groups["raven"]
+                else:
+                    group = self.context.groups["raven_alumni"]
             user.__parent__ = group
             group.members.append(user)
             # Attach to root
             self.context.users[user.__name__] = user
             # Attach status
             self.request.session.pop("raven", None)
+            self.request.session.pop("raven_current", None)
             self.request.session["user_id"] = user.__name__
             header = remember(self.request, user.__name__)
             # Update queuer object with user id

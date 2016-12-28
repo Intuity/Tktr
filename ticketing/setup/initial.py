@@ -336,6 +336,7 @@ class Initial(BaseLayout):
         admin.can_delete = False
         admin.name = "Administrators"
         admin.privileges = ["admin"]
+        admin.can_delete = False
         admin._p_changed = True
         root.groups[admin.__name__] = admin
         # committee
@@ -344,6 +345,7 @@ class Initial(BaseLayout):
         committee.__parent__ = root
         committee.name = "Committee Members"
         committee.privileges = ["committee"]
+        committee.can_delete = False
         committee._p_changed = True
         root.groups[committee.__name__] = committee
         # Raven authentications
@@ -352,14 +354,25 @@ class Initial(BaseLayout):
         raven_grp.__parent__ = root
         raven_grp.name = "Customers (Raven)"
         raven_grp.privileges = ["basic"]
+        raven_grp.can_delete = False
         raven_grp._p_changed = True
         root.groups[raven_grp.__name__] = raven_grp
+        # Alumnus Raven authentications
+        alumni_raven_grp = Group()
+        alumni_raven_grp.__name__ = "raven_alumni"
+        alumni_raven_grp.__parent__ = root
+        alumni_raven_grp.name = "Customers (Alumni via Raven)"
+        alumni_raven_grp.privileges = ["basic"]
+        alumni_raven_grp.can_delete = False
+        alumni_raven_grp._p_changed = True
+        root.groups[alumni_raven_grp.__name__] = alumni_raven_grp
         # Alumnus authentications
         alumni_grp = Group()
         alumni_grp.__name__ = "alumni"
         alumni_grp.__parent__ = root
         alumni_grp.name = "Customers (Alumni)"
         alumni_grp.privileges = ["basic"]
+        alumni_grp.can_delete = False
         alumni_grp._p_changed = True
         root.groups[alumni_grp.__name__] = alumni_grp
         # Ungrouped

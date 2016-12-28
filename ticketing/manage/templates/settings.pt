@@ -131,6 +131,20 @@
                         </div>
                         
                         <div class="control-group">
+                            <label for="alumnus_raven_enabled" class="control-label">Alumnus Raven</label>
+                            <div class="controls">
+                                <label class="checkbox">
+									<input type="checkbox" id="alumnus_raven_enabled" name="alumnus_raven_enabled" value="alumnus_raven_enabled" tal:attributes="checked 'checked' if settings.alumnus_raven_enabled else nothing" /> Enable alumnus Raven login
+								</label>
+                                <span class="help-block">
+                                    By enabling alumnus Raven access you will allow recent graduates to use their Raven accounts to access
+                                    the ticketing system. Any such customers will be automatically filtered into the 'Customers (Alumni via 
+                                    Raven)' group.
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
                             <label for="account_lock_down" class="control-label">Account Detail Lockdown</label>
                             <div class="controls">
                                 <label class="checkbox">

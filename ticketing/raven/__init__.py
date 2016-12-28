@@ -167,7 +167,8 @@ class Raven(BaseLayout):
         
         # Check if they are still a 'current' member of the University
         check_current = ("current" in raven.raven_ptags)
-        if not check_current:
+        self.request.session["raven_current"] = ("current" in raven.raven_ptags)
+        if not check_current and not self.alumni_raven_enabled:
             self.request.session.flash("Raven authentication is only supported for current members of the university.", "info")
             logging.error("Raven authentication refused for non-current member of the university (%s)" % raven.raven_crsid)
             return HTTPFound(location=self.request.route_path("welcome"))
@@ -181,7 +182,7 @@ class Raven(BaseLayout):
         self.request.session.pop("raven_route", None)
         
         # If all checks are good then forward on to success
-        if verify_success and valid and check_success and check_current:
+        if verify_success and valid and check_success and (check_current or self.alumni_raven_enabled):
             self.request.session["raven"] = raven
         else:
             self.request.session["raven"] = None
