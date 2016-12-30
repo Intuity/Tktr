@@ -83,7 +83,7 @@
 			<div class="control-group">
 				<label class="control-label" for="email">Email:</label>
 				<div class="controls">
-					<input type="text" name="email" id="email" value="${email}" tal:attributes="disabled 'disabled' if view.user.profile.raven_user else nothing" />
+					<input type="text" name="email" id="email" value="${email}" tal:attributes="disabled 'disabled' if view.user.profile.raven_user and not view.user.profile.raven_alumnus else nothing" />
 				</div>
 			</div>
 			

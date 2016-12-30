@@ -124,8 +124,9 @@ class ProfileEditing(BaseLayout):
             profile.forename = data["forename"]
             profile.surname = data["surname"]
             if not profile.raven_user:
-                profile.email = data["email"]
                 profile.crsid = data["crsid"]
+            elif profile.raven_user and profile.raven_alumnus:
+                profile.email = data["email"]
             profile.phone_number = data["phone_number"]
             profile.photo_file = data["photofile"]
             profile.dob = data["dob"]
@@ -151,7 +152,7 @@ class ProfileEditing(BaseLayout):
             logging.error("%s: Received a value error when processing profile: %s" % (self.user.username, e))
             message = str(e)
             self.request.session.flash(message, "error")
-            title = self.request.POST["title"]
+            title = self.request.POST["title"] if "title" in self.request.POST else ""
             if title == "Other":
                 title = self.request.POST["othertitle"]
             forename = self.request.POST["forename"]
@@ -177,13 +178,13 @@ class ProfileEditing(BaseLayout):
                         country = self.request.POST["country"]
                     postal_code = self.request.POST["postal_code"]
             else:
-                email = profile.crsid.replace(" ","") + "@cam.ac.uk"
+                email = profile.crsid.replace(" ","") + "@cam.ac.uk" if not self.raven_alumnus else self.request.POST["email"]
                 crsid = profile.crsid
                 college = self.request.POST["college"]
                 grad_status = self.request.POST["grad_status"]
             return {
                 "title": title,
-                "othertitle": (title not in ["Mr", "Mrs", "Miss", "Ms", "Dr", "Prof", "Rev"] and len(title) > 0),
+                "othertitle": (title != None and title not in ["Mr", "Mrs", "Miss", "Ms", "Dr", "Prof", "Rev"] and len(title) > 0),
                 "forename": forename,
                 "surname": surname,
                 "email": email,

@@ -3,7 +3,7 @@ from pyramid.security import remember, forget
 from pyramid.view import view_config
 
 from ticketing.macros.baselayout import BaseLayout
-from ticketing.models import Ticketing, User, salt_password, PROP_KEYS, Group
+from ticketing.models import Ticketing, User, salt_password, PROP_KEYS
 from ticketing.profile.models import UserProfile
 from ticketing.queue.queue import Queue
 
@@ -82,29 +82,35 @@ class Welcome(BaseLayout):
     @view_config(
         route_name="branch_raven_flow",
         permission="raven",
-        context=Ticketing,
+        context=Ticketing
     )
     def branch_raven_flow_view(self):
         if not self.has_queued:
             return HTTPFound(location=self.request.route_path("queue"))
         # Choose raven path, create a user if necessary
         users = self.context.users.values()
-        raven_obj = self.request.session["raven"]
+        raven_obj = self.request.session["raven"] if "raven" in self.request.session else None
+        if raven_obj == None:
+            self.request.session.flash("Raven login flow interrupted, please try again.", "error")
+            return HTTPFound(location=self.request.route_path("welcome"))
         # Should select a single user
         user = [x for x in users if x.profile != None and x.profile.crsid != None and x.profile.crsid.lower() == raven_obj.raven_crsid.lower()]
         if len(user) == 0:
             # Add in the basic user and setup privileges
-            raven = self.request.session["raven"]
+            raven = self.request.session["raven"] if "raven" in self.request.session else None
             self.request.session.pop("raven", None)
             user = User()
             user.username = user.__name__ = raven.raven_crsid.lower()
             # Attach profile
             profile = UserProfile()
             profile.raven_user = True
+            profile.raven_alumnus = ("raven_current" in self.request.session and self.request.session["raven_current"] == False)
             profile.crsid = raven.raven_crsid.lower()
             profile.__parent__ = user
             profile.__name__ = user.__name__ + "-profile"
-            profile.email = profile.crsid + "@cam.ac.uk"
+            # Only provide an auto-populated email if they are a 'current' member and have Hermes
+            if not profile.raven_alumnus:
+                profile.email = profile.crsid + "@cam.ac.uk"
             user.profile = profile
             # Attach to a group
             # - Check whether any group has a filter for this user

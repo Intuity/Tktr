@@ -47,11 +47,10 @@
                 <div class="inner">
                     <table class="table table-bordered table-striped">
                         <thead>
-                            <th class="span3">Group Name</th>
-                            <th class="span2">Privileges</th>
+                            <th class="span4">Group Name</th>
+                            <th class="span3">Privileges</th>
                             <th class="span1">Size</th>
                             <th class="span1">Filter</th>
-                            <th class="span1">Edit</th>
                             <th>Actions</th>
                         </thead>
                         <tbody>
@@ -60,8 +59,7 @@
                                 <td>${group.privileges[0].title()}</td>
                                 <td>${len(group.members)}</td>
                                 <td>${len(group.user_filter)}</td>
-                                <td>${'Yes' if group.can_delete else 'No'}</td>
-                                <td><a href="${request.route_path('admin_users')}?filter=group&value=${group.name}">Members</a><tal:unprotected tal:condition="group.can_delete">&nbsp;&nbsp;&nbsp;&nbsp;<a href="${request.route_path('admin_group_edit', group_id=group.__name__)}">Edit</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" onclick="javascript:if(confirm('Are you sure you want to delete the group ${group.name}?')) window.location.href='${request.route_path('admin_group_delete', group_id=group.__name__)}';" class="danger">Delete</a></tal:unprotected>&nbsp;&nbsp;&nbsp;&nbsp;<a href="${request.route_path('admin_group_filter', group_id=group.__name__)}">User Filter</a></td>
+                                <td><a href="${request.route_path('admin_users')}?filter=group&value=${group.name}">Members</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="${request.route_path('admin_group_edit', group_id=group.__name__)}">Edit</a><tal:unprotected tal:condition="group.can_delete">&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" onclick="javascript:if(confirm('Are you sure you want to delete the group ${group.name}?')) window.location.href='${request.route_path('admin_group_delete', group_id=group.__name__)}';" class="danger">Delete</a></tal:unprotected>&nbsp;&nbsp;&nbsp;&nbsp;<a href="${request.route_path('admin_group_filter', group_id=group.__name__)}">User Filter</a></td>
                             </tr>
                         </tbody>
                     </table>

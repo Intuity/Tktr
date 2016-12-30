@@ -35,21 +35,38 @@
                         <div class="control-group">
                             <label for="name" class="control-label">Name</label>
                             <div class="controls">
+                                <tal:can_edit tal:condition="can_delete">
                                 <input type="text" id="name" name="name" value="${name if edit else nothing}" />
-                                <span class="help-block">This is the name of the group you are creating.</span>
+                                </tal:can_edit>
+                                <tal:cannot_edit tal:condition="not can_delete">
+                                <input type="text" value="${name}" disabled="disabled" />
+                                </tal:cannot_edit>
+                                <span class="help-block" tal:condition="can_delete">This is the name of the group you are creating or editing.</span>
+                                <span class="help-block" tal:condition="not can_delete">This group is essential to Tktr's operation and so the name is fixed.</span>
                             </div>
                         </div>
 
                         <div class="control-group">
                             <label for="name" class="control-label">Privilege Level</label>
                             <div class="controls">
+                                <tal:can_edit tal:condition="can_delete">
                                 <select name="privilege">
                                     <option value="basic" tal:attributes="selected 'selected' if privilege != 'admin' and privilege != 'committee' else nothing">Basic</option>
 									<option value="staff" tal:attributes="selected 'selected' if privilege == 'staff' else nothing">Staff</option>
                                     <option value="committee" tal:attributes="selected 'selected' if privilege == 'committee' else nothing">Committee</option>
                                     <option value="admin" tal:attributes="selected 'selected' if privilege == 'admin' else nothing">Administration</option>
                                 </select>
-                                <span class="help-block">This is the privilege level that the group will have.</span>
+                                </tal:can_edit>
+                                <tal:cannot_edit tal:condition="not can_delete">
+                                <select disabled="disabled">
+                                    <option value="basic" tal:attributes="selected 'selected' if privilege != 'admin' and privilege != 'committee' else nothing">Basic</option>
+									<option value="staff" tal:attributes="selected 'selected' if privilege == 'staff' else nothing">Staff</option>
+                                    <option value="committee" tal:attributes="selected 'selected' if privilege == 'committee' else nothing">Committee</option>
+                                    <option value="admin" tal:attributes="selected 'selected' if privilege == 'admin' else nothing">Administration</option>
+                                </select>
+                                </tal:cannot_edit>
+                                <span class="help-block" tal:condition="can_delete">This is the privilege level that the group will have.</span>
+                                <span class="help-block" tal:condition="not can_delete">This group is essential to Tktr's operation and so the privilege level is fixed.</span>
                             </div>
                         </div>
                         

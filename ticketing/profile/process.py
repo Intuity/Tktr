@@ -18,7 +18,12 @@ class ProcessAndValidate(object):
         self.phone_number_required = phone_number_required
 
     def process(self):
-        # First the name
+        # Check the salutation exists
+        if "title" not in self.new_data or self.new_data["title"] not in ["Mr", "Mrs", "Miss", "Ms", "Dr", "Prof", "Rev", "Other"]:
+            raise ValueError("Please check that you have selected a valid salutation.")
+        elif self.new_data["title"] == "Other" and ("othertitle" not in self.new_data or len(self.new_data["othertitle"].strip()) == 0):
+            raise ValueError("Please check that you have entered a valid salutation.")
+        # Process the name
         forename = self.new_data["forename"]
         forename = re.sub(r"[^a-zA-Z\- ]+", "", forename)
         surname = self.new_data["surname"]
@@ -39,11 +44,13 @@ class ProcessAndValidate(object):
         email = None
         if "email" in self.new_data:
             email = self.new_data["email"]
-            if atcambridge:
+            if atcambridge and not self.profile.raven_alumnus:
                 email = self.new_data["crsid"].replace(" ","") + "@cam.ac.uk"
             validator = Email()
             if not validator(email):
                 raise ValueError("You have not entered a valid email address, please provide one.")
+            elif self.profile.raven_alumnus and (self.profile.crsid.lower() + "@cam.ac.uk") in email:
+                raise ValueError("Alumni Raven accounts are not allowed to use an '@cam.ac.uk' email address as you will be unable to access it")
         # Now the date of birth
         day = int(float(self.new_data["dob_day"]))
         month = int(float(self.new_data["dob_month"]))

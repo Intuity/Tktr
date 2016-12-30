@@ -133,6 +133,6 @@ If you want to begin again with a clean setup, simply stop the server (by pressi
 
 ## Troubleshooting
 
-### "Unsupported Locale" errors under Ubuntu
-To resolve "Unsupported Locale" errors run 'sudo locale-gen en_GB' from the command line, and then restart
+### "Unsupported Locale" errors under Ubuntu (Prices appear as '-')
+To resolve "Unsupported Locale" errors run `sudo locale-gen en_GB` from the command line, and then restart
 the paster/gunicorn instance.

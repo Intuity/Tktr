@@ -146,21 +146,21 @@ class Accounts(BaseLayout):
         name = None
         privilege = None
         access_code = None
+        can_delete = True
         edit = False
         if "group_id" in self.request.matchdict and self.request.matchdict["group_id"] in self.request.root.groups:
             group = self.request.root.groups[self.request.matchdict["group_id"]]
-            if not group.can_delete:
-                self.request.session.flash("This group cannot be edited!", "error")
-                return HTTPFound(location=self.request.route_path("admin_accounts"))
             name = group.name
             access_code = group.access_code
             privilege = group.privileges[0]
+            can_delete = group.can_delete
             edit = True
         return {
-            "name": name, 
-            "privilege": privilege,
-            "access_code": access_code,
-            "edit": edit
+            "name":         name, 
+            "privilege":    privilege,
+            "access_code":  access_code,
+            "edit":         edit,
+            "can_delete":   can_delete
         }
 
     @view_config(
@@ -178,8 +178,16 @@ class Accounts(BaseLayout):
         renderer="templates/add_group.pt"
     )
     def add_group_view_do(self):
-        name = self.request.POST["name"]
-        privilege = self.request.POST["privilege"]
+        group = None
+        if "group_id" in self.request.matchdict and self.request.matchdict["group_id"] in self.request.root.groups:
+            group = self.request.root.groups[self.request.matchdict["group_id"]]
+        else:
+            group = Group()
+            group.__name__ = Coding().generateUniqueCode(withdash=False)
+            group.__parent__ = self.request.root
+        # If the group is protected, fetch certain values from its existing configuration
+        name = self.request.POST["name"] if group.can_delete else group.name
+        privilege = self.request.POST["privilege"] if group.can_delete else group.privileges[0]
         access_code = self.request.POST["access_code"].replace(" ", "")
         if len(name.replace(" ","")) < 2:
             self.request.session.flash("The name entered is not valid, please try again.", "error")
@@ -191,23 +199,17 @@ class Accounts(BaseLayout):
             access_code = None
         else:
             access_code = re.sub('[\W_]+', '', access_code)
+        # Update any values on the object
+        group.name = name
+        group.access_code = access_code
+        group.privileges = [privilege]
+        group._p_changed = True
+        # Notify success/failure
         if "group_id" in self.request.matchdict and self.request.matchdict["group_id"] in self.request.root.groups:
-            group = self.request.root.groups[self.request.matchdict["group_id"]]
-            group.name = name
-            group.access_code = access_code
-            group.privileges = [privilege]
-            group._p_changed = True
             self.request.session.flash("Group updated successfully!", "info")
         else:
-            # Create a new group
-            group = Group()
-            group.name = name
-            group.privileges = [privilege]
-            group.access_code = access_code
-            group.__name__ = Coding().generateUniqueCode(withdash=False)
-            group.__parent__ = self.request.root
+            # As the group is new - attach it to the root object
             self.request.root.groups[group.__name__] = group
-            self.request.root.groups._p_changed = True
             self.request.session.flash("Group added successfully!", "info")
         return HTTPFound(location=self.request.route_path("admin_accounts"))
 
@@ -280,6 +282,7 @@ class Accounts(BaseLayout):
             return HTTPFound(location=self.request.route_path("admin_accounts"))
         group = self.request.root.groups[self.request.matchdict["group_id"]]
         if "action" in self.request.GET:
+            added_usernames = []
             if self.request.GET["action"].lower() == "upload":
                 if not "filterfile" in self.request.POST or not isinstance(self.request.POST["filterfile"], cgi.FieldStorage):
                     self.request.session.flash("You did not upload a filter file!", "error")
@@ -300,7 +303,8 @@ class Accounts(BaseLayout):
                         # Generate clean usernames
                         for line in lines:
                             cleaned = pattern.sub("", line).lower()
-                            # Now this to the existing filter
+                            added_usernames.append(cleaned)
+                            # Now add this to the existing filter
                             if not cleaned in group.user_filter:
                                 group.user_filter.append(cleaned)
                     # Ok all good
@@ -308,14 +312,24 @@ class Accounts(BaseLayout):
             elif self.request.GET["action"] == "add":
                 pattern = re.compile("[\W_]+")
                 username = pattern.sub("", self.request.POST["username"]).lower()
+                added_usernames.append(username)
                 if username in group.user_filter:
                     self.request.session.flash("User is already part of the filter.", "error")
                 else:
                     group.user_filter.append(username)
                     self.request.session.flash("User has been added to the filter successfully!", "info")
-            # Run a check for existing users in other groups that should be in this one
+            # Check through all groups for two things:
+            #   1) If any other groups contain the usernames just added to this filter, then
+            #      remove them from the ORIGINAL group.
+            #   2) If any other groups contain a user matched by the filter, then move them
+            #      to this group now.
             for grp in self.request.root.groups.values():
-                if grp == group: continue # Don't worry about our group - that'd be silly!
+                if grp.__name__ == group.__name__: continue # Don't worry about our group - that'd be silly!
+                # Remove any occurrences of added usernames in other groups' filters
+                for username in added_usernames:
+                    if username in grp.user_filter:
+                        grp.user_filter.remove(username)
+                # Move any users matched by the filter into this group
                 to_move = []
                 for user in grp.members:
                     if user.username in group.user_filter:
