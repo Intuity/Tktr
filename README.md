@@ -8,6 +8,7 @@ Cambridge.
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [First Run Setup](#first-run-setup)
+- [Staging to Deployment](#staging-to-deployment)
 - [Troubleshooting](#troubleshooting)
  * ["Unsupported Locale" errors under Ubuntu](#unsupported-locale-errors-under-ubuntu)
 
@@ -52,14 +53,17 @@ encryption. A number of settings exists within `data/paste.ini` to assist with d
 ```bash
 [app:main]
 ...
-hostname = http://127.0.0.1:6543                    # Set this to the external hostname for Tktr, compensating for any proxy-pass configuration
-                                                    # for example, if using a proxy-pass from an SSL subdomain set hostname to an address of the
-                                                    # form: https://mysubdomain.mydomain.com - this parameter is used to assemble absolute links
+hostname = http://127.0.0.1:6543                    # Set this to the external hostname for Tktr, compensating 
+                                                    # for any proxy-pass configuration for example, if using a 
+                                                    # proxy-pass from an SSL subdomain set hostname to an address 
+                                                    # of the form: https://mysubdomain.mydomain.com - this 
+                                                    # parameter is used to assemble absolute links
 ...
 [server:main]
 ...
-host = 0.0.0.0                                      # The host's IP address, for most purposes '0.0.0.0' is suitable
-port = 6543                                         # The port number to serve on - ensure this doesn't clash with any other running services
+host = 0.0.0.0                                      # The host's IP address, for most purposes use '0.0.0.0'
+port = 6543                                         # The port number to serve on - ensure this doesn't clash 
+                                                    # with any other running services
 ```
 
 #### Raven Session Authentication
@@ -67,11 +71,14 @@ Raven is the student and staff authentication system for the University of Cambr
 number of parameters exist to configure this authentication pathway. You may wish to update these parameters for your own deployment:
 
 ```bash
-raven.testing = false                               # If you wish to use the demo Raven authentication system set this to 'true' - for
-                                                    # staging into deployment, this should always be 'false'.
-raven.checkstr = tktr_ticketing_system              # A string used to acknowledge a login via the Raven authentication system
-raven.description = Tktr Login                      # A human-readable description that the Raven authentication system displays to the student/
-                                                    # staff member when logging in. This should be recognisable as identifying your deployment.
+raven.testing = false                               # If you wish to use the demo Raven authentication system
+                                                    # set this to 'true' - for staging into deployment, this 
+                                                    # should always be 'false'.
+raven.checkstr = tktr_ticketing_system              # A string used to acknowledge a login via the Raven 
+                                                    # authentication system
+raven.description = Tktr Login                      # A human-readable description that the Raven authentication 
+                                                    # system displays to the student/staff member when logging in. 
+                                                    # This should be recognisable as identifying your deployment.
 raven.timeout_msg = Please try again.               # A help message in case authentication times out.
 ```
 
@@ -81,8 +88,10 @@ ticket order, their logged-in identity and any other necessary information. To p
 default hashing secret. The following settings within `data/paste.ini` are relevant:
 
 ```bash
-session.key = tktr_session                          # The name of the cookie used to track the customer (default value is fine)
-session.secret = thisismysessionsecret              # The secret used to hash the customer's identity (change this value for security!)
+session.key = tktr_session                          # The name of the cookie used to track the customer (default 
+                                                    # value is fine)
+session.secret = thisismysessionsecret              # The secret used to hash the customer's identity (change this 
+                                                    # value for security!)
 ```
 
 #### Marrow Mailer Configuration
@@ -130,6 +139,10 @@ during the setup wizard.
 If you want to begin again with a clean setup, simply stop the server (by pressing `CTRL+C` on the command line) then delete the contents of 
 `data/database/` (making sure the `data/database/` folder still exists afterwards!) and then start the server again using the command
 `bin/pserve data/paste.ini`. When you visit the ticketing system again, you'll find yourself taken back to the first-time setup procedure.
+
+# Staging to Deployment
+When you reach the stage that you want to run Tktr in deployment mode (i.e. when you want to run Tktr for an event and not just for 
+development)
 
 ## Troubleshooting
 
