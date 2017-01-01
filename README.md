@@ -141,8 +141,43 @@ If you want to begin again with a clean setup, simply stop the server (by pressi
 `bin/pserve data/paste.ini`. When you visit the ticketing system again, you'll find yourself taken back to the first-time setup procedure.
 
 # Staging to Deployment
-When you reach the stage that you want to run Tktr in deployment mode (i.e. when you want to run Tktr for an event and not just for 
-development)
+When you want to ticket a real event, a few changes are made to the way the system is run. Firstly, to increase performance under heavy load
+an alternative Python WSGI HTTP server is included within the installation called 'Gunicorn'. Additionally a dedicated ZoDB server called 'Zeo' 
+is included to spread the transaction load across the server's resources. Both of these tools are managed by a process control system known as
+'Supervisor' which monitors the processes during runtime and restarts them if they ever fail - increasingly reliability and uptime. Using
+Supervisor also allows you to disconnect safely from the terminal session without quitting the running server process.
+
+To run Tktr using Gunicorn, Zeo and Supervisor is very easy. Firstly, check that a `bin/pserve` instance is not running, and then from the
+command line type `bin/supervisord` within the Tktr directory. The command will execute silently by default, so to check that the servers are
+both running type `bin/supervisorctl status all` - you should see output similar to the example below:
+
+```bash
+$> cd Tktr
+$> bin/supervisord
+$> bin/supervisorctl status all
+gunicorn                         RUNNING   pid 10452, uptime 0:00:19
+zeo                              RUNNING   pid 10453, uptime 0:00:19
+```
+
+To stop the Supervisor instance (which will shutdown any contained processes) type `bin/supervisorctl shutdown`. You can also start, stop
+and restart individual child processes of Supervisor by typing:
+```bash
+$> bin/supervisorctl stop gunicorn      # Stops the specified child process (here 'gunicorn')
+gunicorn: stopped
+$> bin/supervisorctl start gunicorn     # Starts the specified child process
+gunicorn: started
+$> bin/supervisorctl restart gunicorn   # Stops then starts the specified child process
+gunicorn: stopped
+gunicorn: started
+$> bin/supervisorctl restart all        # Restarts all (both gunicorn and zeo) child processes (also works with stop and start)
+zeo: stopped
+gunicorn: stopped
+gunicorn: started
+zeo: started
+```
+
+You will also need to configure Apache or Nginx to provide a proxy-pass from a domain name, a firewall (e.g. UFW) and an SSL certificate. For
+more information, see the ['Getting Ready for Deployment'](https://github.com/Intuity/Tktr/wiki/Getting-Ready-for-Deployment) page in the wiki.
 
 ## Troubleshooting
 
