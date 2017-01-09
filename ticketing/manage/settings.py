@@ -1,5 +1,6 @@
 from datetime import datetime
 from math import floor
+from persistent.list import PersistentList
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 
@@ -272,6 +273,7 @@ class Settings(BaseLayout):
         methods = PROP.getProperty(self.request, PROP.PAYMENT_METHODS)
         if "submit" in self.request.POST:
             errored = False
+            # Process method settings
             for key in self.request.POST.keys():
                 if "enable_" in key:
                     sect_key = key.split("enable_")[1]
@@ -287,6 +289,14 @@ class Settings(BaseLayout):
                                 good = prop.update_value(self.request.POST[post_key])
                                 if not good:
                                     errored = True
+                        # Go through eligible groups
+                        if method.groups == None:
+                            method.groups = PersistentList()
+                        del method.groups[:]
+                        for group_key in self.request.root.groups.keys():
+                            post_key = sect_key + "+" + group_key + "+group"
+                            if post_key in self.request.POST and self.request.POST[post_key] == group_key:
+                                method.groups.append(self.request.root.groups[group_key])
             if errored:
                 self.request.session.flash("Some data was not saved as it didn't pass validation.", "error")
         elif "action" in self.request.GET and self.request.GET["action"] == "resetdefaults":

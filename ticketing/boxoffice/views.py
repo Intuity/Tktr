@@ -266,8 +266,11 @@ class BoxOffice(BaseLayout):
         tickets = [x for x in user.tickets if x.payment == None]
         if len(tickets) == 0:
             return HTTPFound(location=self.request.route_path("buy_tickets"))
+        # Work out what payment methods are available to us
+        enabled_methods = [x for x in PROP.getProperty(self.request, PROP.PAYMENT_METHODS) if x.enabled and x.public]
+        eligible_methods = [x for x in enabled_methods if len(x.groups) == 0 or self.user.__parent__ in x.groups]
         return {
-            "methods": [x for x in PROP.getProperty(self.request, PROP.PAYMENT_METHODS) if x.enabled and x.public]
+            "methods": eligible_methods
         }
     
     @view_config(route_name="pay_confirm", context=Ticketing, permission="basic", renderer="templates/confirm.pt")

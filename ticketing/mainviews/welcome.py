@@ -7,6 +7,9 @@ from ticketing.models import Ticketing, User, salt_password, PROP_KEYS
 from ticketing.profile.models import UserProfile
 from ticketing.queue.queue import Queue
 
+import logging
+logging = logging.getLogger("ticketing") 
+
 class Welcome(BaseLayout):
 
     @view_config(
@@ -96,6 +99,12 @@ class Welcome(BaseLayout):
         # Should select a single user
         user = [x for x in users if x.profile != None and x.profile.crsid != None and x.profile.crsid.lower() == raven_obj.raven_crsid.lower()]
         if len(user) == 0:
+            if not "raven_current" in self.request.session or (self.request.session["raven_current"] == False and not self.alumni_raven_enabled):
+                self.request.session.pop("raven", None)
+                self.request.session.pop("raven_current", None)
+                self.request.session.flash("Raven authentication is only supported for current members of the university.", "info")
+                logging.error("Raven authentication refused for non-current member of the university (%s)" % raven_obj.raven_crsid)
+                return HTTPFound(location=self.request.route_path("welcome"))
             # Add in the basic user and setup privileges
             raven = self.request.session["raven"] if "raven" in self.request.session else None
             self.request.session.pop("raven", None)

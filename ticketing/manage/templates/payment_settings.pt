@@ -12,7 +12,11 @@
                 <div class="breakerline"></div>
                 <div class="inner">
 					<p>
-					    Payment methods determine the different ways in which customers can make payments for your tickets. By switching on a payment method you will enable that payment method to be used for individuals when checking out (changes to state are only applied when you click 'Save'). Each payment method available to you has a separate section below with its own settings, make sure you fill in all the details for each payment method before enabling it otherwise customers will be presented with incorrect information.
+					    Payment methods determine the different ways in which customers can make payments for your tickets. By switching 
+                        on a payment method you will enable that payment method to be used for individuals when checking out (changes to 
+                        state are only applied when you click 'Save'). Each payment method available to you has a separate section below 
+                        with its own settings, make sure you fill in all the details for each payment method before enabling it otherwise 
+                        customers will be presented with incorrect information.
 					</p>
                 </div>
             </div>
@@ -58,6 +62,15 @@
                                 <input type="password" name="${method.__name__}+${setting.__name__}" id="${method.__name__}+${setting.__name__}" value="${setting.display_value}" tal:condition="python:(not setting.long_value and setting.confidential and not setting.monetary)" />
                                 <textarea style="width:450px;height:100px;resize:none;" id="${method.__name__}+${setting.__name__}" name="${method.__name__}+${setting.__name__}" tal:condition="setting.long_value">${setting.display_value}</textarea>
                                 <span class="help-block">${setting.description}${' Please note the field value is hidden for security.' if setting.confidential else nothing}</span>
+                            </div>
+                        </div>
+                        <div class="control-group" tal:condition="method.__name__ != 'gifted'">
+                            <label class="control-label">Eligible Groups</label>
+                            <div class="controls">
+                                <label class="checkbox" tal:repeat="group_key request.root.groups">
+									<input type="checkbox" id="${method.__name__}+${group_key}+group" name="${method.__name__}+${group_key}+group" value="${group_key}" tal:attributes="checked 'checked' if method.groups != None and group_key in [x.__name__ for x in method.groups] else nothing" /> ${request.root.groups[group_key].name}
+								</label>
+                                <span class="help-block">Select the groups able to purchase tickets of this type, if no groups are selected then all groups will be eligible to purchase via this method.</span>
                             </div>
                         </div>
                         

@@ -57,12 +57,18 @@ class AlterPayment(BaseLayout):
         orig_method_name = "Unknown"
         if orig_method != None:
             orig_method_name = orig_method.name
+        # Work out what payment methods are available to us
+        enabled_methods = [x for x in PROP.getProperty(self.request, PROP.PAYMENT_METHODS) if x.enabled and x.public]
+        eligible_methods = [x for x in enabled_methods if len(x.groups) == 0 or self.user.__parent__ in x.groups]
+        return {
+            "methods": eligible_methods
+        }
         return {
             "tick_id": tick_id,
             "payment" : ticket.payment,
             "orig_method_name": orig_method_name,
             "orig_method": orig_method,
-            "methods": [x for x in PROP.getProperty(self.request, PROP.PAYMENT_METHODS) if x.enabled and x.public]
+            "methods": eligible_methods
         }
 
     @view_config(

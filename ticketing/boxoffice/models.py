@@ -379,6 +379,7 @@ class PaymentMethod(Persistent):
     enabled = False
     public = True
     deadlined = False
+    groups = None
     # Dict maps plain text names for properties to their keys
     transaction_properties = None
 
@@ -392,6 +393,7 @@ class PaymentMethod(Persistent):
         self.public = True
         self.deadlined = False
         self.transaction_properties = PersistentMapping()
+        self.groups = PersistentList()
 
     @property
     def customer_description(self):
