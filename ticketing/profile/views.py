@@ -178,7 +178,7 @@ class ProfileEditing(BaseLayout):
                         country = self.request.POST["country"]
                     postal_code = self.request.POST["postal_code"]
             else:
-                email = profile.crsid.replace(" ","") + "@cam.ac.uk" if not self.raven_alumnus else self.request.POST["email"]
+                email = profile.crsid.replace(" ","") + "@cam.ac.uk" if (self.user.profile == None or not self.user.profile.raven_alumnus) else self.request.POST["email"]
                 crsid = profile.crsid
                 college = self.request.POST["college"]
                 grad_status = self.request.POST["grad_status"]

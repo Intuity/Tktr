@@ -44,12 +44,12 @@ class ProcessAndValidate(object):
         email = None
         if "email" in self.new_data:
             email = self.new_data["email"]
-            if atcambridge and not self.profile.raven_alumnus:
+            if atcambridge and (self.profile == None or self.profile.raven_alumnus == False):
                 email = self.new_data["crsid"].replace(" ","") + "@cam.ac.uk"
             validator = Email()
             if not validator(email):
                 raise ValueError("You have not entered a valid email address, please provide one.")
-            elif self.profile.raven_alumnus and (self.profile.crsid.lower() + "@cam.ac.uk") in email:
+            elif self.profile != None and self.profile.raven_alumnus and (self.profile.crsid.lower() + "@cam.ac.uk") in email:
                 raise ValueError("Alumni Raven accounts are not allowed to use an '@cam.ac.uk' email address as you will be unable to access it")
         # Now the date of birth
         day = int(float(self.new_data["dob_day"]))
