@@ -61,9 +61,6 @@ class AlterPayment(BaseLayout):
         enabled_methods = [x for x in PROP.getProperty(self.request, PROP.PAYMENT_METHODS) if x.enabled and x.public]
         eligible_methods = [x for x in enabled_methods if len(x.groups) == 0 or self.user.__parent__ in x.groups]
         return {
-            "methods": eligible_methods
-        }
-        return {
             "tick_id": tick_id,
             "payment" : ticket.payment,
             "orig_method_name": orig_method_name,
