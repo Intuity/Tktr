@@ -148,8 +148,7 @@
 				</div>
 				
 			</div>
-			
-			<tal:postaladdress tal:condition="python:(view.user.profile == None or not view.user.profile.raven_user)">
+			<tal:postaladdress tal:condition="python:(view.user.profile == None or not view.user.profile.raven_user or view.user.profile.raven_alumnus)">
 			<h4>Postal Address</h4><br />
 			<div class="control-group">
 				<label class="control-label" for="lineone">Address Line One:</label>

@@ -125,14 +125,19 @@ class ProfileEditing(BaseLayout):
             profile.surname = data["surname"]
             if not profile.raven_user:
                 profile.crsid = data["crsid"]
-            elif profile.raven_user and profile.raven_alumnus:
+            if profile.raven_user and profile.raven_alumnus != True:
+                profile.email = profile.crsid + "@cam.ac.uk"
+            else:
                 profile.email = data["email"]
             profile.phone_number = data["phone_number"]
             profile.photo_file = data["photofile"]
             profile.dob = data["dob"]
             profile.college = data["college"]
             profile.grad_status = data["grad_status"]
-            if profile.address != None:
+            if self.user.profile == profile and (profile.raven_user == False or profile.raven_alumnus == True):
+                if profile.address == None:
+                    profile.address = PostalAddress()
+                    profile.address.__parent__ = user.profile
                 profile.address.line_one = self.request.POST["lineone"]
                 if len(profile.address.line_one) < 4:
                     raise ValueError("You must provide a full and valid address.")
@@ -166,19 +171,20 @@ class ProfileEditing(BaseLayout):
             college = None
             grad_status = None
             lineone = linetwo = city = county = country = postal_code = None
-            if not profile.raven_user:
+            # Optionally fill in postal details
+            if self.user.profile == profile and (profile.raven_alumnus == True or profile.raven_user == False):
+                lineone = self.request.POST["lineone"]
+                linetwo = self.request.POST["linetwo"]
+                city = self.request.POST["city"]
+                county = self.request.POST["county"]
+                if "country" in self.request.POST:
+                    country = self.request.POST["country"]
+                postal_code = self.request.POST["postal_code"]
+            if profile.raven_user == False or profile.raven_alumnus == True:
                 email = self.request.POST["email"]
-                # If not a raven user then fill in postal details
-                if profile.address != None:
-                    lineone = self.request.POST["lineone"]
-                    linetwo = self.request.POST["linetwo"]
-                    city = self.request.POST["city"]
-                    county = self.request.POST["county"]
-                    if "country" in self.request.POST:
-                        country = self.request.POST["country"]
-                    postal_code = self.request.POST["postal_code"]
-            else:
-                email = profile.crsid.replace(" ","") + "@cam.ac.uk" if (self.user.profile == None or not self.user.profile.raven_alumnus) else self.request.POST["email"]
+            elif profile.raven_user == True and profile.raven_alumnus == False:
+                email = profile.crsid.replace(" ","") + "@cam.ac.uk"
+            if profile.raven_user == True:
                 crsid = profile.crsid
                 college = self.request.POST["college"]
                 grad_status = self.request.POST["grad_status"]
