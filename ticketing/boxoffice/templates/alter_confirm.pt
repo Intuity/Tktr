@@ -107,7 +107,7 @@
         </table>
         <h4 class="pull-right" tal:condition="(payment.history[-1].method == 'stripe')">Processing Fee: + ${structure:view.format_price(payment.processing)}</h4>
 		<div class="clearbar"></div>
-        <h3 class="pull-right">Payment Total: ${structure:view.format_price(payment.current_stage.amount_paid)}</h3>
+        <h3 class="pull-right">Amount Left To Pay: ${structure:view.format_price(payment.amount_remaining)}</h3>
         <div class="clearbar"></div>
         <a id="profile" class="ll_btn pull-right" href="${request.route_path('user_profile')}"><i class="icon-user"></i><span class="pull-right">Go To Profile</span></a>
         <br />
