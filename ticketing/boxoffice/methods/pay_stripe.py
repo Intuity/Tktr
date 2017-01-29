@@ -137,7 +137,7 @@ class PayStripe(BaseLayout):
             logging.info(self.user.username + ": Attempting to make Stripe charge for %i with token %s" % (total, purchase_token))
             stripe.api_key = priv_api_key
             charge = stripe.Charge.create(
-                amount      = total,
+                amount      = int(ceil(total)),
                 currency    = "gbp",
                 description = organisation_name,
                 source      = purchase_token
@@ -346,7 +346,7 @@ class PayStripe(BaseLayout):
             logging.info(self.user.username + ": Attempting to make Stripe charge to alter payment %s with total %i with token %s" % (payment_id, total, purchase_token))
             stripe.api_key = priv_api_key
             charge = stripe.Charge.create(
-                amount      = total,
+                amount      = int(ceil(total)),
                 currency    = "gbp",
                 description = organisation_name,
                 source      = purchase_token
