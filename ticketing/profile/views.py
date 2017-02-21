@@ -555,7 +555,7 @@ class ProfileEditing(BaseLayout):
             return HTTPFound(location=self.request.route_path("transfer_ticket", tick_id=tick_id))
         recipient = self.request.session["transfer_to"].lower()
         # OK, now if we have a payment deal with it
-        if "stripeToken" in self.request.POST:
+        if "stripeToken" in self.request.POST or "confirm" in self.request.POST:
             # Double check the username
             username = self.request.POST["username"].lower().replace(" ","")
             if len(username) <= 2:
@@ -567,168 +567,77 @@ class ProfileEditing(BaseLayout):
             elif self.request.root.users[username].profile == None or not self.request.root.users[username].profile.complete:
                 self.request.session.flash("The username \"%s\" does not have a complete profile, please complete it before transferring. You have not been charged." % username, "error")
                 return HTTPFound(location=self.request.route_path("transfer_ticket", tick_id=tick_id))
-            # Run Stripe payment to authorise
-            organisation_name = self.get_payment_method('stripe').settings[PROP_KEYS.ORGANISATION_NAME].value
-            transfer_fee = PROP_KEYS.getProperty(self.request, PROP_KEYS.TRANSFER_FEE)
-            token = self.request.POST["stripeToken"]
-            stripe.api_key = self.get_payment_method('stripe').settings[PROP_KEYS.STRIPE_API_KEY].value
-            charge = None
-            error = None
-            try:
-                charge = stripe.Charge.create(
-                    amount=transfer_fee,
-                    currency="gbp",
-                    source=token,
-                    description=organisation_name,
-                )
-                if "paid" in charge and charge["paid"] == True:
-                    # Ok, now exchange
-                    new_user = self.request.root.users[username]
-                    payment = ticket.payment
-                    old_user = ticket.owner
-                    
-                    # Open a new payment for the new owner, deduct the value of money associated
-                    # with this ticket from the original payment and add it to this payment, then
-                    # open a transfer payment stage and move the ticket across. If the original payment
-                    # was gifted then need to treat specially
-                    
-                    new_payment = Payment()
-                    new_payment.__parent__ = new_user
-                    new_payment.owner = new_user
-                    
-                    # Find out if it was gifted
-                    gifted = (len([x for x in payment.history if x.method == "gifted"]) > 0)
-                    
-                    # Open the finance stage
-                    finance_stage = PaymentStage()
-                    finance_stage.__parent__ = new_payment
-                    finance_stage.completed = finance_stage.received = finance_stage.cashed = True
-                    finance_stage.stage_owner = old_user.__name__
-                    finance_stage.date = datetime.now()
-                    if gifted:
-                        finance_stage.method = "gifted"
-                    else:
-                        finance_stage.method = "banktransfer"
-                    finance_stage.amount_paid = ticket.total_cost
-                    new_payment.history.append(finance_stage)
-                    
-                    # Open the ticket transfer stage
-                    transfer_stage = PaymentStage()
-                    transfer_stage.__parent__ = new_payment
-                    transfer_stage.method_properties["last_four"] = charge["source"]["last4"]
-                    transfer_stage.method_properties["ref_code"] = charge["id"]
-                    transfer_stage.amount_paid = transfer_fee
-                    transfer_stage.processing_charge = transfer_fee
-                    transfer_stage.completed = transfer_stage.received = transfer_stage.cashed = True
-                    transfer_stage.stage_owner = new_user.__name__
-                    transfer_stage.date = datetime.now()
-                    transfer_stage.method = "stripe"
-                    transfer_stage.transfer = True
-                    new_payment.history.append(transfer_stage)
-                    
-                    # Open the outgoing ticket transfer stage for the original owner
-                    out_trans_stage = PaymentStage()
-                    out_trans_stage.__parent__ = payment
-                    if not gifted:
-                        out_trans_stage.amount_paid = -ticket.total_cost # To make sure books balance!
-                    out_trans_stage.completed = out_trans_stage.received = out_trans_stage.cashed = True
-                    out_trans_stage.stage_owner = new_user.__name__
-                    out_trans_stage.date = datetime.now()
-                    out_trans_stage.method = "stripe"
-                    out_trans_stage.method_properties["last_four"] = charge["source"]["last4"]
-                    out_trans_stage.method_properties["ref_code"] = charge["id"]
-                    out_trans_stage.transfer = True
-                    payment.history.append(out_trans_stage)
-                    
-                    # Mark new payment as having been completed today
-                    new_payment.completed_date = datetime.now()
 
-                    # Move the ticket over to the new payment
-                    new_payment.tickets.append(ticket)
-                    payment.tickets.remove(ticket)
-                    
-                    # Move the ticket over to the new user (different to above)
-                    new_user.tickets.append(ticket)
-                    new_user.total_tickets += 1 # We increment, but don't decrement (stop scalpers)
-                    old_user.tickets.remove(ticket)
-                    ticket.__parent__ = new_user
-                    ticket.payment = new_payment
-                    ticket.owner = new_user
-                    
-                    # Register payment
-                    new_user.payments.append(new_payment)
-                    self.request.root.payments[new_payment.__name__] = new_payment
-                    
-                    # If the receiver only has one ticket, then make this their main ticket
-                    if len(new_user.tickets) == 1:
-                        ticket.guest_info = new_user.profile
-                    # Else gift one free guest detail alteration and clear existing details
-                    else:
-                        ticket.guest_info = None
-                        ticket.change_enabled = True
-                        
-                    # Transfer complete - notify
-                    GenericEmail(self.request).compose_and_send(
-                        "Ticket Transfer Complete",
-                        "The ticket %s has been successfully transferred to %s. If you did not request this change, please get in touch with us by email or phone (details at the bottom of this message)."
-                        % (ticket.__name__, new_user.profile.fullname),
-                        old_user.__name__
-                    )
-                    GenericEmail(self.request).compose_and_send(
-                        "Ticket Transfer from %s" % old_user.profile.fullname,
-                        "You have been transferred a ticket (%s) from %s. If you think this is a mistake, please get in touch with us by email or phone (details at the bottom of this message)."
-                        % (ticket.__name__, old_user.profile.fullname),
-                        new_user.__name__
-                    )
-                    self.request.session.flash("Ticket transfer successful!", "info")
-                    return HTTPFound(location=self.request.route_path("user_profile"))
-                else:
-                    error = "The payment failed, please check your details and try again!"
-                    if "failure_message" in charge and charge["failure_message"] != None:
-                        error = charge["failure_message"]
-            except stripe.error.CardError, e:
-                logging.error(self.user.username + ": Stripe invalid card error occurred: %s" % e)
-                error = e
-            except stripe.error.InvalidRequestError, e:
-                logging.error(self.user.username + ": Stripe invalid card request occurred: %s" % e)
-                error = e
-            except stripe.error.RateLimitError, e:
-                logging.error(self.user.username + ": Stripe rate limit error: %s" % e)
-                error = "Too many people are trying to pay right now, please try again in a moment"
-            except stripe.error.AuthenticationError, e:
-                logging.error(self.user.username + ": Stripe authentication error: %s" % e)
-                error = "An authentication error occurred trying to connect to Stripe, please contact the committee"
-            except stripe.error.APIConnectionError, e:
-                logging.error(self.user.username + ": Stripe API connection error: %s" % e)
-                error = "Failed to connect to Stripe, please contact the committee"
-            except stripe.error.StripeError, e:
-                logging.error(self.user.username + ": Generic stripe error: %s" % e)
-                error = "An error occurred with Stripe: %s" % e
-            except Exception, e:
-                logging.error(self.user.username + ": Exception thrown in Stripe ticket transfer payment: %s" % e)
-                error = e
-            # If we end up here with a paid charge, we need to refund it
-            if charge != None and "paid" in charge and charge["paid"] == True:
+            # Process a Stripe paid transfer
+            if "stripeToken" in self.request.POST and self.transfer_fee_enabled:
+                # Run Stripe payment to authorise
+                organisation_name = self.get_payment_method('stripe').settings[PROP_KEYS.ORGANISATION_NAME].value
+                transfer_fee = PROP_KEYS.getProperty(self.request, PROP_KEYS.TRANSFER_FEE)
+                token = self.request.POST["stripeToken"]
+                stripe.api_key = self.get_payment_method('stripe').settings[PROP_KEYS.STRIPE_API_KEY].value
+                charge = None
+                error = None
                 try:
-                    refund = stripe.Refund.create(
-                        charge=charge["id"],
-                        reason="duplicate"
+                    charge = stripe.Charge.create(
+                        amount=transfer_fee,
+                        currency="gbp",
+                        source=token,
+                        description=organisation_name,
                     )
-                    if refund != None and "id" in refund:
-                        logging.error("%s: Refunded charge %s with refund id %s" % (self.user.username, charge["id"], refund["id"]))
-                        error = "Your card was charged and then refunded, an error was thrown: %s" % error
+                    if "paid" in charge and charge["paid"] == True:
+                        # Ok, now exchange
+                        return self.make_transfer(ticket.owner, self.request.root.users[username], ticket, transfer_fee, stripe_charge=charge)
                     else:
-                        logging.error("%s: Refund of charge %s may have failed" % (self.user.username, charge["id"]))
-                        error = "You card was charged, an error occurred and we may or may not have refunded you, please get in touch with the committee."
+                        error = "The payment failed, please check your details and try again!"
+                        if "failure_message" in charge and charge["failure_message"] != None:
+                            error = charge["failure_message"]
+                except stripe.error.CardError, e:
+                    logging.error(self.user.username + ": Stripe invalid card error occurred: %s" % e)
+                    error = e
+                except stripe.error.InvalidRequestError, e:
+                    logging.error(self.user.username + ": Stripe invalid card request occurred: %s" % e)
+                    error = e
+                except stripe.error.RateLimitError, e:
+                    logging.error(self.user.username + ": Stripe rate limit error: %s" % e)
+                    error = "Too many people are trying to pay right now, please try again in a moment"
+                except stripe.error.AuthenticationError, e:
+                    logging.error(self.user.username + ": Stripe authentication error: %s" % e)
+                    error = "An authentication error occurred trying to connect to Stripe, please contact the committee"
+                except stripe.error.APIConnectionError, e:
+                    logging.error(self.user.username + ": Stripe API connection error: %s" % e)
+                    error = "Failed to connect to Stripe, please contact the committee"
+                except stripe.error.StripeError, e:
+                    logging.error(self.user.username + ": Generic stripe error: %s" % e)
+                    error = "An error occurred with Stripe: %s" % e
                 except Exception, e:
-                    logging.exception("%s: Exception was thrown during refund %s" % (self.user.username, e))
-                    error = "Your card was charged and then an error occurred when we tried to refund you: %s" % e
-            return {
-                "error":        error,
-                "ticket":       ticket,
-                "recipient":    recipient,
-                "penny_total":  self.transfer_fee
-            }
+                    logging.error(self.user.username + ": Exception thrown in Stripe ticket transfer payment: %s" % e)
+                    error = e
+                # If we end up here with a paid charge, we need to refund it
+                if charge != None and "paid" in charge and charge["paid"] == True:
+                    try:
+                        refund = stripe.Refund.create(
+                            charge=charge["id"],
+                            reason="duplicate"
+                        )
+                        if refund != None and "id" in refund:
+                            logging.error("%s: Refunded charge %s with refund id %s" % (self.user.username, charge["id"], refund["id"]))
+                            error = "Your card was charged and then refunded, an error was thrown: %s" % error
+                        else:
+                            logging.error("%s: Refund of charge %s may have failed" % (self.user.username, charge["id"]))
+                            error = "You card was charged, an error occurred and we may or may not have refunded you, please get in touch with the committee."
+                    except Exception, e:
+                        logging.exception("%s: Exception was thrown during refund %s" % (self.user.username, e))
+                        error = "Your card was charged and then an error occurred when we tried to refund you: %s" % e
+                return {
+                    "error":        error,
+                    "ticket":       ticket,
+                    "recipient":    recipient,
+                    "penny_total":  self.transfer_fee
+                }
+            
+            # Process a free (unpaid) transfer
+            elif "confirm" in self.request.POST and not self.transfer_fee_enabled:
+                return self.make_transfer(ticket.owner, self.request.root.users[username], ticket, 0)
         return {
             "ticket": ticket,
             "recipient": recipient,
@@ -799,3 +708,108 @@ class ProfileEditing(BaseLayout):
         self.request.session.pop("active_id", None)
         self.request.session.pop("payment_id", None)
         return HTTPFound(location=self.request.route_path("welcome"), headers=header)
+
+    def make_transfer(self, old_user, new_user, ticket, transfer_fee, stripe_charge=None):
+        payment = ticket.payment
+        
+        # Open a new payment for the new owner, deduct the value of money associated
+        # with this ticket from the original payment and add it to this payment, then
+        # open a transfer payment stage and move the ticket across. If the original payment
+        # was gifted then need to treat specially
+        
+        new_payment = Payment()
+        new_payment.__parent__ = new_user
+        new_payment.owner = new_user
+        
+        # Find out if it was gifted
+        gifted = (len([x for x in payment.history if x.method == "gifted"]) > 0)
+        
+        # Open the finance stage
+        finance_stage = PaymentStage()
+        finance_stage.__parent__ = new_payment
+        finance_stage.completed = finance_stage.received = finance_stage.cashed = True
+        finance_stage.stage_owner = old_user.__name__
+        finance_stage.date = datetime.now()
+        if gifted:
+            finance_stage.method = "gifted"
+        else:
+            finance_stage.method = "banktransfer"
+        finance_stage.amount_paid = ticket.total_cost
+        new_payment.history.append(finance_stage)
+        
+        # Open the ticket transfer stage
+        transfer_stage = PaymentStage()
+        transfer_stage.__parent__ = new_payment
+        transfer_stage.amount_paid = transfer_fee
+        transfer_stage.processing_charge = transfer_fee
+        transfer_stage.completed = transfer_stage.received = transfer_stage.cashed = True
+        transfer_stage.stage_owner = new_user.__name__
+        transfer_stage.date = datetime.now()
+        if stripe_charge != None:
+            transfer_stage.method = "stripe"
+            transfer_stage.method_properties["last_four"] = stripe_charge["source"]["last4"]
+            transfer_stage.method_properties["ref_code"] = stripe_charge["id"]
+        else:
+            transfer_stage.method = "gifted"
+        transfer_stage.transfer = True
+        new_payment.history.append(transfer_stage)
+        
+        # Open the outgoing ticket transfer stage for the original owner
+        out_trans_stage = PaymentStage()
+        out_trans_stage.__parent__ = payment
+        if not gifted:
+            out_trans_stage.amount_paid = -ticket.total_cost # To make sure books balance!
+        out_trans_stage.completed = out_trans_stage.received = out_trans_stage.cashed = True
+        out_trans_stage.stage_owner = new_user.__name__
+        out_trans_stage.date = datetime.now()
+        if stripe_charge != None:
+            out_trans_stage.method = "stripe"
+            out_trans_stage.method_properties["last_four"] = stripe_charge["source"]["last4"]
+            out_trans_stage.method_properties["ref_code"] = stripe_charge["id"]
+        else:
+            out_trans_stage.method = "gifted"
+        out_trans_stage.transfer = True
+        payment.history.append(out_trans_stage)
+        
+        # Mark new payment as having been completed today
+        new_payment.completed_date = datetime.now()
+
+        # Move the ticket over to the new payment
+        new_payment.tickets.append(ticket)
+        payment.tickets.remove(ticket)
+        
+        # Move the ticket over to the new user (different to above)
+        new_user.tickets.append(ticket)
+        new_user.total_tickets += 1 # We increment, but don't decrement (stop scalpers)
+        old_user.tickets.remove(ticket)
+        ticket.__parent__ = new_user
+        ticket.payment = new_payment
+        ticket.owner = new_user
+        
+        # Register payment
+        new_user.payments.append(new_payment)
+        self.request.root.payments[new_payment.__name__] = new_payment
+        
+        # If the receiver only has one ticket, then make this their main ticket
+        if len(new_user.tickets) == 1:
+            ticket.guest_info = new_user.profile
+        # Else gift one free guest detail alteration and clear existing details
+        else:
+            ticket.guest_info = None
+            ticket.change_enabled = True
+            
+        # Transfer complete - notify
+        GenericEmail(self.request).compose_and_send(
+            "Ticket Transfer Complete",
+            "The ticket %s has been successfully transferred to %s. If you did not request this change, please get in touch with us by email or phone (details at the bottom of this message)."
+            % (ticket.__name__, new_user.profile.fullname),
+            old_user.__name__
+        )
+        GenericEmail(self.request).compose_and_send(
+            "Ticket Transfer from %s" % old_user.profile.fullname,
+            "You have been transferred a ticket (%s) from %s. If you think this is a mistake, please get in touch with us by email or phone (details at the bottom of this message)."
+            % (ticket.__name__, old_user.profile.fullname),
+            new_user.__name__
+        )
+        self.request.session.flash("Ticket transfer successful!", "info")
+        return HTTPFound(location=self.request.route_path("user_profile"))

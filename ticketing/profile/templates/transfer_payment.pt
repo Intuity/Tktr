@@ -1,14 +1,25 @@
 <tal:macro metal:use-macro="view.site_style">
     <tal:content metal:fill-slot="content">
         
-        <h1 class="pull-left">Transfer Payment</h1>
+        <h1 class="pull-left" tal:condition="view.transfer_fee_enabled">Transfer Payment</h1>
+        <h1 class="pull-left" tal:condition="not:view.transfer_fee_enabled">Transfer Confirmation</h1>
         <div class="clearline"></div>
-		<p>
-			To complete the ticket transfer you will need to pay the transfer fee of ${structure:view.format_price(view.transfer_fee)}. The payment may only be made via debit or credit card using Stripe. Fill the form below and click "Pay Via Stripe" to complete your payment. The ticket transfer will be made immediately if the payment is successful.
-		</p>
-		<p>
-			Stripe is a secure, online payment service for processing transactions from Visa or MasterCard credit or debit cards. We do not store any information on your debit or credit cards on our servers, all processing is done by Stripe. For more information on Stripe visit www.stripe.com.
-		</p>
+        <tal:transfer_fee tal:condition="view.transfer_fee_enabled">
+    		<p>
+    			To complete the ticket transfer you will need to pay the transfer fee of ${structure:view.format_price(view.transfer_fee)}. 
+                The payment may only be made via debit or credit card using Stripe. Fill the form below and click 'Pay Via Stripe' to complete 
+                your payment. The ticket transfer will be made immediately if the payment is successful.
+    		</p>
+    		<p>
+    			Stripe is a secure, online payment service for processing transactions from Visa or MasterCard credit or debit cards. We do not store any information on your debit or credit cards on our servers, all processing is done by Stripe. For more information on Stripe visit www.stripe.com.
+    		</p>
+        </tal:transfer_fee>
+        <tal:no_transfer_fee tal:condition="not:view.transfer_fee_enabled">
+    		<p>
+    			To complete the ticket transfer, first check that the details below are correct and then click 'Confirm Transfer'. The ticket will be
+                immediately transferred from your account to the specified recipient.
+    		</p>
+        </tal:no_transfer_fee>
 		<div class="clearline"></div>
         <h3>Ticket: ${ticket.__name__}</h3>
 		<table class="table table-bordered">
@@ -47,38 +58,53 @@
 				</tr>
 			</tbody>
 		</table>
-		<h3>Payment Via Stripe</h3>
-		<h4>You will be charged ${structure:view.format_price(view.transfer_fee)} for this transfer.</h4>
-        <div class="alert alert-error hidden" id="alert" style="background-color:#F5F5F5; border-radius:0;" tal:condition="not:exists:error">
-            <strong>Sorry!</strong> <span id="errormsg"></span>
-        </div>
-        <div class="alert alert-error" id="alert" style="background-color:#F5F5F5; border-radius:0;" tal:condition="exists:error">
-            <strong>Sorry!</strong> <span id="errormsg">${error}</span>
-        </div>
-        <br /><br />
+        <tal:transfer_fee tal:condition="view.transfer_fee_enabled">
+    		<h3>Payment Via Stripe</h3>
+    		<h4>You will be charged ${structure:view.format_price(view.transfer_fee)} for this transfer.</h4>
+            <div class="alert alert-error hidden" id="alert" style="background-color:#F5F5F5; border-radius:0;" tal:condition="not:exists:error">
+                <strong>Sorry!</strong> <span id="errormsg"></span>
+            </div>
+            <div class="alert alert-error" id="alert" style="background-color:#F5F5F5; border-radius:0;" tal:condition="exists:error">
+                <strong>Sorry!</strong> <span id="errormsg">${error}</span>
+            </div>
+            <br /><br />
         
-        <div style="text-align:center;width:100%;" tal:define="stripe view.get_payment_method('stripe')">
-            <form id="payment-form" class="form-horizontal" action="" method="POST">
-                <script
-                    src="https://checkout.stripe.com/checkout.js" class="stripe-button"
-                    data-key="${stripe.settings['STRIPEAPIPUBLICKEY'].value}"
-                    data-email="${view.user.profile.email}"
-                    data-currency="GBP"
-                    data-amount="${penny_total}"
-                    data-name="${stripe.settings['ORGNAME'].value}"
-                    data-description="Single Ticket Transfer (${structure:view.format_price(penny_total)})"
-                    data-image="/static/img/StripeCrest.png"
-                    data-label="Make Payment Via Stripe"
-                    data-zip-code="true"
-                    data-allow-remember-me="false">
-                </script>
-				  <input type="hidden" id="username" name="username" value="${recipient}" />
-	        </form>
-		</div>
-        <br /><br />
-        <a id="backlink" href="${request.route_path('transfer_ticket', tick_id=ticket.__name__)}" class="ll_btn pull-left">
-            <i class="icon-arrow-left"></i><span class="pull-right">Back</span>
-        </a>
+            <div style="text-align:center;width:100%;" tal:define="stripe view.get_payment_method('stripe')">
+                <form id="payment-form" class="form-horizontal" action="" method="POST">
+                    <script
+                        src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                        data-key="${stripe.settings['STRIPEAPIPUBLICKEY'].value}"
+                        data-email="${view.user.profile.email}"
+                        data-currency="GBP"
+                        data-amount="${penny_total}"
+                        data-name="${stripe.settings['ORGNAME'].value}"
+                        data-description="Single Ticket Transfer (${structure:view.format_price(penny_total)})"
+                        data-image="/static/img/StripeCrest.png"
+                        data-label="Make Payment Via Stripe"
+                        data-zip-code="true"
+                        data-allow-remember-me="false">
+                    </script>
+                    <input type="hidden" id="username" name="username" value="${recipient}" />
+    	        </form>
+    		</div>
+            <br />
+            <br />
+            <a id="backlink" href="${request.route_path('transfer_ticket', tick_id=ticket.__name__)}" class="ll_btn pull-left">
+                <i class="icon-arrow-left"></i><span class="pull-right">Back</span>
+            </a>
+        </tal:transfer_fee>
+        <tal:no_transfer_fee tal:condition="not:view.transfer_fee_enabled">
+            <br />
+            <form id="confirmation-form" action="" method="POST">
+                <input type="hidden" id="username" name="username" value="${recipient}" />
+                <a id="backlink" href="${request.route_path('transfer_ticket', tick_id=ticket.__name__)}" class="ll_btn pull-left">
+                    <i class="icon-arrow-left"></i><span class="pull-right">Back</span>
+                </a>
+                <button type="submit" value="confirm" name="confirm" class="ll_btn pull-right success">
+                    <i class="icon-ok"></i><span class="pull-right">Confirm Transfer</span>
+                </button>
+            </form>
+        </tal:no_transfer_fee>
 		
 		<br /><br /><br />
         
