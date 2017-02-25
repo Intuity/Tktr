@@ -1,0 +1,164 @@
+<tal:macro metal:use-macro="view.site_style">
+    <tal:title metal:fill-slot="title">Check-In Lookup</tal:title>
+    <link rel="stylesheet" href="/admin/static/css/admin.css" metal:fill-slot="style" />
+    <tal:scripts metal:fill-slot="script">
+        <script type="text/javascript" src="/admin/static/js/ticketing-admin.js"></script>
+        <script type="text/javascript" src="/admin/static/js/Chart.min.js"></script>
+        <script metal:fill-slot="script" type="text/javascript">
+        function changeFilterType(selector) {
+            $("#filtervalue").val("").prop('disabled', false);
+        }
+        </script>
+    </tal:scripts>
+    <tal:content metal:fill-slot="content">
+        
+        <div style="width:100%;height:40px;">
+            <div style="width:300px;height:40px;float:left;">
+                <h1 style="margin:0;padding:0;">Check-In Guests</h1>
+				<h4 style="margin:5px 0 0 0; padding:0;">Guest, Payment or Ticket Lookup</h4>
+            </div>
+            <div style="width:600px;height:40px;float:right;">
+                
+                <div class="ll_tab" onclick="javascript:window.location.href='/logout';">
+                    <div class="header">
+                        <h4>Logout</h4>
+                    </div>
+                    <div class="colour"></div>
+                </div>
+                
+                <div class="ll_tab tab_accounts" onclick="javascript:window.location.href='/profile';">
+                    <div class="header">
+                        <h4>Profile</h4>
+                    </div>
+                    <div class="colour"></div>
+                </div>
+                
+				<tal:adminoptions tal:condition="view.is_admin">
+                <div class="ll_tab tab_settings" onclick="javascript:window.location.href='/admin';">
+                    <div class="header">
+                        <h4>Manage</h4>
+                    </div>
+                    <div class="colour"></div>
+                </div>
+                </tal:adminoptions>
+                
+                <div class="ll_tab tab_sales active" onclick="javascript:window.location.href='/checkin';">
+                    <div class="header">
+                        <h4>Check-In</h4>
+                    </div>
+                    <div class="colour"></div>
+                </div>
+                
+            </div>
+        </div>
+        <div style="width:100%;height:40px;clear:both;"></div>
+        
+        <div class="expandable green unselectable">
+            <div class="exp-head container" onclick="Tick.admin.toggle_expandable($(this).closest('.expandable'));">
+                <h3 class="pull-left">Help</h3>
+                <h2 class="pull-right muted"><i class="icon-angle-down"></i></h2>
+            </div>
+            <div class="exp-body container collapse">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <p>Ticket types are the different tickets that people are able to purchase through the system. The ticket type defines the name, description and cost of each ticket. Each ticket type has its own ticket pool, this is a set of tickets that have been released but not yet purchased. The "Released" column shows the total number of tickets of this type that have been made available for purchase, while the "In Pool" column shows the total number of tickets of this type that are still available for purchase.</p>
+					<p>For each ticket a number of "add-ons" may be configured that allows the customer to add additional experiences and features to their ticket, such as dining or queue jump. Add-ons may also be unlimited for use in the case of charitable donations or any other "unlimited" upgrade.</p>
+                </div>
+            </div>
+            <div class="clearline"></div>
+        </div>
+        
+        <div class="clearline" style="margin-bottom:5px;"></div>
+        
+        <div class="expandable green container">
+            <div class="exp-head container">
+                <h3 class="pull-left">Tickets</h3>
+            </div>
+            <div class="exp-body">
+                <div class="breakerline"></div>
+                <div class="inner">
+                    <form action="" method="POST" class="form-horizontal">
+                        <br />
+                        <div class="control-group">
+                            <label for="name" class="control-label">Search for ticket</label>
+                            <div class="controls">
+                                <select id="filtertype" name="filtertype" onchange="javascript:changeFilterType(this);">
+                                    <option tal:attributes="selected not:exists:filtertype" disabled>Filter...</option>
+                                    <tal:filtered tal:condition="exists:filtertype">
+                                    <option value="payment_id" tal:attributes="selected python:(filtertype=='payment_id')">By Payment ID</option>
+                                    <option value="ticket_id" tal:attributes="selected python:(filtertype=='ticket_id')">By Ticket ID</option>
+                                    <option value="guestname" tal:attributes="selected python:(filtertype=='guestname')">By Guest Name</option>
+                                    <option value="guestcrsid" tal:attributes="selected python:(filtertype=='guestcrsid')">By Guest CRSid</option>
+                                    <option value="guestemail" tal:attributes="selected python:(filtertype=='guestemail')">By Guest Email</option>
+                                    <option value="ownername" tal:attributes="selected python:(filtertype=='ownername')">By Purchaser Name</option>
+                                    <option value="ownercrsid" tal:attributes="selected python:(filtertype=='ownercrsid')">By Purchaser CRSid</option>
+                                    <option value="owneremail" tal:attributes="selected python:(filtertype=='owneremail')">By Purchaser Email</option>
+                                    <option value="ownerusername" tal:attributes="selected python:(filtertype=='ownerusername')">By Purchaser Username</option>
+                                    </tal:filtered>
+                                    <tal:unfiltered tal:condition="not:exists:filtertype">
+                                    <option value="payment_id">By Payment ID</option>
+                                    <option value="ticket_id">By Ticket ID</option>
+                                    <option value="guestname">By Guest Name</option>
+                                    <option value="guestcrsid">By Guest CRSid</option>
+                                    <option value="guestemail">By Guest Email</option>
+                                    <option value="ownername">By Purchaser Name</option>
+                                    <option value="ownercrsid">By Purchaser CRSid</option>
+                                    <option value="owneremail">By Purchaser Email</option>
+                                    <option value="ownerusername">By Purchaser Username</option>
+                                    </tal:unfiltered>
+                                </select> 
+                                <tal:filtered tal:condition="exists:filtervalue">
+                                <input type="text" id="filtervalue" name="filtervalue" value="${filtervalue}" placeholder="Search value..." />
+                                </tal:filtered>
+                                <tal:unfiltered tal:condition="not:exists:filtervalue">
+                                <input type="text" id="filtervalue" name="filtervalue" placeholder="Search value..." disabled />
+                                </tal:unfiltered>
+                                <button type="submit" id="submit" name="submit" value="submit" class="ll_btn" style="display:inline-block;">
+                                    <i class="icon-search"></i>
+                                    <span class="pull-right">Search</span>
+                                </button>
+                                <span class="help-block">Select the filter you wish to use and enter the text you wish to filter by and click "Search".</span>
+                            </div>
+                        </div>
+            
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <tal:lookup tal:condition="exists:tickets">
+        <br />
+        <table class="table table-bordered table-striped" tal:condition="len(tickets) > 0">
+            
+            <thead>
+                
+                <th class="span2">Purchase ID</th>
+                <th>Ticket ID</th>
+                <th>Guest</th>
+                <th>Purchaser</th>
+                <th>Type</th>
+                <th>Actions</th>
+                
+            </thead>
+            
+            <tbody>
+                <tr tal:repeat="tkt tickets">
+                    <td>${tkt.payment.__name__}</td>
+                    <td>${tkt.__name__}</td>
+                    <td>${tkt.guest_info.title} ${tkt.guest_info.fullname}</td>
+                    <td>${tkt.owner.profile.title} ${tkt.owner.profile.fullname}</td>
+                    <td>${tkt.tick_type.name}</td>
+                    <td>
+						View Notes (1) &nbsp; Check-In
+					</td>
+                </tr>
+            </tbody>
+            
+        </table>
+        <br />
+        <h4 style="text-align:center;" tal:condition="len(tickets) == 0">No Tickets Matched Your Search Criteria</h4>
+        <br />
+        </tal:lookup>
+        
+    </tal:content>
+</tal:macro>
