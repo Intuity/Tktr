@@ -13,7 +13,7 @@ class CheckInViews(BaseLayout):
     )
     def lookup_view(self):
         if not self.checkin_active:
-            self.request.session.flash("Check-in is not currently available as it has been disabled in settings.")
+            self.request.session.flash("Check-in is not currently available as it has been disabled in settings.", "error")
             return HTTPFound(location=self.request.route_path('user_profile'))
         if 'submit' in self.request.POST:
             # Get parameters for lookup
