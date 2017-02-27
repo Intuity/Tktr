@@ -52,7 +52,14 @@ class APIBaseView(object):
             raise APIPrivilegeException("Invalid privilege level presented")
 
     def authenticate_user(self):
-        if "HTTP_AUTHORIZATION" not in self.request.headers.environ or self.request.headers.environ["HTTP_AUTHORIZATION"] == None:
+        # See if this user is logged in through the web-portal
+        if "user_id" in self.request.session and self.request.session["user_id"] in self.request.root.users:
+            self.is_authenticated = True
+            self.auth_user = self.request.root.users[self.request.session["user_id"]]
+            self.auth_privilege = self.auth_user.__parent__.privileges[0]
+            return True
+        # Otherwise check whether the relevant authorization headers are present
+        elif "HTTP_AUTHORIZATION" not in self.request.headers.environ or self.request.headers.environ["HTTP_AUTHORIZATION"] == None:
             self.is_authenticated = False
             self.auth_user = None
             self.auth_privilege = None

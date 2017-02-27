@@ -1,10 +1,6 @@
 from pyramid.view import view_config
-from datetime import datetime
-
 from ticketing.models import Ticketing
 from ticketing.macros.baselayout import BaseLayout
-from ticketing.checkin.models import CheckIn
-from ticketing.models import PROP_KEYS as PROP
 
 class CheckInViews(BaseLayout):
 
@@ -51,13 +47,17 @@ class CheckInViews(BaseLayout):
                 payments = [x for x in self.request.root.payments.values() if len([y.guest_info.fullname.lower() for y in x.tickets if y.guest_info != None and y.guest_info.crsid != None and filter_value in y.guest_info.crsid.lower()]) > 0]
             elif filter_type == 'guestemail':
                 payments = [x for x in self.request.root.payments.values() if len([y.guest_info.fullname.lower() for y in x.tickets if y.guest_info != None and y.guest_info.email != None and filter_value in y.guest_info.email.lower()]) > 0]
-            # If any payments were found, include their tickets
-            for payment in payments: tickets += payment.tickets
             # Exclude tickets without payments, or with incomplete payments
             tickets = [x for x in tickets if x.payment != None and x.payment.paid == True]
+            # Extract the payments from the tickets
+            for tkt in tickets:
+                if not tkt.payment.__name__ in [x.__name__ for x in payments]:
+                    payments.append(tkt.payment)
+            # Remove any payments with empty ticket lists or no payment
+            payments = [x for x in payments if len(x.tickets) > 0 and x.paid == True]
             # Return the tickets to be rendered
             return {
-                "tickets": tickets,
+                "payments": payments,
                 "filtertype": filter_type,
                 "filtervalue": filter_value
             }

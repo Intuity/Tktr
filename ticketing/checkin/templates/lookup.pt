@@ -8,9 +8,103 @@
         function changeFilterType(selector) {
             $("#filtervalue").val("").prop('disabled', false);
         }
+        function checkInGuest(ticket_id) {
+            if (!confirm('Are you sure you want to check in ticket ' + ticket_id + '?')) return;
+            $.ajax({
+                url: '/api/checkin/enact?unique=' + (new Date()).getTime(),
+                cache: false,
+                dataType: 'json',
+                method: 'POST',
+                data: {
+                    ticket_ids: '["' + ticket_id + '"]'
+                },
+                success: (function(ticket_id) {
+                    return function(data) {
+                        console.log(data);
+                        // Check for errors occurring and alert correctly
+                        if(data.error != undefined && data.error.length > 0) {
+                            if (
+                                data.error == 'No tickets were found for the IDs provided' ||
+                                data.error == 'Some tickets were not found'
+                            ) {
+                                alert('The requested tickets could not be found on the system');
+                            } else if(
+                                data.error == 'Payment is not complete for tickets'
+                            ) {
+                                alert('Payment is not complete for the ticket you requested to check-in');
+                            } else if(
+                                data.error == 'Some tickets are already checked-in'
+                            ) {
+                                alert('The ticket you requested has already been checked-in');
+                            } else {
+                                console.log(data.error);
+                                alert('An unknown error occurred during the check-in process');
+                            }
+                        // Otherwise notify that the check-in was successful
+                        } else {
+                            alert('Check-in was successful for ' + ticket_id);
+                            var button = document.getElementById('checkin_' + ticket_id);
+                            button.setAttribute('class', 'll_btn disabled pull-right');
+                            button.setAttribute('disabled', 'disabled');
+                            button.setAttribute('onclick', '');
+                            lookupCheckInDetails(ticket_id);
+                        }
+                    };
+                })(ticket_id),
+                error: function(err) {
+                    alert('An unknown error occurred during check-in - please try again');
+                    window.location.href = '/checkin';
+                }
+            });
+        }
+        function lookupCheckInDetails(ticket_id) {
+            $.ajax({
+                url: '/api/checkin/query?unique=' + (new Date()).getTime(),
+                method: 'POST',
+                dataType: 'json',
+                data: {
+                    query_type: 'ticket_id',
+                    query_value: ticket_id
+                },
+                success: (function(ticket_id) {
+                    return function(data) {
+                        if (data['result'] == 'success') {
+                            checkin = data['tickets'][0]['checkin_details'];
+                            var date = new Date(checkin['date']);
+                            var date_parts = [
+                                padAndJoin([date.getHours(),
+                                 date.getMinutes(),
+                                 date.getSeconds()], 2, ':'),
+                                'on',
+                                padAndJoin([date.getDate(),
+                                 (date.getMonth() + 1),
+                                 date.getFullYear()], 2, '/')
+                            ];
+                            var details = 'Checked in at ' + date_parts.join(' ') + ' by ' + checkin['enacted_by'];
+                            var button = document.getElementById('checkin_' + ticket_id);
+                            button.parentElement.innerHTML = details;
+                        }
+                    };
+                })(ticket_id)
+            });
+        }
+        function padAndJoin(tojoin, length, joiner) {
+            var padded = [];
+            for(i = 0; i < tojoin.length; i++) {
+                var pad_str = '00' + tojoin[i];
+                padded.push(pad_str.slice(-2));
+            }
+            return padded.join(joiner);
+        }
         </script>
     </tal:scripts>
     <tal:content metal:fill-slot="content">
+        <style>
+        p {
+            padding:0 !important;
+            margin:0 !important;
+        }
+        </style>
         
         <div style="width:100%;height:40px;">
             <div style="width:300px;height:40px;float:left;">
@@ -111,7 +205,7 @@
                                 <input type="text" id="filtervalue" name="filtervalue" value="${filtervalue}" placeholder="Search value..." />
                                 </tal:filtered>
                                 <tal:unfiltered tal:condition="not:exists:filtervalue">
-                                <input type="text" id="filtervalue" name="filtervalue" placeholder="Search value..." disabled />
+                                <input type="text" id="filtervalue" name="filtervalue" placeholder="Search value..." disabled/>
                                 </tal:unfiltered>
                                 <button type="submit" id="submit" name="submit" value="submit" class="ll_btn" style="display:inline-block;">
                                     <i class="icon-search"></i>
@@ -126,37 +220,62 @@
             </div>
         </div>
         
-        <tal:lookup tal:condition="exists:tickets">
+        <tal:lookup tal:condition="exists:payments">
         <br />
-        <table class="table table-bordered table-striped" tal:condition="len(tickets) > 0">
+        <tal:payment tal:repeat="payment payments">
+        <h3>Payment ${payment.__name__} (${payment.owner.profile.title} ${payment.owner.profile.fullname})</h3>
+        <table class="table table-bordered table-striped" tal:condition="len(payment.tickets) > 0">
             
             <thead>
-                
-                <th class="span2">Purchase ID</th>
-                <th>Ticket ID</th>
-                <th>Guest</th>
-                <th>Purchaser</th>
+                <th class="span2">Guest</th>
+                <th class="span2">Date of Birth</th>
+                <th class="span3">Ticket ID</th>
                 <th>Type</th>
-                <th>Actions</th>
-                
+                <th class="span3" style="text-align:right;">Actions</th>
             </thead>
             
             <tbody>
-                <tr tal:repeat="tkt tickets">
-                    <td>${tkt.payment.__name__}</td>
+                <tal:ticketblock tal:repeat="tkt payment.tickets">
+                <tr>
+                    <td tal:condition="tkt.guest_info != None">${tkt.guest_info.title} ${tkt.guest_info.fullname}</td>
+                    <td tal:condition="tkt.guest_info == None">-</td>
+                    <td>${tkt.guest_info.dob.strftime('%d/%m/%Y') if tkt.guest_info.dob != None else '-'}</td>
                     <td>${tkt.__name__}</td>
-                    <td>${tkt.guest_info.title} ${tkt.guest_info.fullname}</td>
-                    <td>${tkt.owner.profile.title} ${tkt.owner.profile.fullname}</td>
                     <td>${tkt.tick_type.name}</td>
                     <td>
-						View Notes (1) &nbsp; Check-In
+						<a id="checkin_${ tkt.__name__ }" class="ll_btn success pull-right" onclick="javascript:checkInGuest('${tkt.__name__}');" tal:condition="not:tkt.checkin_status"><i class="icon-check"></i>Check-In</a>
+                        <tal:checkedin tal:condition="tkt.checkin_status">
+                        Checked in at ${tkt.checkin_data.date.strftime("%H:%M:%S on %d/%m/%Y")} by ${tkt.checkin_data.enacted_by.username}
+                        </tal:checkedin>
 					</td>
+                </tr>
+                <tr tal:condition="python:(len(tkt.notes) > 0)">
+                    <td colspan="4">
+                        <strong>Ticket Notes</strong>
+                        ${structure:tkt.notes}
+                    </td>
+                    <td style="border-left:none;vertical-align:middle;text-align:right;text-align:center;">
+                        <i style="font-size:50px;color:#CCC;" class="icon-ticket"></i>
+                    </td>
+                </tr>
+                </tal:ticketblock>
+                <tr tal:condition="python:(len(payment.notes) > 0 or len(payment.owner.notes) > 0)">
+                    <td style="border:1px solid #666;border-right:none;" colspan="4">
+                        <strong>Payment and Account Notes</strong>
+                        ${structure:payment.notes}
+                        ${structure:payment.owner.notes}
+                    </td>
+                    <td style="border:1px solid #666;border-left:none;vertical-align:middle;text-align:center;">
+                        <i style="font-size:50px;color:#CCC;" class="icon-pencil"></i>
+                    </td>
                 </tr>
             </tbody>
             
         </table>
+        <hr />
+        </tal:payment>
         <br />
-        <h4 style="text-align:center;" tal:condition="len(tickets) == 0">No Tickets Matched Your Search Criteria</h4>
+        <h4 style="text-align:center;" tal:condition="len(payments) == 0">No Tickets Matched Your Search Criteria</h4>
         <br />
         </tal:lookup>
         
