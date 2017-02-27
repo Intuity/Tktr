@@ -1,6 +1,7 @@
 from pyramid.view import view_config
 from ticketing.models import Ticketing
 from ticketing.macros.baselayout import BaseLayout
+from pyramid.httpexceptions import HTTPFound
 
 class CheckInViews(BaseLayout):
 
@@ -11,6 +12,9 @@ class CheckInViews(BaseLayout):
         renderer='templates/lookup.pt'
     )
     def lookup_view(self):
+        if not self.checkin_active:
+            self.request.session.flash("Check-in is not currently available as it has been disabled in settings.")
+            return HTTPFound(location=self.request.route_path('user_profile'))
         if 'submit' in self.request.POST:
             # Get parameters for lookup
             filter_type  = self.request.POST['filtertype'].lower() if 'filtertype' in self.request.POST else None
