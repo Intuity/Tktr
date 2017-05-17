@@ -30,10 +30,6 @@ class Settings(BaseLayout):
         PROP.DETAILS_FEE_ENABLED        : { "field": "details_fee_enabled", "type": "checkbox", "test_val": "details_fee_enabled" },
         PROP.DETAILS_FEE                : { "field": "details_fee", "type": "money" },
         PROP.CHECKIN_ACTIVE             : { "field": "checkin_enabled", "type": "hidden", "test_val": "yes" },
-        PROP.CHECKIN_SHOW_ALL           : { "field": "checkin_show_all", "type": "checkbox", "test_val": "checkin_show_all" },
-        PROP.CHECKIN_OVERRIDE_ONE       : { "field": "overrideone", "type": "password", "test_val": "*" },
-        PROP.CHECKIN_OVERRIDE_TWO       : { "field": "overridetwo", "type": "password", "test_val": "*" },
-        PROP.CHECKIN_OVERRIDE_THREE     : { "field": "overridethree", "type": "password", "test_val": "*" },
         PROP.AUTO_EMAIL_INCLUDED_TEXT   : { "field": "email_included_text", "type": "text" },
         PROP.AUTO_EMAIL_CONTACT_DETAILS : { "field": "email_contact_text", "type": "text" },
         PROP.SIGNUP_ENABLED             : { "field": "public_signup_enabled", "type": "checkbox", "test_val": "public_signup_enabled" },
@@ -143,12 +139,6 @@ class Settings(BaseLayout):
 
         # Do not publicly show the API key or passwords
         rendered_values["stripe_api_key"] = '*'*20
-        if len(rendered_values["overrideone"]) > 0:
-            rendered_values["overrideone"] = '*'*20
-        if len(rendered_values["overridetwo"]) > 0:
-            rendered_values["overridetwo"] = '*'*20
-        if len(rendered_values["overridethree"]) > 0:
-            rendered_values["overridethree"] = '*'*20
 
         # Return data to renderer
         return {

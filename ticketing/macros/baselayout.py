@@ -191,10 +191,6 @@ class BaseLayout(object):
         return (PROP.getProperty(self.request, PROP.CHECKIN_ACTIVE) == True)
 
     @property
-    def checkin_show_all(self):
-        return (PROP.CHECKIN_SHOW_ALL in self.request.root.properties and self.request.root.properties[PROP.CHECKIN_SHOW_ALL])
-
-    @property
     def event_name(self):
         return PROP.getProperty(self.request, PROP.EVENT_NAME)
 

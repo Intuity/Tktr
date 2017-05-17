@@ -401,47 +401,11 @@
                         <input id="checkin_enabled" name="checkin_enabled" class="enabled" type="hidden" value="yes" tal:condition="settings.checkin_enabled" />
                         <input id="checkin_enabled" name="checkin_enabled" class="enabled" type="hidden" value="no" tal:condition="not:settings.checkin_enabled" />
                         
-                        During check-in, an override password allows a supervisor or ball official to overstep the requirement that the ticket holder enters with the guest. One of the pre-set passwords must be entered in order to enact the override.<br /><br />
-                        
-                        <div class="control-group">
-                            <label for="overrideone" class="control-label">Override Password 1</label>
-                            <div class="controls">
-                                <input id="overrideone" name="overrideone" type="password" value="${settings.overrideone}" class="span3" />
-                                <span class="help-block">
-                                    Leave blank to disable.
-                                </span>
-                            </div>
-                        </div>
-                        <div class="control-group">
-                            <label for="overridetwo" class="control-label">Override Password 2</label>
-                            <div class="controls">
-                                <input id="overridetwo" name="overridetwo" type="password" value="${settings.overridetwo}" class="span3" />
-                                <span class="help-block">
-                                    Leave blank to disable.
-                                </span>
-                            </div>
-                        </div>
-                        <div class="control-group">
-                            <label for="overridethree" class="control-label">Override Password 3</label>
-                            <div class="controls">
-                                <input id="overridethree" name="overridethree" type="password" value="${settings.overridethree}" class="span3" />
-                                <span class="help-block">
-                                    Leave blank to disable.
-                                </span>
-                            </div>
-                        </div>
-                        
-                        <div class="control-group">
-                            <label for="guest_details_required" class="control-label">Full Payment Lookup</label>
-                            <div class="controls">
-                                <label class="checkbox">
-									<input type="checkbox" id="checkin_show_all" name="checkin_show_all" value="checkin_show_all" tal:attributes="checked 'checked' if settings.checkin_show_all else nothing" /> Show All Tickets
-								</label>
-                                <span class="help-block">
-                                    By enabling the system to show all tickets, when looking up a payment reference code at check-in all tickets that the user has purchased will be shown. If disabled, only the tickets within the requested payment will be shown.
-                                </span>
-                            </div>
-                        </div>
+                        With check-in enabled any user with staff, committee or administrator privileges may use the online check-in system
+                        or the iOS Tktr app to check guests into your event. The system will keep a log of which tickets have been checked
+                        in as well as the enacting user account and the date at which the ticket was checked. The system will alert a member
+                        of staff if the ticket has already been marked as attending, reducing the chances of false entry through ticket
+                        duplication.
                         
                     </div>
                 </div>

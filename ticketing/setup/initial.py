@@ -154,10 +154,6 @@ class Initial(BaseLayout):
         root.properties[PROP.DETAILS_FEE_ENABLED] = False
         root.properties[PROP.DETAILS_FEE] = 500 # Defaults to 5 quid
         root.properties[PROP.CHECKIN_ACTIVE] = False
-        root.properties[PROP.CHECKIN_SHOW_ALL] = False
-        root.properties[PROP.CHECKIN_OVERRIDE_ONE] = ""
-        root.properties[PROP.CHECKIN_OVERRIDE_TWO] = ""
-        root.properties[PROP.CHECKIN_OVERRIDE_THREE] = ""
         root.properties[PROP.PAYMENT_METHODS] = PersistentList()
         root.properties[PROP.SIGNUP_ENABLED] = False
         root.properties[PROP.ACCOUNT_LOCK_DOWN] = False
